@@ -11,7 +11,10 @@
 ## ファイル一覧（番号順）
 | 番号 | ファイル | 種別 | 状態 | 最終更新 | 短い説明 |
 |---|---|---|---|---|---|
-| (まだ設計文書なし。`/flow:feature execution` で生成) |
+| 001 | 001_execution_SPEC.md | SPEC | 設計済 | 2026-06-08 | 時間ベース実行状態機械 + タイムスタンプ経過 + 今日メモ + 達成記録 |
+| 002 | 002_execution_PLAN.md | PLAN | 設計済 | 2026-06-08 | machine/elapsed/repo/hook/UI 4Phase |
+| 003 | 003_execution_UNIT_TEST.md | UNIT_TEST | 設計済 | 2026-06-08 | 全遷移/経過/復元/穴あき達成 |
+| 004 | 004_execution_E2E_TEST.md | E2E_TEST | 設計済 | 2026-06-08 | 実行フロー + 背景化/リロード経過 + offline + 視覚 |
 
 ## サブフォルダ（改修・バグ修正・クレーム判定履歴）
 | パス | 種別 | issue/slug | 状態 | 概要 | INDEX |
