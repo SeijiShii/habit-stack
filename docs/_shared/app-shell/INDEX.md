@@ -15,6 +15,8 @@
 | 002 | 002__shared_app-shell_PLAN.md | PLAN | 設計済 | 2026-06-08 | Vite基盤/合成/API配線/グローバルUI/bootstrap 5Phase |
 | 003 | 003__shared_app-shell_UNIT_TEST.md | UNIT_TEST | 設計済 | 2026-06-08 | Provider/routes/匿名→authed200/O55到達性 |
 | (004 E2E は全 feature E2E が app-shell 上で実行) |
+| 101 | 101__shared_app-shell_IMPL_REPORT.md | IMPL_REPORT | 実装完了 | 2026-06-08 | 合成/API配線/PWA/bootstrap + build green |
+| 102 | 102__shared_app-shell_UNIT_TEST_REPORT.md | UNIT_TEST_REPORT | 実装完了 | 2026-06-08 | 5テスト + build green |
 
 ## サブフォルダ（改修・バグ修正・クレーム判定履歴）
 | パス | 種別 | issue/slug | 状態 | 概要 | INDEX |

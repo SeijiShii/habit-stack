@@ -1,0 +1,70 @@
+/* デザイントークン（docs/design/design-system.md「穏やか・積み上げ」由来）。 */
+:root {
+  --color-bg: #faf8f3;
+  --color-surface: #ffffff;
+  --color-surface-sunken: #f2efe8;
+  --color-text: #2a2e2c;
+  --color-text-muted: #6b716e;
+  --color-border: #e3dfd6;
+  --color-primary: #3f7a6e;
+  --color-primary-hover: #356558;
+  --color-primary-subtle: #e4efec;
+  --color-accent: #e8a23d;
+  --color-accent-subtle: #fbefd9;
+  --color-success: #4f9d6e;
+  --color-warning: #c9892f;
+  --color-danger: #b5524a;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  --font-body: 'Inter', system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--color-text);
+  background: var(--color-bg);
+  line-height: 1.6;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  min-height: 44px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  padding: var(--space-2) var(--space-4);
+}
+
+button[aria-pressed='true'] {
+  background: var(--color-primary-subtle);
+  border-color: var(--color-primary);
+}
+
+main {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: var(--space-4);
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}

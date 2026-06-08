@@ -1,8 +1,12 @@
-import Stripe from 'stripe';
+import Stripe from "stripe";
 
 /** 署名検証器（injectable、O35）。本番は Stripe SDK、テストは mock。 */
 export interface WebhookVerifier {
-  constructEvent(rawBody: string, signature: string, secret: string): { type: string; data: { object: { id: string } } };
+  constructEvent(
+    rawBody: string,
+    signature: string,
+    secret: string,
+  ): { type: string; data: { object: { id: string } } };
 }
 
 /** 投げ銭記録（冪等、stripe_session_id で重複防止）。 */
@@ -29,17 +33,29 @@ export function makeWebhookHandler(
   recordTip: RecordTip,
 ) {
   return async (req: Request): Promise<Response> => {
-    const signature = req.headers.get('stripe-signature') ?? '';
+    const signature = req.headers.get("stripe-signature") ?? "";
     const rawBody = await req.text(); // raw body（パース前、SEC-005）
     let event: { type: string; data: { object: { id: string } } };
     try {
       event = verifier.constructEvent(rawBody, signature, secret);
     } catch {
-      return new Response(JSON.stringify({ error: 'invalid_signature' }), { status: 400 });
+      return new Response(JSON.stringify({ error: "invalid_signature" }), {
+        status: 400,
+      });
     }
-    if (event.type === 'checkout.session.completed') {
+    if (event.type === "checkout.session.completed") {
       await recordTip(event.data.object.id);
     }
     return new Response(JSON.stringify({ received: true }), { status: 200 });
   };
+}
+
+// Vercel Function エントリ（遅延配線、実 Stripe 署名検証）。Stripe を正本とし記録は no-op（MVP）。
+export default async function (req: Request): Promise<Response> {
+  const secretKey = process.env.STRIPE_SECRET_KEY ?? "";
+  const whSecret = process.env.STRIPE_WEBHOOK_SECRET ?? "";
+  const verifier = makeStripeVerifier(secretKey);
+  return makeWebhookHandler(verifier, whSecret, async () => {
+    // MVP: Stripe ダッシュボードを正本とし追加記録なし（tips テーブルは将来）
+  })(req);
 }

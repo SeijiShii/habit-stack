@@ -28,7 +28,7 @@
 | 2 | _shared/auth | 実装完了 | 2026-06-08 | [INDEX](./_shared/auth/INDEX.md) |
 | 2 | _shared/local-sync | 実装完了 | 2026-06-08 | [INDEX](./_shared/local-sync/INDEX.md) |
 | 2 | _shared/legal | 実装完了 | 2026-06-08 | [INDEX](./_shared/legal/INDEX.md) |
-| 最後 | _shared/app-shell | 設計済 | 2026-06-08 | [INDEX](./_shared/app-shell/INDEX.md) |
+| 最後 | _shared/app-shell | 実装完了 | 2026-06-08 | [INDEX](./_shared/app-shell/INDEX.md) |
 
 ## 見積もり
 | ファイル | 種別 | 最終更新 |

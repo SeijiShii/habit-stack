@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="つみあげ">
+  <rect width="64" height="64" rx="14" fill="#FAF8F3"/>
+  <!-- 積み上がるブロック（成長・継続） -->
+  <rect x="16" y="40" width="32" height="10" rx="3" fill="#3F7A6E"/>
+  <rect x="20" y="28" width="24" height="10" rx="3" fill="#3F7A6E" opacity="0.85"/>
+  <rect x="24" y="16" width="16" height="10" rx="3" fill="#3F7A6E" opacity="0.7"/>
+  <!-- 達成の点（amber） -->
+  <circle cx="32" cy="12" r="3.2" fill="#E8A23D"/>
+</svg>
