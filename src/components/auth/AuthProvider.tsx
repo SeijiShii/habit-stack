@@ -1,11 +1,9 @@
 import { useEffect, type ReactNode } from 'react';
-import {
-  ClerkProvider,
-  useAuth,
-  useSignIn,
-} from '@clerk/clerk-react';
+import { ClerkProvider, useAuth, useSignIn } from '@clerk/clerk-react';
+import { asOwnerId } from '../../types/domain.js';
+import { getOrCreateLocalGuestId } from '../../services/auth/localGuest.js';
+import { OwnerContext } from '../../services/auth/ownerContext.js';
 
-/** ゲストチケットを取得するデフォルト実装（注入可能、テスト用に差し替え）。 */
 export type GuestTicketFetcher = () => Promise<string | null>;
 
 const defaultFetchGuestTicket: GuestTicketFetcher = async () => {
@@ -19,18 +17,15 @@ const defaultFetchGuestTicket: GuestTicketFetcher = async () => {
   }
 };
 
-/**
- * 初回起動で匿名セッションが無ければゲストチケットで自動サインイン（0 タップ実行、O22）。
- * 失敗してもローカル（IndexedDB）で degrade する（offline-critical）。
- */
-function GuestBootstrap({
+/** Clerk セッションを owner に橋渡し（未確立はローカルゲスト fallback）。 */
+function ClerkOwnerBridge({
   fetchGuestTicket,
   children,
 }: {
   fetchGuestTicket: GuestTicketFetcher;
   children: ReactNode;
 }) {
-  const { isLoaded, isSignedIn } = useAuth();
+  const { isLoaded, isSignedIn, userId } = useAuth();
   const { signIn, setActive } = useSignIn();
 
   useEffect(() => {
@@ -45,7 +40,7 @@ function GuestBootstrap({
           await setActive({ session: res.createdSessionId });
         }
       } catch {
-        // degrade: ローカルで継続（同期は後で）
+        // degrade: ローカルゲストで継続
       }
     })();
     return () => {
@@ -53,26 +48,52 @@ function GuestBootstrap({
     };
   }, [isLoaded, isSignedIn, signIn, setActive, fetchGuestTicket]);
 
-  return <>{children}</>;
+  const ownerId = userId
+    ? asOwnerId(userId)
+    : isLoaded
+      ? asOwnerId(getOrCreateLocalGuestId())
+      : null;
+
+  return (
+    <OwnerContext.Provider
+      value={{ ownerId, isLoaded, isLocalGuest: !userId && isLoaded }}
+    >
+      {children}
+    </OwnerContext.Provider>
+  );
+}
+
+/** Clerk 無し（キー未設定/オフライン）でローカルゲスト owner を供給。 */
+function LocalOwnerProvider({ children }: { children: ReactNode }) {
+  return (
+    <OwnerContext.Provider
+      value={{ ownerId: asOwnerId(getOrCreateLocalGuestId()), isLoaded: true, isLocalGuest: true }}
+    >
+      {children}
+    </OwnerContext.Provider>
+  );
 }
 
 export interface AuthProviderProps {
   publishableKey: string;
   children: ReactNode;
-  /** テスト用にゲストチケット取得を差し替え。 */
   fetchGuestTicket?: GuestTicketFetcher;
 }
 
+/**
+ * publishableKey があれば Clerk 認証（匿名→段階認証）、無ければローカルゲストのみで動作（offline-first）。
+ */
 export function AuthProvider({
   publishableKey,
   children,
   fetchGuestTicket = defaultFetchGuestTicket,
 }: AuthProviderProps) {
+  if (!publishableKey) {
+    return <LocalOwnerProvider>{children}</LocalOwnerProvider>;
+  }
   return (
     <ClerkProvider publishableKey={publishableKey}>
-      <GuestBootstrap fetchGuestTicket={fetchGuestTicket}>
-        {children}
-      </GuestBootstrap>
+      <ClerkOwnerBridge fetchGuestTicket={fetchGuestTicket}>{children}</ClerkOwnerBridge>
     </ClerkProvider>
   );
 }
