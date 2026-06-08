@@ -14,6 +14,8 @@ DB スキーマ・マイグレーション（Neon + Drizzle）
 | 001 | 001__shared_db_SPEC.md | SPEC | 設計済 | 2026-06-08 | Drizzle 6 テーブル + enum + owner_id 分離 + 同期メタ |
 | 002 | 002__shared_db_PLAN.md | PLAN | 設計済 | 2026-06-08 | schema/client/migrations 3 Phase |
 | 003 | 003__shared_db_UNIT_TEST.md | UNIT_TEST | 設計済 | 2026-06-08 | 型テスト + 制約/index assert |
+| 101 | 101__shared_db_IMPL_REPORT.md | IMPL_REPORT | 実装完了 | 2026-06-08 | 5テーブル/client/migration + 基盤scaffold |
+| 102 | 102__shared_db_UNIT_TEST_REPORT.md | UNIT_TEST_REPORT | 実装完了 | 2026-06-08 | 12/12 green |
 | (004 E2E は cross-cutting のため skip) |
 
 ## サブフォルダ（改修・バグ修正・クレーム判定履歴）
