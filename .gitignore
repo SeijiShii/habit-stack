@@ -19,3 +19,7 @@ exports/
 # flow runtime markers (ephemeral)
 .flow-loop-active
 .flow-needs-compact
+
+# playwright
+test-results/
+playwright-report/
