@@ -67,20 +67,17 @@
 ## 5. 現在地カーソル
 
 <!-- AUTO-GENERATED:BEGIN scenario-cursor -->
-- 現在フェーズ: Phase 3 (実装/TDD) 進行中 — 基盤層完了、フロント/統合層が残り
-- 進行中ターゲット: _shared/auth（Phase 1 owner resolver 完了、Phase 2-4 + 3.5 が React/Clerk 導入後に残り）
-- 最終更新セッション: D20260608_002_resume_continuous（/flow:auto loop、CF-010 不正停止訂正後 続行中）
-- 最終更新時刻: 2026-06-08 18:40
-- 完了フェーズ: [Phase 1 概念設計, Phase 1.5 デザインシステム(SoT), Phase 2 機能設計(全11), Phase 2.5 spec-review(全11)]
-- Phase 3 実装進捗:
-  - ✅ _shared/db（5テーブル+migration、12テスト）
-  - ✅ _shared/types（domain/db/sync、6テスト）
-  - 🔶 _shared/auth（Phase1 owner resolver 7テスト完了 / Phase2-4+3.5 残り）
-  - ⬜ _shared/local-sync, _shared/legal, activity-sets, execution, feedback, streak-summary, tip-jar, _shared/app-shell
-  - 累計テスト: 25/25 green、typecheck green、実トーチェーン稼働
-- 次の推奨コマンド: /flow:auto（再開）→ auth Phase 2 から継続。React/Vite/Clerk スタック導入が必要（auth client Provider / 実 Clerk セッション P4.46 / 各 feature の UI）
-- ⚠️ 残り: フロント React UI(8 feature)+ app-shell 合成 + Playwright E2E(P4.5) + /flow:release(実 Clerk/Neon/Stripe キー=Class C、ローカル実機確認、デプロイ=Class B)。大規模・複数セッション想定（per-commit 再開可能）
-- Open 論点: 論点-001(ストリークUX/design)、論点-002(ドメイン)、論点-003/010(feedback-hub)、論点-009(ゲスト移行方式)
+- 現在フェーズ: Phase 4 (公開準備) — Release gate (P4.7、実キー Class C)
+- 進行中ターゲット: /flow:release（実 Clerk/Neon/Stripe キー FILL → 実機確認 → デプロイ）
+- 最終更新セッション: D20260608_030_e2e_core-journey
+- 最終更新時刻: 2026-06-08 20:10
+- 完了フェーズ: [Phase 1 概念設計, Phase 1.5 デザイン, Phase 2 機能設計(全11), Phase 2.5 spec-review(全11), Phase 3 実装(全11), Phase 3.5 E2E(コアジャーニー), release-pre audit/secure]
+- Phase 3 実装: **全11 target 実装完了**（db/types/auth/local-sync/legal/activity-sets/execution/feedback/streak-summary/tip-jar/app-shell）
+  - 累計 116/116 テスト green、typecheck green、**vite build 成功（デプロイ可能 O57）**、E2E コアジャーニー 3/3 green、release-pre audit pass
+  - SEC-001〜005 実装で充足、SEC-DEP High closed/Critical accepted-risk(dev-only)
+- 次の推奨コマンド: **/flow:release**（P4.7）— 実キー FILL（Clerk/Neon/Stripe、env-acquisition-guide）→ ローカルスマホ動作確認（課金系含む）→ デプロイ（Class B）。**実キーは人間しか持たない = Class C 1問1答**
+- Release 後: サブドメ確定(論点-002) → /flow:promote(告知文) → P5
+- Open 論点: 論点-002(ドメイン=Release)、論点-003/010(feedback-hub)、論点-009(Clerk確認時)、論点-011(vitest accepted-risk)
 <!-- AUTO-GENERATED:END scenario-cursor -->
 
 ## 6. 変更履歴
