@@ -422,6 +422,14 @@ db/                  # Drizzle スキーマ・マイグレーション（§1.3.2
 
 > O28 依存脆弱性は lockfile 生成後 `/flow:secure --phase=deps` で実施。O54 DSR 履行可能性は §9.2 で対応済み（ゲスト=セルフサービス削除）。
 
+### [論点-011] [SEC-DEP-002] vitest UI server の Critical CVE（dev-only）
+- **status**: `accepted-risk`（pending user confirmation）
+- **観点 ID**: O28_dependency_vulnerabilities ／ **severity**: Critical（実曝露ゼロ）
+- **検出**: `/flow:secure --phase=deps`（2026-06-08）。`vitest --ui` サーバの任意ファイル read/exec。
+- **実曝露**: ゼロ（vitest は本番非同梱、`--ui` 未使用、CI は `vitest run`）。
+- **対応**: drizzle-orm の High は 0.45.2 で closed。vitest critical は修正に vitest3→vite6/7 が必要で Node 22.11 の build を破壊するため、**Node 22.12+ アップ後に vitest3+vite6 移行で closed 化**。それまで accepted-risk。詳細: `./SECURITY_DEPS_20260608.md#22`
+- **判断期限**: Node アップグレード時 / **担当**: seiji（accepted-risk の最終確認）
+
 ## 9. 法務・コンプライアンス書類
 
 > 公開 + tip-jar（日本国内有償要素）のため §9.1 プラポリ + §9.4 特商法表記が必須。
