@@ -14,6 +14,7 @@
 | 001 | 001__shared_auth_SPEC.md | SPEC | 設計済 | 2026-06-08 | Clerk 匿名→段階認証 + owner resolver + 移行 + 削除(O54) |
 | 002 | 002__shared_auth_PLAN.md | PLAN | 設計済 | 2026-06-08 | owner/guest/Provider/delete 4+Phase |
 | 003 | 003__shared_auth_UNIT_TEST.md | UNIT_TEST | 設計済 | 2026-06-08 | 401/403/200 + 匿名→authed(P4.46) + PII マスク |
+| 実装 | Phase 1 owner resolver (withOwner/requireOwner) | 実装中 | 2026-06-08 | src/services/auth/owner.ts 7テスト green。Phase2-4(Provider/Googleリンク/deleteAllData)+3.5(実Clerk) は React/Clerk 導入後 |
 | 論点-009 | ゲスト→アカウント owner 統合方式 | open | 2026-06-08 | 実装時 Clerk API 確認 |
 
 ## サブフォルダ（改修・バグ修正・クレーム判定履歴）
