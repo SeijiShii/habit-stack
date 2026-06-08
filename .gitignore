@@ -1,0 +1,17 @@
+# dependencies
+node_modules/
+
+# env / secrets
+.env
+.env.*.local
+.env.local
+
+# build
+dist/
+.vercel/
+
+# misc
+.DS_Store
+*.log
+coverage/
+exports/
