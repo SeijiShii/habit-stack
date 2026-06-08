@@ -15,6 +15,8 @@
 | 002 | 002_tip-jar_PLAN.md | PLAN | 設計済 | 2026-06-08 | webhook署名(SEC-005)/checkout/UI |
 | 003 | 003_tip-jar_UNIT_TEST.md | UNIT_TEST | 設計済 | 2026-06-08 | 署名検証/冪等/未認証誘導 |
 | 004 | 004_tip-jar_E2E_TEST.md | E2E_TEST | 設計済 | 2026-06-08 | 応援フロー + O43視覚L3 |
+| 101 | 101_tip-jar_IMPL_REPORT.md | IMPL_REPORT | 実装完了 | 2026-06-08 | webhook署名/checkout/button |
+| 102 | 102_tip-jar_UNIT_TEST_REPORT.md | UNIT_TEST_REPORT | 実装完了 | 2026-06-08 | 7テスト green |
 
 ## サブフォルダ（改修・バグ修正・クレーム判定履歴）
 | パス | 種別 | issue/slug | 状態 | 概要 | INDEX |
