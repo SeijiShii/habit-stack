@@ -15,6 +15,8 @@
 | 002 | 002_activity-sets_PLAN.md | PLAN | 設計済 | 2026-06-08 | model/hooks/2画面 4Phase |
 | 003 | 003_activity-sets_UNIT_TEST.md | UNIT_TEST | 設計済 | 2026-06-08 | CRUD/Zod/reorder |
 | 004 | 004_activity-sets_E2E_TEST.md | E2E_TEST | 設計済 | 2026-06-08 | 作成→アイテム→並べ替え + offline + 視覚L1/L2 |
+| 101 | 101_activity-sets_IMPL_REPORT.md | IMPL_REPORT | 実装完了 | 2026-06-08 | model/hooks/2画面 |
+| 102 | 102_activity-sets_UNIT_TEST_REPORT.md | UNIT_TEST_REPORT | 実装完了 | 2026-06-08 | 11テスト green |
 
 ## サブフォルダ（改修・バグ修正・クレーム判定履歴）
 | パス | 種別 | issue/slug | 状態 | 概要 | INDEX |
