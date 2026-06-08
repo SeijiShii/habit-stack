@@ -15,6 +15,8 @@
 | 002 | 002_feedback_PLAN.md | PLAN | 設計済 | 2026-06-08 | piiScrub/client/widget/api |
 | 003 | 003_feedback_UNIT_TEST.md | UNIT_TEST | 設計済 | 2026-06-08 | PII scrub 網羅 + 再送/degrade |
 | 004 | 004_feedback_E2E_TEST.md | E2E_TEST | 設計済 | 2026-06-08 | 送信 + scrub + degrade |
+| 101 | 101_feedback_IMPL_REPORT.md | IMPL_REPORT | 実装完了 | 2026-06-08 | piiScrub/client/widget/api |
+| 102 | 102_feedback_UNIT_TEST_REPORT.md | UNIT_TEST_REPORT | 実装完了 | 2026-06-08 | 8テスト green |
 | 論点-010 | feedback-hub 所在 | open | 2026-06-08 | hub 未構築なら別 PJ 化 |
 
 ## サブフォルダ（改修・バグ修正・クレーム判定履歴）
