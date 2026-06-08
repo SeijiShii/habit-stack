@@ -14,7 +14,10 @@
 | 001 | 001__shared_legal_SPEC.md | SPEC | 設計済 | 2026-06-08 | プラポリ/利用規約/特商法 + O54ゲスト削除 + O55導線 |
 | 002 | 002__shared_legal_PLAN.md | PLAN | 設計済 | 2026-06-08 | 3ページ + content + consent + LegalFooter |
 | 003 | 003__shared_legal_UNIT_TEST.md | UNIT_TEST | 設計済 | 2026-06-08 | 必須法務項目 text assert |
+| 101 | 101__shared_legal_IMPL_REPORT.md | IMPL_REPORT | 実装完了 | 2026-06-08 | content/3ページ/LegalFooter(O54/O55) |
+| 102 | 102__shared_legal_UNIT_TEST_REPORT.md | UNIT_TEST_REPORT | 実装完了 | 2026-06-08 | 5テスト green |
 | (004 E2E は app-shell/feature 側でカバー) |
+| 後続 | consent 記録(同意タイムスタンプ) / 特商法販売者情報 | 配線待ち | 2026-06-08 | app-shell 認証配線 / 事業形態確定後 |
 
 ## サブフォルダ（改修・バグ修正・クレーム判定履歴）
 | パス | 種別 | issue/slug | 状態 | 概要 | INDEX |
