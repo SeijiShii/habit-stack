@@ -57,3 +57,19 @@
     公開 URL=https://habit-stack.givers.work / Stripe webhook=/api/tip/webhook / APP_URL=同。
     [論点-002] resolved。webhook URL・告知 URL の上流確定。
 ```
+- id: D20260608-058
+  timestamp: 2026-06-08T20:40:00+09:00
+  command: /flow:release
+  phase: Phase 1 §1.0c / DEV スキップ判断
+  question: DEV/test 環境を作るか本番直行か
+  options:
+    - prod-direct (本番直行) (recommended)
+    - DEV-first (慎重)
+  recommended: prod-direct
+  chosen: prod-direct (本番直行) — 116 unit/integration + E2E green・課金系 test 検証済・ドメイン確定済で推奨条件充足
+  chosen_type: explicit-choice
+  depends_on: [D20260608-057]
+  context: |
+    §1.0c 新機構 (CF-20260608-011) の初適用。FILL先=.env.production.local(live)、
+    Phase2 ローカル確認 skip → post-deploy スモーク(実機+100円実課金 B-4)。
+    依存順: GitHub push → Vercel+domain DNS → Clerk prod instance(clerk.<domain> DNS) → Neon prod → Stripe live+webhook → FILL → deploy。
