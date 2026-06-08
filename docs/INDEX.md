@@ -18,7 +18,7 @@
 | 4 | ✅ | execution | 設計済 | 2026-06-08 | 0 | 0 | 0 | [INDEX](./execution/INDEX.md) |
 | 4 | ❌ | feedback | 設計済 | 2026-06-08 | 0 | 0 | 0 | [INDEX](./feedback/INDEX.md) |
 | 5 | ❌ | streak-summary | 設計済 | 2026-06-08 | 0 | 0 | 0 | [INDEX](./streak-summary/INDEX.md) |
-| 5 | ❌ | tip-jar | 未設計 | ❌ | 0 | 0 | 0 | [INDEX](./tip-jar/INDEX.md) |
+| 5 | ❌ | tip-jar | 設計済 | 2026-06-08 | 0 | 0 | 0 | [INDEX](./tip-jar/INDEX.md) |
 
 ## 横断フォルダ
 | 優先度 | フォルダ | 状態 | 設計完了 | INDEX |
