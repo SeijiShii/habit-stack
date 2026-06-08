@@ -67,15 +67,20 @@
 ## 5. 現在地カーソル
 
 <!-- AUTO-GENERATED:BEGIN scenario-cursor -->
-- 現在フェーズ: Phase 2 (機能設計) 完了 → Phase 2 spec-review/secure ゲート
-- 進行中ターゲット: spec-review（P3.7、_shared/db から優先度順）
-- 最終更新セッション: D20260608_015_feature__shared_app-shell
-- 最終更新時刻: 2026-06-08 17:43
-- 完了フェーズ: [Phase 1 概念設計, Phase 1.5 デザインシステム(SoT), Phase 2 機能設計(全11対象)]
-  - Phase 2: 全11対象の設計文書生成済（db/types/auth/local-sync/legal/activity-sets/execution/feedback/streak-summary/tip-jar/app-shell）
-- 次の推奨コマンド: /flow:spec-review（優先度順、P3.7 実装前ゲート）→ その後 Phase 3 /flow:tdd（実装）
+- 現在フェーズ: Phase 3 (実装/TDD) 進行中 — 基盤層完了、フロント/統合層が残り
+- 進行中ターゲット: _shared/auth（Phase 1 owner resolver 完了、Phase 2-4 + 3.5 が React/Clerk 導入後に残り）
+- 最終更新セッション: D20260608_002_resume_continuous（/flow:auto loop、capacity 上限で clean pause）
+- 最終更新時刻: 2026-06-08 18:22
+- 完了フェーズ: [Phase 1 概念設計, Phase 1.5 デザインシステム(SoT), Phase 2 機能設計(全11), Phase 2.5 spec-review(全11)]
+- Phase 3 実装進捗:
+  - ✅ _shared/db（5テーブル+migration、12テスト）
+  - ✅ _shared/types（domain/db/sync、6テスト）
+  - 🔶 _shared/auth（Phase1 owner resolver 7テスト完了 / Phase2-4+3.5 残り）
+  - ⬜ _shared/local-sync, _shared/legal, activity-sets, execution, feedback, streak-summary, tip-jar, _shared/app-shell
+  - 累計テスト: 25/25 green、typecheck green、実トーチェーン稼働
+- 次の推奨コマンド: /flow:auto（再開）→ auth Phase 2 から継続。React/Vite/Clerk スタック導入が必要（auth client Provider / 実 Clerk セッション P4.46 / 各 feature の UI）
+- ⚠️ 残り: フロント React UI(8 feature)+ app-shell 合成 + Playwright E2E(P4.5) + /flow:release(実 Clerk/Neon/Stripe キー=Class C、ローカル実機確認、デプロイ=Class B)。大規模・複数セッション想定（per-commit 再開可能）
 - Open 論点: 論点-001(ストリークUX/design)、論点-002(ドメイン)、論点-003/010(feedback-hub)、論点-009(ゲスト移行方式)
-- ⚠️ 実装フェーズ(TDD)は実コードプロジェクト(Vite scaffold + npm install + 実テスト)が必要 = 大規模・複数セッション想定。Release gate(P4.7)で実 Clerk/Neon/Stripe キー(Class C)が必要
 <!-- AUTO-GENERATED:END scenario-cursor -->
 
 ## 6. 変更履歴
