@@ -142,6 +142,16 @@ db/                  # Drizzle スキーマ・マイグレーション（§1.3.2
 | 運用・監視 | Sentry（エラー）、Vercel Web Analytics（cookieless）、自前コストログ（外部 API 積算） | 無料枠超過監視、§4.6 |
 | UX 安全性 | ストリーク/継続率は「手応え」止まり。罪悪感・競争・射幸心を煽らない（穴あき許容＝セット単位だが一部未実行でも達成） | charter §2.2、§4.6 ではなく §1.2 除外と整合 |
 
+### 3.X セキュリティ要件 (auto-added by /flow:secure 2026-06-08)
+
+<!-- auto-generated-start -->
+- **[SEC-001] 認可（O23）**: 全 API endpoint で行レベル owner-check（`ownerId = auth.userId()`）必須。owner resolver を `_shared/auth` に実装、Drizzle クエリは user_id で絞る。匿名 local_id → 認証 user_id の所有権移譲も設計。
+- **[SEC-002] 入力検証（O24）**: 全 API 入力を Zod スキーマで検証。note は文字長制限 + 表示時エスケープ。CSV エクスポートは `=+-@` 始まりをエスケープ。
+- **[SEC-003] 秘密情報（O25）**: secret key（Clerk/Stripe/DB/Stripe webhook/server Sentry）は `VITE_` プレフィックス禁止（クライアント露出防止）。publishable のみ `VITE_*`。`.env.example` 作成 + `.gitignore` で `.env*.local` 除外（済）。ビルド成果物 grep を CI 化。
+- **[SEC-004] PII ログ（O26、法令必須）**: Sentry `beforeSend` で PII マスク。feedback 送信前 PII scrub。エラーに DB 内容/トークンを含めない。アナリティクスは匿名 ID（cookieless）。
+- **[SEC-005] レート制限/webhook 署名（O27）**: Stripe webhook は署名検証必須（raw body + `STRIPE_WEBHOOK_SECRET`）。feedback/tip 開始はレート制限（Vercel Edge / Upstash）+ Turnstile。同期エンドポイントは認証必須でスコープ最小化。
+<!-- auto-generated-end -->
+
 ## 4. 全体アーキテクチャ
 
 ```
@@ -383,7 +393,34 @@ db/                  # Drizzle スキーマ・マイグレーション（§1.3.2
 - **判断期限**: feedback 設計時
 - **担当**: seiji
 
-> セキュリティ論点（owner-check / Zod / PII scrub / レート制限 / webhook 署名検証）は `/flow:secure --phase=design` 実施時に [SEC-NNN] として登録予定。
+### [論点-004] [SEC-001] 認可漏れ / 行レベル owner-check: High
+- **status**: `accepted-as-requirement`
+- **status 履歴**: 2026-06-08 16:30 open → accepted-as-requirement（concept §3.X NFR に要件化）
+- **観点 ID**: O23_authorization_check ／ **影響範囲**: §3.X, _shared/auth, 全 feature
+- **検出根拠**: 複数ユーザー PJ、§3 NFR に owner-check 記載ありだが全 API 認可マトリクスは feature 設計で詳細化
+- **推奨/対応**: feature 設計時に `/flow:secure --scope=feature` で dispatched-to-feature へ。L1 レポート: `./SECURITY_REVIEW_20260608.md#sec-001`
+
+### [論点-005] [SEC-002] 入力検証 (Zod): High
+- **status**: `accepted-as-requirement` ／ **観点 ID**: O24_input_validation ／ **影響範囲**: §3.X, §5, §6
+- **status 履歴**: 2026-06-08 16:30 open → accepted-as-requirement
+- **対応**: 全 API 入力 Zod 検証。feature 設計で再照合。L1: `./SECURITY_REVIEW_20260608.md#sec-002`
+
+### [論点-006] [SEC-003] 秘密情報管理 (VITE_ 露出): High
+- **status**: `accepted-as-requirement` ／ **観点 ID**: O25_secrets_management ／ **影響範囲**: §3.X, §4.5
+- **status 履歴**: 2026-06-08 16:30 open → accepted-as-requirement
+- **対応**: secret key は VITE_ 禁止、`.env.example` 作成、CI grep。L1: `./SECURITY_REVIEW_20260608.md#sec-003`
+
+### [論点-007] [SEC-004] PII ログ漏洩 (Sentry beforeSend): High（法令必須）
+- **status**: `accepted-as-requirement` ／ **観点 ID**: O26_pii_logging ／ **影響範囲**: §3.X, §9.1, §9.2
+- **status 履歴**: 2026-06-08 16:30 open → accepted-as-requirement
+- **対応**: Sentry beforeSend マスク + feedback 送信前 scrub。L1: `./SECURITY_REVIEW_20260608.md#sec-004`
+
+### [論点-008] [SEC-005] レート制限 / webhook 署名検証: High
+- **status**: `accepted-as-requirement` ／ **観点 ID**: O27_rate_limit_scope ／ **影響範囲**: §3.X, §4.3, tip-jar, feedback
+- **status 履歴**: 2026-06-08 16:30 open → accepted-as-requirement
+- **対応**: Stripe webhook 署名検証必須 + feedback/tip レート制限 + Turnstile。L1: `./SECURITY_REVIEW_20260608.md#sec-005`
+
+> O28 依存脆弱性は lockfile 生成後 `/flow:secure --phase=deps` で実施。O54 DSR 履行可能性は §9.2 で対応済み（ゲスト=セルフサービス削除）。
 
 ## 9. 法務・コンプライアンス書類
 
