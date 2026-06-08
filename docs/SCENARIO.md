@@ -67,12 +67,14 @@
 ## 5. 現在地カーソル
 
 <!-- AUTO-GENERATED:BEGIN scenario-cursor -->
-- 現在フェーズ: Phase 1 (概念設計)
-- 進行中ターゲット: concept (初版生成完了)
-- 最終更新セッション: D20260608_001_concept_initial
-- 最終更新時刻: 2026-06-08 16:10
-- 完了フェーズ: []
-- 次の推奨コマンド: /flow:secure --phase=design --scope=concept（Phase 1 完了ゲート）、続いて /flow:estimate（初回見積）→ /flow:design（Phase 1.5）
+- 現在フェーズ: Phase 2 (機能設計) 着手前
+- 進行中ターゲット: なし（Phase 1 + 1.5 完了）
+- 最終更新セッション: D20260608_004_design_system
+- 最終更新時刻: 2026-06-08 16:39
+- 完了フェーズ: [Phase 1 概念設計, Phase 1.5 デザインシステム(SoT)]
+  - Phase 1: concept ✅ / secure(concept) ✅ High5件accepted-as-requirement / initial estimate ✅
+  - Phase 1.5: design-system.md ✅（穏やか・積み上げ、トークン適用は実装フェーズ）
+- 次の推奨コマンド: /flow:feature（concept §1.3 優先度順: _shared/db → _shared/types → _shared/auth/local-sync/legal → activity-sets → execution/feedback → streak-summary/tip-jar → _shared/app-shell）
 <!-- AUTO-GENERATED:END scenario-cursor -->
 
 ## 6. 変更履歴
