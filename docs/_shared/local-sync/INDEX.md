@@ -11,7 +11,10 @@ local-first 同期層（IndexedDB + Neon 同期キュー、タイムスタンプ
 ## ファイル一覧（番号順）
 | 番号 | ファイル | 種別 | 状態 | 最終更新 | 短い説明 |
 |---|---|---|---|---|---|
-| (まだ設計文書なし。`/flow:feature local-sync` で生成) |
+| 001 | 001__shared_local-sync_SPEC.md | SPEC | 設計済 | 2026-06-08 | IndexedDB local-first + 同期キュー + LWW + tombstone |
+| 002 | 002__shared_local-sync_PLAN.md | PLAN | 設計済 | 2026-06-08 | localStore/syncQueue/conflict/api/useSync |
+| 003 | 003__shared_local-sync_UNIT_TEST.md | UNIT_TEST | 設計済 | 2026-06-08 | 競合/冪等/tombstone/オフライン |
+| (004 E2E は feature 側 offline シナリオでカバー) |
 
 ## サブフォルダ（改修・バグ修正・クレーム判定履歴）
 | パス | 種別 | issue/slug | 状態 | 概要 | INDEX |
