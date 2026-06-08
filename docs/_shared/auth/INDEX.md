@@ -14,8 +14,10 @@
 | 001 | 001__shared_auth_SPEC.md | SPEC | 設計済 | 2026-06-08 | Clerk 匿名→段階認証 + owner resolver + 移行 + 削除(O54) |
 | 002 | 002__shared_auth_PLAN.md | PLAN | 設計済 | 2026-06-08 | owner/guest/Provider/delete 4+Phase |
 | 003 | 003__shared_auth_UNIT_TEST.md | UNIT_TEST | 設計済 | 2026-06-08 | 401/403/200 + 匿名→authed(P4.46) + PII マスク |
-| 実装 | Phase 1 owner resolver (withOwner/requireOwner) | 実装中 | 2026-06-08 | src/services/auth/owner.ts 7テスト green。Phase2-4(Provider/Googleリンク/deleteAllData)+3.5(実Clerk) は React/Clerk 導入後 |
-| 論点-009 | ゲスト→アカウント owner 統合方式 | open | 2026-06-08 | 実装時 Clerk API 確認 |
+| 101 | 101__shared_auth_IMPL_REPORT.md | IMPL_REPORT | 実装完了 | 2026-06-08 | owner resolver/匿名ゲストセッション(実Clerk)/Provider/O54削除/移行。P4.46 充足 |
+| 102 | 102__shared_auth_UNIT_TEST_REPORT.md | UNIT_TEST_REPORT | 実装完了 | 2026-06-08 | 19テスト green（匿名→authed 200含む） |
+| 後続 | Google リンク UI / delete・merge のローカル IndexedDB 側 | 配線待ち | 2026-06-08 | app-shell UI / local-sync 配線時。サーバ側は実装済 |
+| 論点-009 | ゲスト→アカウント owner 統合方式 | open | 2026-06-08 | reassignOwner(案B)実装済、Clerk 永続化アップグレード可なら案A優先 |
 
 ## サブフォルダ（改修・バグ修正・クレーム判定履歴）
 | パス | 種別 | issue/slug | 状態 | 概要 | INDEX |

@@ -69,8 +69,8 @@
 <!-- AUTO-GENERATED:BEGIN scenario-cursor -->
 - 現在フェーズ: Phase 3 (実装/TDD) 進行中 — 基盤層完了、フロント/統合層が残り
 - 進行中ターゲット: _shared/auth（Phase 1 owner resolver 完了、Phase 2-4 + 3.5 が React/Clerk 導入後に残り）
-- 最終更新セッション: D20260608_002_resume_continuous（/flow:auto loop、capacity 上限で clean pause）
-- 最終更新時刻: 2026-06-08 18:22
+- 最終更新セッション: D20260608_002_resume_continuous（/flow:auto loop、CF-010 不正停止訂正後 続行中）
+- 最終更新時刻: 2026-06-08 18:40
 - 完了フェーズ: [Phase 1 概念設計, Phase 1.5 デザインシステム(SoT), Phase 2 機能設計(全11), Phase 2.5 spec-review(全11)]
 - Phase 3 実装進捗:
   - ✅ _shared/db（5テーブル+migration、12テスト）
