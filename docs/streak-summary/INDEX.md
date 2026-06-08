@@ -15,6 +15,8 @@
 | 002 | 002_streak-summary_PLAN.md | PLAN | 設計済 | 2026-06-08 | summarize/repo/api/UI + Recharts |
 | 003 | 003_streak-summary_UNIT_TEST.md | UNIT_TEST | 設計済 | 2026-06-08 | 継続率/連続/穴あき達成/空状態 |
 | 004 | 004_streak-summary_E2E_TEST.md | E2E_TEST | 設計済 | 2026-06-08 | サマリ表示/期間切替 + 未達非danger視覚 |
+| 101 | 101_streak-summary_IMPL_REPORT.md | IMPL_REPORT | 実装完了 | 2026-06-08 | summarize/repo/components/page |
+| 102 | 102_streak-summary_UNIT_TEST_REPORT.md | UNIT_TEST_REPORT | 実装完了 | 2026-06-08 | 8テスト green |
 
 ## サブフォルダ（改修・バグ修正・クレーム判定履歴）
 | パス | 種別 | issue/slug | 状態 | 概要 | INDEX |
