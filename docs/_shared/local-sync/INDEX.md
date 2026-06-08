@@ -14,6 +14,8 @@ local-first 同期層（IndexedDB + Neon 同期キュー、タイムスタンプ
 | 001 | 001__shared_local-sync_SPEC.md | SPEC | 設計済 | 2026-06-08 | IndexedDB local-first + 同期キュー + LWW + tombstone |
 | 002 | 002__shared_local-sync_PLAN.md | PLAN | 設計済 | 2026-06-08 | localStore/syncQueue/conflict/api/useSync |
 | 003 | 003__shared_local-sync_UNIT_TEST.md | UNIT_TEST | 設計済 | 2026-06-08 | 競合/冪等/tombstone/オフライン |
+| 101 | 101__shared_local-sync_IMPL_REPORT.md | IMPL_REPORT | 実装完了 | 2026-06-08 | localStore/conflict/syncQueue/api/useSync |
+| 102 | 102__shared_local-sync_UNIT_TEST_REPORT.md | UNIT_TEST_REPORT | 実装完了 | 2026-06-08 | 19テスト green |
 | (004 E2E は feature 側 offline シナリオでカバー) |
 
 ## サブフォルダ（改修・バグ修正・クレーム判定履歴）
