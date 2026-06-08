@@ -160,7 +160,11 @@ owner_id = Clerk user id を直接保持。匿名ゲスト→Google リンクは
 - 監査ログテーブル（単一ユーザー自己データのため不要、concept §12.7）
 
 ## 8. 未決事項
-- 現時点で論点なし（2026-06-08）。daily_achievements を「キャッシュ（再計算可能）」とするか「正本」とするかは streak-summary 設計（§7）で確定 → 現状はキャッシュ方針（同期/実行確定時に upsert、再計算可能）。
+- 現時点で論点なし（2026-06-08）。
+<!-- spec-review R1: daily_achievements はキャッシュ（正本 = execution_records、再計算可能）。execution が実行確定時に upsert、streak-summary が読む。破損時は records から summarize で再計算。 -->
+- daily_achievements = **キャッシュ**（正本 = execution_records）。execution が upsert、streak-summary が読む。欠落/破損時は execution_records から再計算可能（streak-summary の summarize に再計算経路）。
+<!-- spec-review R2: 全 read で deleted_at IS NULL を repo 層標準化、同期 pull は tombstone 配信。 -->
+- 論理削除: repo 層で `deleted_at IS NULL` を標準フィルタ化、同期層は tombstone を配信（削除も同期）。
 
 ## 9. 更新履歴
 | 日付 | 変更概要 | 実行者 |
