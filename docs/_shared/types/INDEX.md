@@ -14,6 +14,8 @@
 | 001 | 001__shared_types_SPEC.md | SPEC | 設計済 | 2026-06-08 | DB 型 re-export + enum + 同期エンベロープ + VO |
 | 002 | 002__shared_types_PLAN.md | PLAN | 設計済 | 2026-06-08 | domain/db/sync/index |
 | 003 | 003__shared_types_UNIT_TEST.md | UNIT_TEST | 設計済 | 2026-06-08 | 型テスト中心 |
+| 101 | 101__shared_types_IMPL_REPORT.md | IMPL_REPORT | 実装完了 | 2026-06-08 | domain/db/sync/index |
+| 102 | 102__shared_types_UNIT_TEST_REPORT.md | UNIT_TEST_REPORT | 実装完了 | 2026-06-08 | 6/6 green |
 | (004 E2E は cross-cutting で skip) |
 
 ## サブフォルダ（改修・バグ修正・クレーム判定履歴）

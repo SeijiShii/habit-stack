@@ -67,14 +67,15 @@
 ## 5. 現在地カーソル
 
 <!-- AUTO-GENERATED:BEGIN scenario-cursor -->
-- 現在フェーズ: Phase 2 (機能設計) 着手前
-- 進行中ターゲット: なし（Phase 1 + 1.5 完了）
-- 最終更新セッション: D20260608_004_design_system
-- 最終更新時刻: 2026-06-08 16:39
-- 完了フェーズ: [Phase 1 概念設計, Phase 1.5 デザインシステム(SoT)]
-  - Phase 1: concept ✅ / secure(concept) ✅ High5件accepted-as-requirement / initial estimate ✅
-  - Phase 1.5: design-system.md ✅（穏やか・積み上げ、トークン適用は実装フェーズ）
-- 次の推奨コマンド: /flow:feature（concept §1.3 優先度順: _shared/db → _shared/types → _shared/auth/local-sync/legal → activity-sets → execution/feedback → streak-summary/tip-jar → _shared/app-shell）
+- 現在フェーズ: Phase 2 (機能設計) 完了 → Phase 2 spec-review/secure ゲート
+- 進行中ターゲット: spec-review（P3.7、_shared/db から優先度順）
+- 最終更新セッション: D20260608_015_feature__shared_app-shell
+- 最終更新時刻: 2026-06-08 17:43
+- 完了フェーズ: [Phase 1 概念設計, Phase 1.5 デザインシステム(SoT), Phase 2 機能設計(全11対象)]
+  - Phase 2: 全11対象の設計文書生成済（db/types/auth/local-sync/legal/activity-sets/execution/feedback/streak-summary/tip-jar/app-shell）
+- 次の推奨コマンド: /flow:spec-review（優先度順、P3.7 実装前ゲート）→ その後 Phase 3 /flow:tdd（実装）
+- Open 論点: 論点-001(ストリークUX/design)、論点-002(ドメイン)、論点-003/010(feedback-hub)、論点-009(ゲスト移行方式)
+- ⚠️ 実装フェーズ(TDD)は実コードプロジェクト(Vite scaffold + npm install + 実テスト)が必要 = 大規模・複数セッション想定。Release gate(P4.7)で実 Clerk/Neon/Stripe キー(Class C)が必要
 <!-- AUTO-GENERATED:END scenario-cursor -->
 
 ## 6. 変更履歴

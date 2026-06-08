@@ -15,3 +15,7 @@ dist/
 *.log
 coverage/
 exports/
+
+# flow runtime markers (ephemeral)
+.flow-loop-active
+.flow-needs-compact
