@@ -15,6 +15,8 @@
 | 002 | 002_execution_PLAN.md | PLAN | 設計済 | 2026-06-08 | machine/elapsed/repo/hook/UI 4Phase |
 | 003 | 003_execution_UNIT_TEST.md | UNIT_TEST | 設計済 | 2026-06-08 | 全遷移/経過/復元/穴あき達成 |
 | 004 | 004_execution_E2E_TEST.md | E2E_TEST | 設計済 | 2026-06-08 | 実行フロー + 背景化/リロード経過 + offline + 視覚 |
+| 101 | 101_execution_IMPL_REPORT.md | IMPL_REPORT | 実装完了 | 2026-06-08 | machine/elapsed/repo/hook/page |
+| 102 | 102_execution_UNIT_TEST_REPORT.md | UNIT_TEST_REPORT | 実装完了 | 2026-06-08 | 15テスト green |
 
 ## サブフォルダ（改修・バグ修正・クレーム判定履歴）
 | パス | 種別 | issue/slug | 状態 | 概要 | INDEX |
