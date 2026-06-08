@@ -16,7 +16,7 @@
 |---|---|---|---|---|---|---|---|---|
 | 3 | ❌ | activity-sets | 設計済 | 2026-06-08 | 0 | 0 | 0 | [INDEX](./activity-sets/INDEX.md) |
 | 4 | ✅ | execution | 設計済 | 2026-06-08 | 0 | 0 | 0 | [INDEX](./execution/INDEX.md) |
-| 4 | ❌ | feedback | 未設計 | ❌ | 0 | 0 | 0 | [INDEX](./feedback/INDEX.md) |
+| 4 | ❌ | feedback | 設計済 | 2026-06-08 | 0 | 0 | 0 | [INDEX](./feedback/INDEX.md) |
 | 5 | ❌ | streak-summary | 未設計 | ❌ | 0 | 0 | 0 | [INDEX](./streak-summary/INDEX.md) |
 | 5 | ❌ | tip-jar | 未設計 | ❌ | 0 | 0 | 0 | [INDEX](./tip-jar/INDEX.md) |
 

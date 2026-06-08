@@ -11,7 +11,11 @@
 ## ファイル一覧（番号順）
 | 番号 | ファイル | 種別 | 状態 | 最終更新 | 短い説明 |
 |---|---|---|---|---|---|
-| (まだ設計文書なし。`/flow:feature feedback` で生成) |
+| 001 | 001_feedback_SPEC.md | SPEC | 設計済 | 2026-06-08 | 好き嫌い+バグ報告 + PII scrub + hub二重シンク(O40) |
+| 002 | 002_feedback_PLAN.md | PLAN | 設計済 | 2026-06-08 | piiScrub/client/widget/api |
+| 003 | 003_feedback_UNIT_TEST.md | UNIT_TEST | 設計済 | 2026-06-08 | PII scrub 網羅 + 再送/degrade |
+| 004 | 004_feedback_E2E_TEST.md | E2E_TEST | 設計済 | 2026-06-08 | 送信 + scrub + degrade |
+| 論点-010 | feedback-hub 所在 | open | 2026-06-08 | hub 未構築なら別 PJ 化 |
 
 ## サブフォルダ（改修・バグ修正・クレーム判定履歴）
 | パス | 種別 | issue/slug | 状態 | 概要 | INDEX |
