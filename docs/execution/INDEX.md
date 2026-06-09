@@ -21,7 +21,8 @@
 ## サブフォルダ（改修・バグ修正・クレーム判定履歴）
 | パス | 種別 | issue/slug | 状態 | 概要 | INDEX |
 |---|---|---|---|---|---|
-| (なし。`/flow:revise` / `/flow:fix` / `/flow:claim` で生成) |
+| `claim_C20260610-001_20260610_timer-frozen-display/` | claim | C20260610-001 / timer-frozen-display | 判定完了→fix | 計時中の経過時間が 00:00 で固まる→**バグ判定**。開始/現在時刻表示も同梱 | `001_TRIAGE.md` |
+| `fix_C20260610-001_20260610_timer-frozen-display/` | fix | C20260610-001 / timer-frozen-display | 着手予定 | 計時中の経過ライブ表示 + 開始/現在時刻表示。起点: claim C20260610-001 | — |
 
 ## 関連
 - 親 concept: `../concept.md` §1.3.1 execution 行
