@@ -58,6 +58,21 @@ describe("App 合成 (O57)", () => {
     await waitFor(() => expect(screen.getByLabelText("セット名")).toBeTruthy());
   });
 
+  it("C20260609-002: アカウント動線が常設され /account に到達できる (O55)", () => {
+    wrap("/", <App />);
+    const hrefs = Array.from(document.querySelectorAll("a")).map((a) =>
+      a.getAttribute("href"),
+    );
+    expect(hrefs).toContain("/account"); // nav inbound link
+  });
+
+  it("C20260609-002: /account がレンダーされる (keyless=ローカル利用表示)", () => {
+    wrap("/account", <App />);
+    expect(screen.getByRole("heading", { level: 1 }).textContent).toContain(
+      "アカウント",
+    );
+  });
+
   it("未定義ルートは 404 ページ", () => {
     wrap("/nope", <App />);
     expect(screen.getByRole("heading", { level: 1 }).textContent).toContain(

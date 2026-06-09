@@ -13,6 +13,7 @@ import { SetListPage } from "./features/activity-sets/SetListPage.js";
 import { SetEditPage } from "./features/activity-sets/SetEditPage.js";
 import { ExecutionPage } from "./features/execution/ExecutionPage.js";
 import { SummaryPage } from "./features/streak-summary/SummaryPage.js";
+import { AccountPage } from "./features/account/AccountPage.js";
 import { useRepos, type Repos } from "./app/repos.js";
 
 function Loading() {
@@ -174,6 +175,7 @@ export function App() {
             <SummaryRoute repos={r} />
           ))}
         />
+        <Route path="/account" element={<AccountPage />} />
         <Route path="/legal/privacy" element={<PrivacyPage />} />
         <Route path="/legal/terms" element={<TermsPage />} />
         <Route

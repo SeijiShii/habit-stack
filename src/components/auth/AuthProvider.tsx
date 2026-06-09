@@ -1,14 +1,21 @@
-import { useEffect, type ReactNode } from 'react';
-import { ClerkProvider, useAuth, useSignIn } from '@clerk/clerk-react';
-import { asOwnerId } from '../../types/domain.js';
-import { getOrCreateLocalGuestId } from '../../services/auth/localGuest.js';
-import { OwnerContext } from '../../services/auth/ownerContext.js';
+import { useEffect, type ReactNode } from "react";
+import {
+  ClerkProvider,
+  useAuth,
+  useSignIn,
+  useUser,
+  useClerk,
+} from "@clerk/clerk-react";
+import { asOwnerId } from "../../types/domain.js";
+import { getOrCreateLocalGuestId } from "../../services/auth/localGuest.js";
+import { OwnerContext } from "../../services/auth/ownerContext.js";
+import { linkWithGoogle } from "../../services/auth/linkWithGoogle.js";
 
 export type GuestTicketFetcher = () => Promise<string | null>;
 
 const defaultFetchGuestTicket: GuestTicketFetcher = async () => {
   try {
-    const res = await fetch('/api/auth/guest', { method: 'POST' });
+    const res = await fetch("/api/auth/guest", { method: "POST" });
     if (!res.ok) return null;
     const data = (await res.json()) as { ticket?: string };
     return data.ticket ?? null;
@@ -27,6 +34,8 @@ function ClerkOwnerBridge({
 }) {
   const { isLoaded, isSignedIn, userId } = useAuth();
   const { signIn, setActive } = useSignIn();
+  const { user } = useUser();
+  const clerk = useClerk();
 
   useEffect(() => {
     if (!isLoaded || isSignedIn || !signIn) return;
@@ -35,8 +44,8 @@ function ClerkOwnerBridge({
       const ticket = await fetchGuestTicket();
       if (cancelled || !ticket) return;
       try {
-        const res = await signIn.create({ strategy: 'ticket', ticket });
-        if (res.status === 'complete' && setActive) {
+        const res = await signIn.create({ strategy: "ticket", ticket });
+        if (res.status === "complete" && setActive) {
           await setActive({ session: res.createdSessionId });
         }
       } catch {
@@ -54,9 +63,37 @@ function ClerkOwnerBridge({
       ? asOwnerId(getOrCreateLocalGuestId())
       : null;
 
+  // 外部アカウント（Google 等）連携済みか = データ引き継ぎ可能な authed owner
+  const isLinked = (user?.externalAccounts?.length ?? 0) > 0;
+  const email = user?.primaryEmailAddress?.emailAddress ?? undefined;
+
+  const linkGoogle = user
+    ? async () => {
+        await linkWithGoogle(
+          user,
+          `${window.location.origin}/account`,
+          (url) => {
+            window.location.href = url;
+          },
+        );
+      }
+    : undefined;
+
+  const signOut = async () => {
+    await clerk.signOut();
+  };
+
   return (
     <OwnerContext.Provider
-      value={{ ownerId, isLoaded, isLocalGuest: !userId && isLoaded }}
+      value={{
+        ownerId,
+        isLoaded,
+        isLocalGuest: !userId && isLoaded,
+        isLinked,
+        email,
+        linkGoogle,
+        signOut,
+      }}
     >
       {children}
     </OwnerContext.Provider>
@@ -67,7 +104,12 @@ function ClerkOwnerBridge({
 function LocalOwnerProvider({ children }: { children: ReactNode }) {
   return (
     <OwnerContext.Provider
-      value={{ ownerId: asOwnerId(getOrCreateLocalGuestId()), isLoaded: true, isLocalGuest: true }}
+      value={{
+        ownerId: asOwnerId(getOrCreateLocalGuestId()),
+        isLoaded: true,
+        isLocalGuest: true,
+        isLinked: false,
+      }}
     >
       {children}
     </OwnerContext.Provider>
@@ -93,7 +135,9 @@ export function AuthProvider({
   }
   return (
     <ClerkProvider publishableKey={publishableKey}>
-      <ClerkOwnerBridge fetchGuestTicket={fetchGuestTicket}>{children}</ClerkOwnerBridge>
+      <ClerkOwnerBridge fetchGuestTicket={fetchGuestTicket}>
+        {children}
+      </ClerkOwnerBridge>
     </ClerkProvider>
   );
 }

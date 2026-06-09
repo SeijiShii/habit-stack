@@ -27,6 +27,7 @@ export function AppLayout({
           <Link to="/">つみあげルーティン</Link>
           <Link to="/sets">セット</Link>
           <Link to="/summary">継続</Link>
+          <Link to="/account">アカウント</Link>
           <button
             type="button"
             aria-label="これは何？"
