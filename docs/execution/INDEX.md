@@ -21,7 +21,7 @@
 ## サブフォルダ（改修・バグ修正・クレーム判定履歴）
 | パス | 種別 | issue/slug | 状態 | 概要 | INDEX |
 |---|---|---|---|---|---|
-| `revise_R20260610-001_20260610_exec-buttons-simplify/` | revise | R20260610-001 / exec-buttons-simplify | 設計完了 | 実行画面の「終了」ボタン削除 + 「次の活動へ」表記統一（表示層のみ） | `INDEX.md` |
+| `revise_R20260610-001_20260610_exec-buttons-simplify/` | revise | R20260610-001 / exec-buttons-simplify | 実装完了 | 実行画面の「終了」ボタン削除 + 「次の活動へ」表記統一（表示層のみ、135 green） | `INDEX.md` |
 | `claim_C20260610-001_20260610_timer-frozen-display/` | claim | C20260610-001 / timer-frozen-display | 判定完了→fix | 計時中の経過時間が 00:00 で固まる→**バグ判定**。開始/現在時刻表示も同梱 | `001_TRIAGE.md` |
 | `fix_C20260610-001_20260610_timer-frozen-display/` | fix | C20260610-001 / timer-frozen-display | 実装完了 | 計時中の経過ライブ表示 + 開始/現在時刻表示（表示層のみ、132 green）。起点: claim C20260610-001 | `INDEX.md` |
 
