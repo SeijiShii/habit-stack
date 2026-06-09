@@ -73,3 +73,21 @@
     §1.0c 新機構 (CF-20260608-011) の初適用。FILL先=.env.production.local(live)、
     Phase2 ローカル確認 skip → post-deploy スモーク(実機+100円実課金 B-4)。
     依存順: GitHub push → Vercel+domain DNS → Clerk prod instance(clerk.<domain> DNS) → Neon prod → Stripe live+webhook → FILL → deploy。
+
+---
+## 追記 (D20260609_001 auto 再開, 2026-06-09 12:05)
+- §4.5.1#0 no-key/Class-A 残作業を点検 → **デプロイ scaffold (§3.1c) が未生成**を検出 = Class A no-key 作業あり → 停止せず生成
+- 生成 (commit f65b6a8): scripts/vercel-build.mjs (Build Output API, Web 標準ハンドラ, esbuild bundle で O51 回避) / sync-prod-env.sh / deploy-prod.sh (関数数ガード 7/12) / with-env.sh
+- ローカル検証: vite build + 7 関数 bundle 成功、各 .mjs import OK (ERR_MODULE_NOT_FOUND なし)
+- → **Class A 枯渇**。残り = GitHub/Vercel/Clerk prod/Neon/Stripe live + FILL + deploy = 全 Class C/B human gate。Phase 1 prod FILL ハンドオフへ。
+
+---
+## デプロイ完了 (D20260609_001, 2026-06-09 14:18)
+- prod-direct 実行: GitHub push (SeijiShii/habit-stack) → Vercel link (quadii) → domain habit-stack.givers.work (CNAME) → Clerk prod (5 DNS verified) → Neon prod (migrate 5 tables) → Stripe live + webhook → FILL → deploy
+- **本番 2 バグを deploy 中に検出・修正**:
+  1. Web 標準ハンドラが launcherType:Nodejs で hang/500 → vercel-build に Node↔Web adapter (commit c7ad9f7)
+  2. Clerk guest createUser 識別子なしで 422→503 → 合成 email+password (commit a10a386, CF-20260529-016)
+  3. env テンプレ CLERK_PUBLISHABLE_KEY (server) 欠落 → 追加 (commit d6333b3) + flow 横展開 (CF-20260609-005)
+- post-deploy smoke green: / 200 / api/health 200 / api/auth/guest 200(ticket) / api/sync/pull 401(gate OK)
+- 公開 URL: https://habit-stack.givers.work
+- 残: 実機ブラウザ確認 + Stripe webhook テストイベント + 実 100円 tip (B-4) / P4.8 promote 告知文生成

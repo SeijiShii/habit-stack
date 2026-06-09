@@ -67,10 +67,13 @@
 ## 5. 現在地カーソル
 
 <!-- AUTO-GENERATED:BEGIN scenario-cursor -->
-- 現在フェーズ: Phase 4 (公開準備) — Release gate (P4.7、実キー Class C)
-- 進行中ターゲット: /flow:release（実 Clerk/Neon/Stripe キー FILL → 実機確認 → デプロイ）
-- 最終更新セッション: D20260608_030_e2e_core-journey
-- 最終更新時刻: 2026-06-08 20:10
+- 現在フェーズ: Phase 4 (公開準備) — **本番デプロイ済**、残=実機/課金スモーク + promote
+- 進行中ターゲット: /flow:release（デプロイ完了、post-deploy スモーク green）→ 次 P4.8 promote
+- 公開 URL: **https://habit-stack.givers.work**（live、Clerk prod verified / Neon prod / Stripe live）
+- デプロイ: prod-direct、Build Output API (Node↔Web adapter)、7関数、smoke: health/guest 200・auth gate 401
+- 本番修正: c7ad9f7 (Web handler adapter) / a10a386 (Clerk guest createUser 識別子 CF-016) / d6333b3 (CLERK_PUBLISHABLE_KEY)
+- 最終更新セッション: D20260609_001_resume_continuous
+- 最終更新時刻: 2026-06-09 14:18
 - 完了フェーズ: [Phase 1 概念設計, Phase 1.5 デザイン, Phase 2 機能設計(全11), Phase 2.5 spec-review(全11), Phase 3 実装(全11), Phase 3.5 E2E(コアジャーニー), release-pre audit/secure]
 - Phase 3 実装: **全11 target 実装完了**（db/types/auth/local-sync/legal/activity-sets/execution/feedback/streak-summary/tip-jar/app-shell）
   - 累計 116/116 テスト green、typecheck green、**vite build 成功（デプロイ可能 O57）**、E2E コアジャーニー 3/3 green、release-pre audit pass
