@@ -100,7 +100,7 @@ export function ExecutionPage({
         </section>
       )}
       {s.status === "done" && (
-        <p role="status">おつかれさまでした。今日もひとつ、やれました。</p>
+        <p role="status">おつかれさまでした。今日もひとつ、できました。</p>
       )}
     </main>
   );
