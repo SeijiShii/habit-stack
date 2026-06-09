@@ -147,4 +147,31 @@ describe("ExecutionPage 計時中表示 (fix C20260610-001)", () => {
     expect(startedAt.textContent).toMatch(/\d{2}:\d{2}:\d{2}/);
     expect(currentTime.textContent).toMatch(/\d{2}:\d{2}:\d{2}/);
   });
+
+  it("R7: 一時停止中も現在時刻はライブ更新される (経過は凍結のまま)", async () => {
+    let clock = Date.parse("2026-06-10T09:00:00.000Z");
+    const now = () => new Date(clock).toISOString();
+    await startTimed(now, "sess_r7");
+
+    act(() => {
+      clock += 30_000;
+      vi.advanceTimersByTime(1000);
+    });
+    act(() => {
+      fireEvent.click(screen.getByRole("button", { name: "一時停止" }));
+    });
+    const beforeClock = screen.getByTestId("current-time").textContent;
+
+    // 一時停止中に実時間が 2 分進む
+    act(() => {
+      clock += 120_000;
+      vi.advanceTimersByTime(1000);
+    });
+    // 現在時刻は進む（時計が止まって見えない）
+    expect(screen.getByTestId("current-time").textContent).not.toBe(
+      beforeClock,
+    );
+    // 経過時間は一時停止時点で凍結
+    expect(screen.getByTestId("elapsed").textContent).toBe("00:30");
+  });
 });

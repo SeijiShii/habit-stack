@@ -14,6 +14,7 @@
 
 | ファイル | 実行日 | コマンド | 対象 | decision 範囲 | 状態 |
 |---|---|---|---|---|---|
+| [D20260610_005_feedback_execution.md](./D20260610_005_feedback_execution.md) | 2026-06-10 | /flow:feedback | execution (fix C20260610-001) | D20260610-022〜023 | 完了 |
 | [D20260610_004_tdd_execution_fix_C20260610-001.md](./D20260610_004_tdd_execution_fix_C20260610-001.md) | 2026-06-10 | /flow:tdd | execution C20260610-001 (fix) | D20260610-019〜021 | 完了 |
 | [D20260610_003_resume_continuous.md](./D20260610_003_resume_continuous.md) | 2026-06-10 | /flow:auto | continuous | D20260610-017〜018 | 進行中 |
 | [D20260610_002_fix_execution_C20260610-001.md](./D20260610_002_fix_execution_C20260610-001.md) | 2026-06-10 | /flow:fix | execution C20260610-001 | D20260610-009〜016 | 完了→tdd |

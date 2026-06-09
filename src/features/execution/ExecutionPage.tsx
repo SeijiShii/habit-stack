@@ -45,15 +45,16 @@ export function ExecutionPage({
   const nameById = new Map(items.map((i) => [i.id, i.name]));
   const nowIso = now ?? (() => new Date().toISOString());
 
-  // 計時中（running）は 1 秒ごとに再描画して経過時間・現在時刻をライブ更新する。
+  // 計時中（running / paused）は 1 秒ごとに再描画して現在時刻をライブ更新する。
+  // 経過時間は paused 中 liveElapsed が pause 時点で凍結するため進まない（現在時刻だけ進む）。
   // 記録はタイムスタンプ差分方式のまま（このタイマーは表示専用、記録には影響しない）。
   const [, setTick] = useState(0);
-  const isRunning = s?.status === "running";
+  const isTiming = s?.status === "running" || s?.status === "paused";
   useEffect(() => {
-    if (!isRunning) return;
+    if (!isTiming) return;
     const id = setInterval(() => setTick((t) => t + 1), 1000);
     return () => clearInterval(id);
-  }, [isRunning]);
+  }, [isTiming]);
 
   if (!s) {
     return (
