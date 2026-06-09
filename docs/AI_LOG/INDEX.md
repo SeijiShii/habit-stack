@@ -14,6 +14,8 @@
 
 | ファイル | 実行日 | コマンド | 対象 | decision 範囲 | 状態 |
 |---|---|---|---|---|---|
+| [D20260610_007_revise_execution_R20260610-001.md](./D20260610_007_revise_execution_R20260610-001.md) | 2026-06-10 | /flow:revise | execution R20260610-001 | D20260610-026〜028 | 完了→tdd |
+| [D20260610_006_release_habit-stack.md](./D20260610_006_release_habit-stack.md) | 2026-06-10 | /flow:release | habit-stack | D20260610-024〜025 | 完了 |
 | [D20260610_005_feedback_execution.md](./D20260610_005_feedback_execution.md) | 2026-06-10 | /flow:feedback | execution (fix C20260610-001) | D20260610-022〜023 | 完了 |
 | [D20260610_004_tdd_execution_fix_C20260610-001.md](./D20260610_004_tdd_execution_fix_C20260610-001.md) | 2026-06-10 | /flow:tdd | execution C20260610-001 (fix) | D20260610-019〜021 | 完了 |
 | [D20260610_003_resume_continuous.md](./D20260610_003_resume_continuous.md) | 2026-06-10 | /flow:auto | continuous | D20260610-017〜018 | 進行中 |
