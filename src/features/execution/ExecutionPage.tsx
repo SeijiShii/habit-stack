@@ -1,5 +1,8 @@
+import { useEffect, useState } from "react";
 import type { ExecutionRepo } from "./model/executionRepo.js";
 import { useExecution } from "./hooks/useExecution.js";
+import { elapsedSec } from "./model/elapsed.js";
+import type { ItemExec, ExecStatus } from "./model/executionMachine.js";
 
 export interface ExecItem {
   id: string;
@@ -21,6 +24,14 @@ function mmss(sec: number): string {
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
+/** ISO 時刻をローカルの HH:MM:SS 表記にする（計時中の開始時刻・現在時刻表示用）。 */
+function hhmmss(iso: string): string {
+  const d = new Date(iso);
+  return [d.getHours(), d.getMinutes(), d.getSeconds()]
+    .map((n) => String(n).padStart(2, "0"))
+    .join(":");
+}
+
 export function ExecutionPage({
   repo,
   setId,
@@ -32,6 +43,17 @@ export function ExecutionPage({
   const exec = useExecution(repo, sessionLocalId, { now });
   const s = exec.state;
   const nameById = new Map(items.map((i) => [i.id, i.name]));
+  const nowIso = now ?? (() => new Date().toISOString());
+
+  // 計時中（running）は 1 秒ごとに再描画して経過時間・現在時刻をライブ更新する。
+  // 記録はタイムスタンプ差分方式のまま（このタイマーは表示専用、記録には影響しない）。
+  const [, setTick] = useState(0);
+  const isRunning = s?.status === "running";
+  useEffect(() => {
+    if (!isRunning) return;
+    const id = setInterval(() => setTick((t) => t + 1), 1000);
+    return () => clearInterval(id);
+  }, [isRunning]);
 
   if (!s) {
     return (
@@ -57,13 +79,28 @@ export function ExecutionPage({
   const currentName = nameById.get(currentRec.itemId) ?? currentRec.itemId;
   const isLast = s.index >= s.itemIds.length - 1;
 
+  // 計時中の経過秒を now との差分でライブ算出（保存済みの確定値ではなく）。
+  // 一時停止中は pause 開始時点で凍結、終了済みは確定値を表示。
+  const liveElapsed = (rec: ItemExec, status: ExecStatus): number => {
+    if (rec.endedAt) return rec.elapsedSec;
+    if (status === "paused")
+      return elapsedSec(
+        rec.startedAt,
+        s.pauseStartedAt ?? nowIso(),
+        rec.pausedTotalSec,
+      );
+    return elapsedSec(rec.startedAt, nowIso(), rec.pausedTotalSec);
+  };
+
   return (
     <main aria-labelledby="exec-title">
       <h1 id="exec-title">{setName}</h1>
       {s.status !== "done" && (
         <section aria-label="実行中">
           <p data-testid="current-item">{currentName}</p>
-          <p data-testid="elapsed">{mmss(currentRec.elapsedSec)}</p>
+          <p data-testid="elapsed">{mmss(liveElapsed(currentRec, s.status))}</p>
+          <p data-testid="started-at">開始 {hhmmss(currentRec.startedAt)}</p>
+          <p data-testid="current-time">現在 {hhmmss(nowIso())}</p>
           <textarea
             aria-label="今日のメモ"
             maxLength={280}
