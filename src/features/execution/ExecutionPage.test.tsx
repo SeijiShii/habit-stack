@@ -39,14 +39,14 @@ async function setup() {
 }
 
 describe("ExecutionPage (UC4)", () => {
-  it("開始 → 現アイテム表示 → 次へ → 終了で完了 + 達成記録", async () => {
+  it("開始 → 現アイテム表示 → 次の活動へ → セット終了で完了 + 達成記録", async () => {
     await setup();
     const user = userEvent.setup();
 
     await user.click(screen.getByRole("button", { name: "開始" }));
     expect(screen.getByTestId("current-item").textContent).toBe("ストレッチ");
 
-    await user.click(screen.getByRole("button", { name: "次へ" }));
+    await user.click(screen.getByRole("button", { name: "次の活動へ" }));
     await waitFor(() =>
       expect(screen.getByTestId("current-item").textContent).toBe("英単語"),
     );
@@ -59,6 +59,28 @@ describe("ExecutionPage (UC4)", () => {
     const all = await store.getAllByOwner("daily_achievement", "owner_1");
     expect(all).toHaveLength(1);
     expect(all[0]).toMatchObject({ achieved: true });
+  });
+
+  it("U1: running に「終了」ボタンが無く、次の活動へ/一時停止/セット終了がある (R20260610-001)", async () => {
+    await setup();
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "開始" }));
+
+    expect(screen.queryByRole("button", { name: "終了" })).toBeNull();
+    expect(screen.getByRole("button", { name: "次の活動へ" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "一時停止" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "セット終了" })).toBeTruthy();
+  });
+
+  it("U3: 一時停止中の次ボタンも「次の活動へ」(表記統一) (R20260610-001)", async () => {
+    await setup();
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "開始" }));
+    await user.click(screen.getByRole("button", { name: "一時停止" }));
+
+    expect(screen.getByRole("button", { name: "同じ活動を再開" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "次の活動へ" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "次を開始" })).toBeNull();
   });
 
   it("開始後にメモ入力できる", async () => {

@@ -110,12 +110,9 @@ export function ExecutionPage({
           />
           {s.status === "running" ? (
             <>
-              <button type="button" onClick={exec.endItem}>
-                終了
-              </button>
               {!isLast && (
                 <button type="button" onClick={exec.next}>
-                  次へ
+                  次の活動へ
                 </button>
               )}
               <button type="button" onClick={exec.pause}>
@@ -131,7 +128,7 @@ export function ExecutionPage({
                 同じ活動を再開
               </button>
               <button type="button" onClick={exec.next}>
-                次を開始
+                次の活動へ
               </button>
             </>
           )}
