@@ -63,11 +63,17 @@ header nav[aria-label='メイン'] {
   max-width: 640px;
   margin: 0 auto;
   display: flex;
+  flex-wrap: nowrap; /* O61: 横一列を保つ（縦積みにしない） */
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
 }
 
+header nav[aria-label='メイン'] a,
+header nav[aria-label='メイン'] button {
+  white-space: nowrap; /* O61: 各項目内のテキストを折り返さない */
+  flex-shrink: 0; /* メニュー項目は潰さない（ブランドのみ縮める） */
+}
 header nav[aria-label='メイン'] a {
   color: var(--color-text-muted);
   font-size: 15px;
@@ -79,6 +85,23 @@ header nav[aria-label='メイン'] a:first-child {
   color: var(--color-primary);
   font-weight: 600;
   font-size: 17px;
+  /* O61: 狭幅では menu でなく brand を省略（…）で 1 行を維持 */
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 360px) {
+  header nav[aria-label='メイン'] {
+    gap: var(--space-2);
+  }
+  header nav[aria-label='メイン'] a:first-child {
+    font-size: 15px;
+  }
+  header nav[aria-label='メイン'] a {
+    font-size: 14px;
+  }
 }
 header nav[aria-label='メイン'] a:hover {
   color: var(--color-text);
