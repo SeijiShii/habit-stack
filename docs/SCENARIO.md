@@ -71,7 +71,8 @@
 - 進行中ターゲット: /flow:release（デプロイ完了、post-deploy スモーク green）→ 次 P4.8 promote
 - 公開 URL: **https://habit-stack.givers.work**（live、Clerk prod verified / Neon prod / Stripe live）
 - デプロイ: prod-direct、Build Output API (Node↔Web adapter)、7関数、smoke: health/guest 200・auth gate 401
-- 本番修正: c7ad9f7 (Web handler adapter) / a10a386 (Clerk guest createUser 識別子 CF-016) / d6333b3 (CLERK_PUBLISHABLE_KEY)
+- デザイン: design-system 適用済 (00dddf5、theme.css 7.57kB)・視覚レビュー green・本番反映済 (claim C20260609-001 解決)
+- 本番修正: c7ad9f7 (Web handler adapter) / a10a386 (Clerk guest createUser 識別子 CF-016) / d6333b3 (CLERK_PUBLISHABLE_KEY) / 00dddf5 (design 適用)
 - 最終更新セッション: D20260609_001_resume_continuous
 - 最終更新時刻: 2026-06-09 14:18
 - 完了フェーズ: [Phase 1 概念設計, Phase 1.5 デザイン, Phase 2 機能設計(全11), Phase 2.5 spec-review(全11), Phase 3 実装(全11), Phase 3.5 E2E(コアジャーニー), release-pre audit/secure]
