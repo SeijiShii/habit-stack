@@ -1,8 +1,16 @@
-import { useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import type { SummaryRepo } from './model/summaryRepo.js';
-import { summarize, enumerateDates } from './model/summarize.js';
-import { AchievementDots, RateGauge } from './components.js';
+import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import type { SummaryRepo } from "./model/summaryRepo.js";
+import { summarize, enumerateDates } from "./model/summarize.js";
+import { AchievementDots, RateGauge } from "./components.js";
+import { ShareButton } from "./ShareButton.js";
+
+const SHARE_URL =
+  typeof window !== "undefined"
+    ? window.location.origin
+    : "https://habit-stack.givers.work";
+const SHARE_TEXT =
+  "続けたい習慣を、時間で記録して穏やかに振り返るアプリ。よかったら使ってみてください。";
 
 export interface SummaryPageProps {
   repo: SummaryRepo;
@@ -13,8 +21,8 @@ export interface SummaryPageProps {
 }
 
 const PERIODS = [
-  { key: 7, label: '7日' },
-  { key: 30, label: '30日' },
+  { key: 7, label: "7日" },
+  { key: 30, label: "30日" },
 ] as const;
 
 function rangeFor(today: string, days: number): { start: string; end: string } {
@@ -26,10 +34,13 @@ function rangeFor(today: string, days: number): { start: string; end: string } {
 export function SummaryPage({ repo, setId, setName, today }: SummaryPageProps) {
   const todayStr = today ?? new Date().toISOString().slice(0, 10);
   const [days, setDays] = useState<number>(7);
-  const { start, end } = useMemo(() => rangeFor(todayStr, days), [todayStr, days]);
+  const { start, end } = useMemo(
+    () => rangeFor(todayStr, days),
+    [todayStr, days],
+  );
 
   const q = useQuery({
-    queryKey: ['summary', setId, start, end],
+    queryKey: ["summary", setId, start, end],
     queryFn: () => repo.getAchievements(setId, start, end),
   });
 
@@ -68,6 +79,8 @@ export function SummaryPage({ repo, setId, setName, today }: SummaryPageProps) {
           <AchievementDots dots={summary.dots} />
         </>
       )}
+
+      <ShareButton url={SHARE_URL} defaultText={SHARE_TEXT} />
     </main>
   );
 }
