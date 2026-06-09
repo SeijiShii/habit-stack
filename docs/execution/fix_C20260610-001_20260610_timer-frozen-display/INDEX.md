@@ -3,7 +3,7 @@
 **issue / slug**: C20260610-001 / timer-frozen-display
 **重大度**: medium
 **実施日**: 2026-06-10
-**状態**: 修正計画済
+**状態**: 実装完了 (2026-06-10)
 
 <!-- auto-generated-start -->
 
@@ -14,6 +14,8 @@
 | 001 | 001_ROOT_CAUSE.md | 根本原因 | 2026-06-10 |
 | 002 | 002_FIX_PLAN.md | 修正計画 | 2026-06-10 |
 | 003 | 003_REGRESSION_TEST.md | リグレッションテスト | 2026-06-10 |
+| 101 | 101_FIX_IMPL_REPORT.md | 実装レポート | 2026-06-10 |
+| 102 | 102_FIX_UNIT_TEST_REPORT.md | 単体テストレポート | 2026-06-10 |
 
 ## 関連
 - 親 INDEX: `../INDEX.md`

@@ -22,7 +22,7 @@
 | パス | 種別 | issue/slug | 状態 | 概要 | INDEX |
 |---|---|---|---|---|---|
 | `claim_C20260610-001_20260610_timer-frozen-display/` | claim | C20260610-001 / timer-frozen-display | 判定完了→fix | 計時中の経過時間が 00:00 で固まる→**バグ判定**。開始/現在時刻表示も同梱 | `001_TRIAGE.md` |
-| `fix_C20260610-001_20260610_timer-frozen-display/` | fix | C20260610-001 / timer-frozen-display | 修正計画済 | 計時中の経過ライブ表示 + 開始/現在時刻表示（表示層のみ）。起点: claim C20260610-001 | `INDEX.md` |
+| `fix_C20260610-001_20260610_timer-frozen-display/` | fix | C20260610-001 / timer-frozen-display | 実装完了 | 計時中の経過ライブ表示 + 開始/現在時刻表示（表示層のみ、132 green）。起点: claim C20260610-001 | `INDEX.md` |
 
 ## 関連
 - 親 concept: `../concept.md` §1.3.1 execution 行
