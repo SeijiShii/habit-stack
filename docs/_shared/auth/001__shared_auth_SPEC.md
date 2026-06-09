@@ -21,7 +21,7 @@
 - ClerkProvider ラッパ（`<AuthProvider>`）。
 - 初回起動: **匿名サインイン**（Clerk anonymous / no-password）を自動実行 → 0 タップで実行開始可能（O22）。
 - `useOwner()` — 現在の owner id（匿名 or 認証）。
-- `linkWithGoogle()` — 段階的認証。匿名ユーザーを Google OAuth でアップグレード（同一 owner id を維持 or 移行処理を起動）。課金時・複数端末同期時に呼ぶ。
+- `linkWithGoogle()` — 段階的認証。匿名ユーザーを Google OAuth でアップグレード（同一 owner id を維持 or 移行処理を起動）。**データ引き継ぎ時・複数端末同期時**に呼ぶ（`/account` 画面の任意導線）。**応援（tip）はログイン不要のため呼ばない**（O46🎁）。
 - `signOut()` / `deleteAllData()`（O54 セルフサービス削除導線、§6.x）。
 
 ## 2. 入出力（提供 API）
@@ -55,7 +55,7 @@
 |---|---|
 | _shared/db | owner_id をクエリに強制（owner resolver 経由） |
 | _shared/local-sync | 匿名ローカル → 認証時同期、mergeGuestData 協調 |
-| tip-jar | 課金前に linkWithGoogle 必須 |
+| tip-jar | **ログイン不要**（応援=対価なしのギフト、ゲストのまま決済完結。O46🎁 / CF-20260609-010。`linkWithGoogle` ゲートを課さない） |
 | 全 feature API | withOwner でラップ |
 
 ## 6. タグ別追加項目

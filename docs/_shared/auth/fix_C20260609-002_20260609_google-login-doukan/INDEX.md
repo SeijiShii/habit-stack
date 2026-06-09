@@ -3,7 +3,7 @@
 **issue / slug**: C20260609-002 / google-login-doukan
 **重大度**: high
 **実施日**: 2026-06-09
-**状態**: 修正計画済
+**状態**: 実装完了 (2026-06-09)
 
 <!-- auto-generated-start -->
 
@@ -15,6 +15,8 @@
 | 002 | 002_FIX_PLAN.md | 修正計画 | 2026-06-09 |
 | 003 | 003_REGRESSION_TEST.md | リグレッション | 2026-06-09 |
 | 004 | 004_POSTMORTEM.md | Postmortem | 2026-06-09 |
+| 101 | 101_FIX_IMPL_REPORT.md | 実装レポート | 2026-06-09 |
+| 102 | 102_FIX_UNIT_TEST_REPORT.md | 単体テスト | 2026-06-09 |
 
 ## 関連
 - 親 INDEX: `../INDEX.md`

@@ -25,3 +25,9 @@
     データ引き継ぎの機能不全）が唯一の actionable Class A dev 作業。実機 B-4 は人間手番で auto 不可。
     fix 設計生成は Class A、実装は GCP OAuth 認証情報など Class C 人手ゲートで pause 想定。
 ```
+
+## 反復 2 (auto-pick)
+- 前反復: /flow:fix _shared/auth C20260609-002 完了（002_FIX_PLAN 生成、commit 814735e）
+- P4.2 Fix-impl gate 発火: fix_C20260609-002_*/002_FIX_PLAN.md 存在 + 101 不在 → /flow:tdd _shared/auth C20260609-002
+- P4.46 は guest セッション実装済のため非発火（gap=login/upgrade 動線=fix で対応中）
+- dispatch: /flow:tdd _shared/auth C20260609-002（Class A、Clerk mock で実装。OAuth provider 設定は Class C=release）
