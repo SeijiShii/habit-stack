@@ -1,5 +1,5 @@
-import type { ExecutionRepo } from './model/executionRepo.js';
-import { useExecution } from './hooks/useExecution.js';
+import type { ExecutionRepo } from "./model/executionRepo.js";
+import { useExecution } from "./hooks/useExecution.js";
 
 export interface ExecItem {
   id: string;
@@ -18,7 +18,7 @@ export interface ExecutionPageProps {
 function mmss(sec: number): string {
   const m = Math.floor(sec / 60);
   const s = sec % 60;
-  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
 export function ExecutionPage({
@@ -37,7 +37,16 @@ export function ExecutionPage({
     return (
       <main aria-labelledby="exec-title">
         <h1 id="exec-title">{setName}</h1>
-        <button type="button" onClick={() => exec.start(setId, items.map((i) => i.id))}>
+        <button
+          type="button"
+          className="btn-primary"
+          onClick={() =>
+            exec.start(
+              setId,
+              items.map((i) => i.id),
+            )
+          }
+        >
           開始
         </button>
       </main>
@@ -51,7 +60,7 @@ export function ExecutionPage({
   return (
     <main aria-labelledby="exec-title">
       <h1 id="exec-title">{setName}</h1>
-      {s.status !== 'done' && (
+      {s.status !== "done" && (
         <section aria-label="実行中">
           <p data-testid="current-item">{currentName}</p>
           <p data-testid="elapsed">{mmss(currentRec.elapsedSec)}</p>
@@ -61,22 +70,38 @@ export function ExecutionPage({
             value={currentRec.note}
             onChange={(e) => exec.setNote(e.target.value)}
           />
-          {s.status === 'running' ? (
+          {s.status === "running" ? (
             <>
-              <button type="button" onClick={exec.endItem}>終了</button>
-              {!isLast && <button type="button" onClick={exec.next}>次へ</button>}
-              <button type="button" onClick={exec.pause}>一時停止</button>
-              <button type="button" onClick={exec.end}>セット終了</button>
+              <button type="button" onClick={exec.endItem}>
+                終了
+              </button>
+              {!isLast && (
+                <button type="button" onClick={exec.next}>
+                  次へ
+                </button>
+              )}
+              <button type="button" onClick={exec.pause}>
+                一時停止
+              </button>
+              <button type="button" onClick={exec.end}>
+                セット終了
+              </button>
             </>
           ) : (
             <>
-              <button type="button" onClick={exec.resume}>同じ活動を再開</button>
-              <button type="button" onClick={exec.next}>次を開始</button>
+              <button type="button" onClick={exec.resume}>
+                同じ活動を再開
+              </button>
+              <button type="button" onClick={exec.next}>
+                次を開始
+              </button>
             </>
           )}
         </section>
       )}
-      {s.status === 'done' && <p role="status">おつかれさまでした。今日もひとつ、やれました。</p>}
+      {s.status === "done" && (
+        <p role="status">おつかれさまでした。今日もひとつ、やれました。</p>
+      )}
     </main>
   );
 }

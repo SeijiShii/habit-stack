@@ -1,4 +1,5 @@
-/* デザイントークン（docs/design/design-system.md「穏やか・積み上げ」由来）。 */
+/* デザイントークン + スタイル基盤（docs/design/design-system.md「穏やか・積み上げ」由来）。
+   コンポーネントはセマンティック HTML 中心のため、要素セレクタ + 少数のユーティリティ class で適用する。 */
 :root {
   --color-bg: #faf8f3;
   --color-surface: #ffffff;
@@ -29,11 +30,15 @@
   --space-6: 32px;
   --space-7: 48px;
 
-  --font-body: 'Inter', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
 
 * {
   box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -44,6 +49,208 @@ body {
   line-height: 1.6;
 }
 
+/* ---- アプリシェル（ヘッダ / ナビ / 入口リード） ---- */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: color-mix(in srgb, var(--color-bg) 88%, transparent);
+  backdrop-filter: saturate(1.1) blur(6px);
+  border-bottom: 1px solid var(--color-border);
+}
+
+header nav[aria-label='メイン'] {
+  max-width: 640px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+}
+
+header nav[aria-label='メイン'] a {
+  color: var(--color-text-muted);
+  font-size: 15px;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+}
+header nav[aria-label='メイン'] a:first-child {
+  margin-right: auto;
+  color: var(--color-primary);
+  font-weight: 600;
+  font-size: 17px;
+}
+header nav[aria-label='メイン'] a:hover {
+  color: var(--color-text);
+  background: var(--color-surface-sunken);
+  text-decoration: none;
+}
+header nav[aria-label='メイン'] button[aria-label='これは何？'] {
+  min-height: 32px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 999px;
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+header p[data-testid='lead'] {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 var(--space-4) var(--space-3);
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+aside[role='dialog'] {
+  max-width: 640px;
+  margin: 0 auto var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-primary-subtle);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+}
+
+/* ---- ページ本体 ---- */
+main,
+article {
+  display: block;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: var(--space-5) var(--space-4) var(--space-7);
+}
+
+main > * + *,
+article > * + * {
+  margin-top: var(--space-4);
+}
+
+h1 {
+  font-size: 26px;
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+h2 {
+  font-size: 18px;
+  line-height: 1.35;
+  font-weight: 600;
+  margin: 0 0 var(--space-2);
+  color: var(--color-text);
+}
+p {
+  margin: 0;
+  color: var(--color-text);
+}
+main > p,
+article > p {
+  color: var(--color-text-muted);
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+a:hover {
+  color: var(--color-primary-hover);
+  text-decoration: underline;
+}
+
+/* ---- セクション（時間帯グループ / 法務 / 実行中） ---- */
+section {
+  margin-top: var(--space-5);
+}
+section[aria-label] > h2 {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  letter-spacing: 0.02em;
+}
+
+/* ---- リスト（セット / アイテム） → カード行 ---- */
+ul {
+  list-style: none;
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+/* セット一覧: li 内のボタンを面いっぱいのカードに */
+section ul li > button[type='button'] {
+  flex: 1;
+  text-align: left;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-4);
+  font-weight: 500;
+}
+section ul li > button[type='button']:hover {
+  border-color: var(--color-primary);
+  background: var(--color-surface);
+}
+/* アイテム一覧: 行カード（名前 + 削除） */
+ul[aria-label='アイテム一覧'] li {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+}
+ul[aria-label='アイテム一覧'] li > span {
+  flex: 1;
+}
+
+/* ---- フォーム ---- */
+form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-4);
+}
+input,
+select,
+textarea {
+  font: inherit;
+  color: var(--color-text);
+  background: var(--color-surface-sunken);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+  min-height: 44px;
+}
+form input,
+form select {
+  flex: 1;
+  min-width: 0;
+}
+textarea {
+  width: 100%;
+  min-height: 88px;
+  resize: vertical;
+  line-height: 1.6;
+}
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-subtle);
+}
+
+/* ---- ボタン ---- */
 button {
   font: inherit;
   cursor: pointer;
@@ -51,18 +258,188 @@ button {
   border-radius: 999px;
   border: 1px solid var(--color-border);
   background: var(--color-surface);
+  color: var(--color-text);
   padding: var(--space-2) var(--space-4);
+  font-weight: 500;
+  transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
 }
-
+button:hover {
+  background: var(--color-surface-sunken);
+}
+button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
 button[aria-pressed='true'] {
   background: var(--color-primary-subtle);
   border-color: var(--color-primary);
+  color: var(--color-primary-hover);
 }
 
-main {
+/* 主アクション（送信 / CTA） */
+button[type='submit'],
+.btn-primary {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+button[type='submit']:hover,
+.btn-primary:hover {
+  background: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+  color: #fff;
+  text-decoration: none;
+}
+
+/* CTA リンク（anchor をボタン見た目に） */
+a.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: var(--space-2) var(--space-5);
+}
+
+/* ---- ナビ（操作リンク群 = チップ） ---- */
+nav[aria-label='セット操作'],
+nav[aria-label='実行後'] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
   max-width: 640px;
   margin: 0 auto;
-  padding: var(--space-4);
+  padding: 0 var(--space-4) var(--space-5);
+}
+nav[aria-label='セット操作'] a,
+nav[aria-label='実行後'] a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: var(--space-2) var(--space-4);
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+nav[aria-label='セット操作'] a:hover,
+nav[aria-label='実行後'] a:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary-hover);
+  text-decoration: none;
+}
+
+/* ---- 実行画面 ---- */
+section[aria-label='実行中'] {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-5) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  align-items: stretch;
+}
+section[aria-label='実行中'] [data-testid='current-item'] {
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+}
+section[aria-label='実行中'] [data-testid='elapsed'] {
+  font-variant-numeric: tabular-nums;
+  font-size: 44px;
+  font-weight: 600;
+  text-align: center;
+  color: var(--color-primary);
+  letter-spacing: 0.02em;
+}
+
+/* ---- 期間トグル（継続） ---- */
+[role='group'][aria-label='期間'] {
+  display: inline-flex;
+  gap: var(--space-2);
+}
+[data-testid='streak'] {
+  font-variant-numeric: tabular-nums;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+/* ---- 状態メッセージ ---- */
+[role='alert'] {
+  color: var(--color-danger);
+  font-size: 14px;
+  width: 100%;
+}
+[role='status'] {
+  background: var(--color-primary-subtle);
+  color: var(--color-primary-hover);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  font-weight: 500;
+}
+
+/* ---- フィードバックダイアログ ---- */
+div[role='dialog'][aria-label='フィードバック'] {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 640px;
+  margin: 0 auto;
+  padding: var(--space-4) var(--space-4) var(--space-6);
+}
+fieldset {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+legend {
+  color: var(--color-text-muted);
+  font-size: 14px;
+  padding: 0 var(--space-2);
+}
+
+/* ---- フッタ（法務リンク、O55） ---- */
+footer[aria-label='法務情報'] {
+  border-top: 1px solid var(--color-border);
+  margin-top: var(--space-7);
+}
+footer[aria-label='法務情報'] nav {
+  max-width: 640px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-4);
+}
+footer[aria-label='法務情報'] a {
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+/* ---- 法務（特商法 dl） ---- */
+dl {
+  margin: var(--space-3) 0 0;
+}
+dl > div {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+dt {
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+dd {
+  margin: 0;
 }
 
 .num {

@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
 
 export function HomePage() {
   return (
@@ -9,7 +9,9 @@ export function HomePage() {
         何日続けられたかを、罪悪感なく穏やかに振り返れます。
       </p>
       <p>
-        <Link to="/sets">セットを作る</Link>
+        <Link to="/sets" className="btn-primary">
+          セットを作る
+        </Link>
       </p>
     </main>
   );
