@@ -1,8 +1,8 @@
 # AI_LOG インデックス — habit-stack
 
-**最終更新**: 2026-06-11 (audit full — release-pre クリア)
-**総セッション数**: 64
-**総 decision 数**: 54
+**最終更新**: 2026-06-12 (secure _shared/auth — release-pre 後半クリア)
+**総セッション数**: 66
+**総 decision 数**: 60
 
 > 注: 下の「セッション一覧」表は直近セッションのみ列挙（全 60 件は `ls docs/AI_LOG/D*.md` 参照）。
 > AUDIT_20260611_2000 で表の網羅性を Low 指摘済み、再生成は別 bookkeeping。
@@ -17,13 +17,15 @@
 
 | ファイル | 実行日 | コマンド | 対象 | decision 範囲 | 状態 |
 |---|---|---|---|---|---|
+| [D20260612_002_secure__shared_auth.md](./D20260612_002_secure__shared_auth.md) | 2026-06-12 | /flow:secure | _shared/auth（release-pre 後半） | D20260612-003〜006 | 完了（C0/H0/Info1、O54 充足、prod deps 0 脆弱性） |
+| [D20260612_001_resume_continuous.md](./D20260612_001_resume_continuous.md) | 2026-06-12 | /flow:auto | continuous | D20260612-001〜 | 進行中 |
 | [D20260611_010_audit_full.md](./D20260611_010_audit_full.md) | 2026-06-11 | /flow:audit | full（release-pre） | D20260611-044 | 完了（C0/H0/L2、Critical解消確認） |
 | [D20260611_009_e2e__shared_auth_revise_R20260611-002.md](./D20260611_009_e2e__shared_auth_revise_R20260611-002.md) | 2026-06-11 | /flow:e2e | _shared/auth R20260611-002 (revise) | D20260611-041〜042 | 完了（8/8 E2E green） |
 | [D20260611_008_tdd__shared_auth_revise_R20260611-002.md](./D20260611_008_tdd__shared_auth_revise_R20260611-002.md) | 2026-06-11 | /flow:tdd | _shared/auth R20260611-002 (revise) | D20260611-037〜039 | 完了（176 green） |
 | [D20260611_007_revise__shared_auth_R20260611-002.md](./D20260611_007_revise__shared_auth_R20260611-002.md) | 2026-06-11 | /flow:revise | _shared/auth R20260611-002 | D20260611-033〜035 | 設計完了→tdd |
 | [D20260611_006_audit_standard.md](./D20260611_006_audit_standard.md) | 2026-06-11 | /flow:audit | standard（全体） | D20260611-029〜031 | 完了（Critical 1 / Low 3） |
 | [D20260611_005_e2e_execution_revise_R20260611-001.md](./D20260611_005_e2e_execution_revise_R20260611-001.md) | 2026-06-11 | /flow:e2e | execution R20260611-001 (revise) | D20260611-025〜027 | 完了（E2E 6/6 green） |
-| [D20260611_004_resume_continuous.md](./D20260611_004_resume_continuous.md) | 2026-06-11 | /flow:auto | continuous | D20260611-023〜024 | 進行中 |
+| [D20260611_004_resume_continuous.md](./D20260611_004_resume_continuous.md) | 2026-06-11 | /flow:auto | continuous | D20260611-023〜043 | 完了（反復6まで、停止是正は D20260612-001） |
 | [D20260611_003_tdd_execution_revise_R20260611-001.md](./D20260611_003_tdd_execution_revise_R20260611-001.md) | 2026-06-11 | /flow:tdd | execution R20260611-001 (revise) | D20260611-018〜022 | 完了（167 green） |
 | [D20260611_002_spec-review_execution_R20260611-001.md](./D20260611_002_spec-review_execution_R20260611-001.md) | 2026-06-11 | /flow:spec-review | execution R20260611-001 (revise) | D20260611-009〜017 | 完了→tdd |
 | [D20260611_001_revise_execution_R20260611-001.md](./D20260611_001_revise_execution_R20260611-001.md) | 2026-06-11 | /flow:revise | execution R20260611-001 (計時永続化・復帰) | D20260611-001〜008 | 設計完了→spec-review |

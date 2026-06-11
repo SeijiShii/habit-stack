@@ -4,7 +4,7 @@
 - **コマンド**: /flow:auto
 - **モード**: continuous
 - **実行者**: seiji + Claude
-- **状態**: 進行中
+- **状態**: 完了（反復6 audit dispatch 後に不正停止 — D20260612-001 retrospective で是正、後続は D20260612_001 が継続）
 - **含まれる decision 範囲**: D20260611-023〜
 
 ## Step 0.5 retrospective（前回停止の適切性）
