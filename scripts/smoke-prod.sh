@@ -18,3 +18,8 @@ echo "    body: $(head -c 160 /tmp/smk_g | sed -E 's/(ticket"?:?\s*"?)[A-Za-z0-9
 
 echo "--- POST /api/sync/pull (未認証 401 = 認証ゲート OK が期待) ---"
 curl -s -o /dev/null -w '  /api/sync/pull → %{http_code}\n' -X POST "$BASE/api/sync/pull"
+
+# O54 セルフ削除 (消去権)。クライアント selfDelete.ts は DELETE /api/account を呼ぶ。
+# 未認証 401 = ルート存在 + 認証ゲート OK。405 が返るならルート不整合 (C20260612 再発)。
+echo "--- DELETE /api/account (未認証 401 = ルート存在+認証ゲート OK が期待、405 はルート不整合) ---"
+curl -s -o /dev/null -w '  DELETE /api/account → %{http_code}\n' -X DELETE "$BASE/api/account"
