@@ -56,7 +56,7 @@
 | 対象 | 変更前 | 変更後 |
 |---|---|---|
 | 経過秒の上限 | なし（端末時計巻き戻しの 0 クランプのみ） | 1活動 `MAX_ACTIVITY_SEC = 14400`（4H）で上限クランプ |
-| 復元時の不整合 | 該当なし | `lastSavedAt` 欠落時は `session.updatedAt` → current item `startedAt` の順でフォールバック。localStorage と IndexedDB が食い違う場合は `updatedAt`/`lastSavedAt` の新しい方を採用（last-write-wins、既存方針踏襲） |
+| 復元時の不整合 | 該当なし | `lastSavedAt` 欠落時は `session.updatedAt` → current item `startedAt` の順でフォールバック。**ExecState の構造正本は IndexedDB**（full records 保持）。localStorage は `lastSavedAt` と IndexedDB miss 時のフォールバックのみ。フィールド単位マージはしない（`<!-- spec-review R4 -->`、P5 リスク低減）。`lastSavedAt` は両ソースの新しい方を採用 |
 | owner 不一致 | 該当なし | localStorage ハートビートの owner が現在の `ownerId` と異なる場合は無視（別アカウントのデータを復元しない） |
 
 ---
@@ -107,16 +107,18 @@
 #### UC-EX-RESUME: マウント時の復元
 - `ExecutionPage`/`useExecution` の初期化で復元を試行（**ライブ描画前に確定**、暴走数値のフラッシュ防止）:
   1. IndexedDB `findInProgress()`（status != done）+ localStorage ハートビート（owner 一致時のみ）を読む。
-  2. 両者から ExecState と `lastSavedAt` を構成（食い違いは新しい方、§2.4）。owner 不一致の localStorage は破棄。
-  3. `gap = now - lastSavedAt` を算出し UC-EX-IDLE 判定へ。
-  4. 終了不要なら ExecState を `useExecution` に hydrate し計時継続（経過は `startedAt` 起点で再算出 + 4Hクランプ）。
+  2. **復元後の永続 id は、見つかった session レコード自身の `clientLocalId` を採用する**（`App.tsx` が再計算する日付スタンプ id ではなく）。理由: `sessionLocalId = sess-<setId>-<YYYY-MM-DD>` は日付を含むため、23:30 開始→翌 00:30 復帰で id が変わる。`findInProgress` は owner 単位で非 done を返し id を無視するため、再計算 id で hydrate すると **別 id で重複 session が生成**される。→ found レコードの id を `useExecution` の `sessionLocalId` として渡す（`<!-- spec-review R6 -->`）。
+  3. ExecState の構造的正本は **IndexedDB**（full records 保持）。localStorage は `lastSavedAt`（ハートビート）と IndexedDB miss 時のフォールバック snapshot のみに使う。**フィールド単位マージはしない**（§2.4、`<!-- spec-review R4 -->`）。owner 不一致の localStorage は破棄。
+  4. `gap = now - lastSavedAt` を算出し UC-EX-IDLE 判定へ。
+  5. 終了不要なら ExecState を `useExecution` に hydrate し計時継続（経過は `startedAt` 起点で再算出 + 4Hクランプ）。
 
 #### UC-EX-IDLE: 放置の自動終了（4H）
 - 復元時、**計時中の活動があり** かつ `gap = now - lastSavedAt >= 14400 秒(4H)` の場合:
-  - current item を `endedAt = lastSavedAt` で終了（`endCurrentItem(state, lastSavedAt)` 相当）。
+  - current item を `endedAt = lastSavedAt` で終了（`endCurrentItem(state, lastSavedAt)` 相当）。記録される `elapsedSec` は §7.4 R1 で 4H クランプ済み。
   - session を `endSession(state, lastSavedAt)` で `status=done, endedAt=lastSavedAt` に。
-  - 達成記録（doneItemCount >= 1 で achieved=true、既存 `recordAchievement`）。
+  - 達成記録: **`endedAt = lastSavedAt` でクランプ後の有効経過が 0 秒より大きい item のみ done と数える**（`<!-- spec-review R3 -->`）。理由: 「開始直後に放置」の場合 `lastSavedAt ≈ startedAt` で実経過 ~0 → 0 秒の達成を継続(streak)に算入すると罪悪感回避の設計意図（concept 論点-001）に反する。実際に手をつけた（>0 秒）セッションのみ achieved=true。
   - 永続（IndexedDB + outbox）+ push。UI は完了状態（サマリ導線）を表示し、ライブタイマーは出さない。
+  - **冪等性**: 自動終了の finalize は clientLocalId 由来 id の put 上書きで冪等。React StrictMode の二重マウント／復元の再実行でも結果は同一（`<!-- spec-review R1 -->`）。`decideRecovery` は純関数、副作用（persist/push）は init 1 回に限定し unmount で interval を解除する。
 - `gap < 4H` の場合は終了せず継続復元。ただし R1 キャップは常時適用。
 
 ### 7.2 入出力（新仕様）

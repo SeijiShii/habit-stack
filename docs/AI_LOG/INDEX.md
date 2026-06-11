@@ -14,6 +14,7 @@
 
 | ファイル | 実行日 | コマンド | 対象 | decision 範囲 | 状態 |
 |---|---|---|---|---|---|
+| [D20260611_002_spec-review_execution_R20260611-001.md](./D20260611_002_spec-review_execution_R20260611-001.md) | 2026-06-11 | /flow:spec-review | execution R20260611-001 (revise) | D20260611-009〜016 | 完了→tdd |
 | [D20260611_001_revise_execution_R20260611-001.md](./D20260611_001_revise_execution_R20260611-001.md) | 2026-06-11 | /flow:revise | execution R20260611-001 (計時永続化・復帰) | D20260611-001〜008 | 設計完了→spec-review |
 | [D20260610_009_tdd_execution_revise_R20260610-001.md](./D20260610_009_tdd_execution_revise_R20260610-001.md) | 2026-06-10 | /flow:tdd | execution R20260610-001 (revise) | D20260610-031 | 完了 |
 | [D20260610_008_resume_continuous.md](./D20260610_008_resume_continuous.md) | 2026-06-10 | /flow:auto | continuous | D20260610-029〜030 | 進行中 |
@@ -30,6 +31,13 @@
 
 | ID | command | phase | chosen (短縮) | type | ファイル |
 |---|---|---|---|---|---|
+| D20260611-016 | /flow:spec-review | Step 5 | 905 生成 + 001/002/003 反映 | auto-recommended | D20260611_002_spec-review_execution_R20260611-001.md |
+| D20260611-015 | /flow:spec-review | R7 | 4H cap を表示+確定保存値の双方に | auto-recommended | D20260611_002_spec-review_execution_R20260611-001.md |
+| D20260611-014 | /flow:spec-review | R4 | IndexedDB=構造正本 / localStorage=heartbeat+fallback | auto-recommended | D20260611_002_spec-review_execution_R20260611-001.md |
+| D20260611-013 | /flow:spec-review | R3 | 自動終了は有効経過>0 item のみ達成算入 | auto-recommended | D20260611_002_spec-review_execution_R20260611-001.md |
+| D20260611-012 | /flow:spec-review | R1(P83) | StrictMode 冪等(純関数+put上書き+interval解除) | auto-recommended | D20260611_002_spec-review_execution_R20260611-001.md |
+| D20260611-011 | /flow:spec-review | R2 | 15秒flush用にSyncQueueをExecutionPageへ注入 | auto-recommended | D20260611_002_spec-review_execution_R20260611-001.md |
+| D20260611-010 | /flow:spec-review | R6 | 復元は found レコードの clientLocalId を採用(日跨ぎ重複防止) | auto-recommended | D20260611_002_spec-review_execution_R20260611-001.md |
 | D20260611-008 | /flow:revise | Step 3.1 | 4H: キャップ(R1)と復帰自動終了(R2)を別ルールで両立 | auto-recommended | D20260611_001_revise_execution_R20260611-001.md |
 | D20260611-003 | /flow:revise | Step 3.1 substrate | ハイブリッド(IndexedDB維持+毎秒localStorage HB+15秒push+復元配線) | explicit-choice | D20260611_001_revise_execution_R20260611-001.md |
 | D20260611-001 | /flow:revise | Step 1.2 | 計時状態の永続化・復帰 + 4H放置キャップ/終了 | explicit-choice | D20260611_001_revise_execution_R20260611-001.md |

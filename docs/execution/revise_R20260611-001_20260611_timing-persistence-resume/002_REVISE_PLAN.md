@@ -14,8 +14,8 @@
 | `src/features/execution/ExecutionPage.tsx` | `liveElapsed` を `cappedElapsedSec` 化。マウント復元の呼び出し（hydrate or 自動終了の反映）。毎秒/15秒ハートビート起動（既存1秒interval拡張） | 中（描画タイミング・フラッシュ防止） | §7.1, §7.4 |
 | `src/features/execution/hooks/useExecution.ts` | 初期化時に `repo.restoreInProgress(sessionLocalId)` を読んで hydrate。`hydrate(state)` / `applyAt(fn, at)`（任意時刻適用、自動終了用）追加。heartbeat 書込 + 15秒 flush の起動 API | 中（init 副作用・状態整合） | §7.1 |
 | `src/features/execution/model/executionRepo.ts` | `persist` の session レコードに `lastSavedAt` 追加。`restoreInProgress(sessionLocalId)`（IndexedDB findInProgress + localStorage ハートビート統合 → `{ state, lastSavedAt }`）追加。`saveHeartbeat`/`flushSession` 追加 | 中 | §7.1, §7.2 |
-| `src/App.tsx` | `sessionLocalId` 採番は現状維持（`sess-<setId>-<date>` は日内安定で復元可能）。owner（`useOwner`）を ExecutionPage/heartbeat へ供給 | 低 | §7.5 |
-| `src/hooks/useSync.ts` | （任意）15秒 flush を本フックに寄せるか、execution 側に持たせるか。最小差分は execution 側に持たせ本フックは不変 | 低 | §7.1 |
+| `src/App.tsx` | owner（`useOwner`）を ExecutionPage/heartbeat へ供給。**`sessionLocalId` は復元時に found レコードの id へ差し替わる**ため、App 採番は「新規開始時の初期 id」に限定（復元時は useExecution 内で上書き、`<!-- spec-review R6 -->`）。**15秒 flush 用に `repos.sync`/SyncQueue を ExecutionPage へ供給する必要あり**（現状 ExecutionPage は `repo` のみ受領、SyncQueue 経路なし、`<!-- spec-review R2 -->`） | 中 | §7.1, §7.5 |
+| `src/hooks/useSync.ts` | 不変。15秒 flush は execution 側（ExecutionPage の interval）で `repo.flushSession()`（IndexedDB 再 put + outbox）→ 注入された SyncQueue.push() を非ブロッキング起動。**App→ExecutionPage に SyncQueue を渡す配線が必須**（R2、現状未配線） | 中 | §7.1 |
 | `api/sync/*`（push handler） | session payload の `lastSavedAt` 透過。`DrizzleSyncRepo.upsert` は `{...payload}` 全列 upsert のため**コード変更ほぼ不要**（schema 列追加で自動反映）。型 `SyncEntity`/payload 型に lastSavedAt を許容 | 低 | §2.2 |
 
 ## 2. 新規ファイル一覧
@@ -50,9 +50,9 @@
 - 対象: `heartbeat.ts`（新規）+ `executionRepo`（lastSavedAt 付き persist / saveHeartbeat / flushSession）+ `schema.ts` + migration + `ExecutionPage` interval 拡張。
 - ゴール: 計時中に毎秒 localStorage、15秒ごとに IndexedDB+outbox+push が走る。owner scope 検証。
 
-### Phase 3: 復元 + 自動終了（R2）
-- 対象: `recovery.ts`（新規 `decideRecovery`）+ `executionRepo.restoreInProgress` + `useExecution` hydrate/applyAt + `ExecutionPage` マウント配線。
-- ゴール: リロードで計時継続復元（gap<4H）/ `lastSavedAt` で自動終了（gap>=4H）。フラッシュ無し。
+### Phase 3: 復元 + 自動終了（R2 仕様）
+- 対象: `recovery.ts`（新規 `decideRecovery`）+ `executionRepo.restoreInProgress`（found レコードの id を返す、spec-review R6）+ `useExecution` hydrate/applyAt + `ExecutionPage` マウント配線（SyncQueue 注入含む、spec-review R2）。
+- ゴール: リロードで計時継続復元（gap<4H）/ `lastSavedAt` で自動終了（gap>=4H）。フラッシュ無し。StrictMode 二重マウントでも冪等（spec-review R1）。日跨ぎでも重複 session を作らない（spec-review R6）。達成記録は有効経過 >0 の item のみ（spec-review R3）。
 
 ## 6. 依存関係順序
 
