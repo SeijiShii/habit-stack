@@ -1,8 +1,11 @@
 # AI_LOG インデックス — habit-stack
 
-**最終更新**: 2026-06-11 (e2e execution R20260611-001)
-**総セッション数**: 13
-**総 decision 数**: 42
+**最終更新**: 2026-06-11 (audit standard)
+**総セッション数**: 60
+**総 decision 数**: 45
+
+> 注: 下の「セッション一覧」表は直近セッションのみ列挙（全 60 件は `ls docs/AI_LOG/D*.md` 参照）。
+> AUDIT_20260611_2000 で表の網羅性を Low 指摘済み、再生成は別 bookkeeping。
 
 > このフォルダは AI 主導の自走 / 後追いトレースを目的とする詳細ログ。
 > セッションごとに 1 ファイル、append-only、過去ファイルは削除・編集禁止。
@@ -14,6 +17,7 @@
 
 | ファイル | 実行日 | コマンド | 対象 | decision 範囲 | 状態 |
 |---|---|---|---|---|---|
+| [D20260611_006_audit_standard.md](./D20260611_006_audit_standard.md) | 2026-06-11 | /flow:audit | standard（全体） | D20260611-029〜031 | 完了（Critical 1 / Low 3） |
 | [D20260611_005_e2e_execution_revise_R20260611-001.md](./D20260611_005_e2e_execution_revise_R20260611-001.md) | 2026-06-11 | /flow:e2e | execution R20260611-001 (revise) | D20260611-025〜027 | 完了（E2E 6/6 green） |
 | [D20260611_004_resume_continuous.md](./D20260611_004_resume_continuous.md) | 2026-06-11 | /flow:auto | continuous | D20260611-023〜024 | 進行中 |
 | [D20260611_003_tdd_execution_revise_R20260611-001.md](./D20260611_003_tdd_execution_revise_R20260611-001.md) | 2026-06-11 | /flow:tdd | execution R20260611-001 (revise) | D20260611-018〜022 | 完了（167 green） |
@@ -34,6 +38,9 @@
 
 | ID | command | phase | chosen (短縮) | type | ファイル |
 |---|---|---|---|---|---|
+| D20260611-031 | /flow:audit | drift shooting | Critical→/flow:revise _shared/auth で削除導線実装 | auto-recommended | D20260611_006_audit_standard.md |
+| D20260611-030 | /flow:audit | #4 観点反映 | Critical: O54/O12×O22 セルフ削除UI欠落（約束済・履行不能） | auto-recommended | D20260611_006_audit_standard.md |
+| D20260611-029 | /flow:audit | スコープ | standard（#1-#6）、28commits stale 鮮度トリガ | auto-recommended | D20260611_006_audit_standard.md |
 | D20260611-027 | /flow:e2e | リグレッション | core-journey 完了文言を できました に追従 | auto-recommended | D20260611_005_e2e_execution_revise_R20260611-001.md |
 | D20260611-026 | /flow:e2e | スコープ | リロード/ログイン/サマリ 3本実装、4H/cap/15秒は unit 委譲 | auto-recommended | D20260611_005_e2e_execution_revise_R20260611-001.md |
 | D20260611-025 | /flow:e2e | StrictMode 復元バグ | restoredRef 同期gate廃止→appliedRef を async内で立てる（本番致命バグ修正） | auto-recommended | D20260611_005_e2e_execution_revise_R20260611-001.md |

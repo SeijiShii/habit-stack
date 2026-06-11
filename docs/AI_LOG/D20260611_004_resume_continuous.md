@@ -17,6 +17,7 @@
 |---|---|---|---|
 | D20260611-023 | retrospective | 前回=不正停止（pace委譲）→ 是正して続行 | auto-recommended |
 | D20260611-024 | 優先度 auto-pick | P4.5 E2E gate → /flow:e2e execution R20260611-001 | auto-recommended |
+| D20260611-028 | 反復2 auto-pick | E2E green 後、P1-P4.5 非該当 + audit 28commits stale → §3.0c 鮮度ゲート /flow:audit --scope=standard | auto-recommended |
 
 ## Decisions
 
@@ -47,4 +48,26 @@
     revise R20260611-001 は 101 完成（unit green）+ 004_REVISE_E2E_TEST 存在 + 103 不在 → P4.5 発火。
     P1 SEC は全て accepted-as-requirement で open なし。P2 中断なし。P4.2 未実装なし。
     ローカル headless E2E = Class A、無確認 dispatch。
+  result: |
+    完了（D20260611_005）。E2E 6/6 green。StrictMode 二重マウント復元バグ（D20260611-025）を
+    検出・修正（restoredRef 同期gate→appliedRef を async内へ）。core-journey 文言ドリフトも追従。
+    commit 980efb9。
+
+- id: D20260611-028
+  timestamp: 2026-06-11T20:00:00+09:00
+  command: /flow:auto
+  phase: Step 3 反復2 優先度 auto-pick
+  question: E2E green 後の次アクション
+  options: [P4.5（他target E2E）, §3.0c 鮮度ゲート audit, P4.7 release（undeployed 再デプロイ）, P5 完了]
+  recommended: §3.0c 鮮度ゲート → /flow:audit --scope=standard
+  chosen: /flow:audit --scope=standard
+  chosen_type: auto-recommended
+  depends_on: [D20260611-024]
+  context: |
+    P1 SEC open なし / P2 中断なし / P3.7 905 済 / P4.2 未実装なし / P4.5 全 target green。
+    最新 AUDIT_20260609_1851 以降 28 commits（revise R20260610-001・fix C20260610-001・
+    revise R20260611-001 の大型完遂を含む）= §3.0c 鮮度トリガ閾値（≥15 + 大型 commit）を大幅超過。
+    SCENARIO §5 カーソルも 2026-06-09 で stale（drift）。release-pre/P5 へ進む前に audit→secure で
+    drift・未実装 require観点を surface しシューティングする必要がある。standard scope（#4 観点反映）。
+    audit = Class A auto-execute。
 ```
