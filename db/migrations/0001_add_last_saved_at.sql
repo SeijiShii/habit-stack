@@ -1,0 +1,1 @@
+ALTER TABLE "execution_sessions" ADD COLUMN "last_saved_at" timestamp with time zone;

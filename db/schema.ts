@@ -95,6 +95,8 @@ export const executionSessions = pgTable(
     endedAt: ts("ended_at"),
     status: sessionStatus("status").notNull().default("running"),
     clientLocalId: text("client_local_id").notNull(),
+    // 進行中セッションの最終生存時刻（ハートビート）。復帰時の 4H 放置判定に使う（R20260611-001）。
+    lastSavedAt: ts("last_saved_at"),
     syncedAt: ts("synced_at"),
     createdAt: ts("created_at").notNull().defaultNow(),
     updatedAt: ts("updated_at").notNull().defaultNow(),
