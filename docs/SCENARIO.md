@@ -67,23 +67,23 @@
 ## 5. 現在地カーソル
 
 <!-- AUTO-GENERATED:BEGIN scenario-cursor -->
-- 現在フェーズ: Phase 4 (公開準備) — **本番デプロイ済**、残=実機/課金スモーク + promote
-- 進行中ターゲット: /flow:release（デプロイ完了、post-deploy スモーク green）→ 次 P4.8 promote
+- 現在フェーズ: Phase 4 (公開準備) — **未デプロイ改修2件を本番反映済**、残=実機 B-4 (100円 live tip) 確認のみ
+- 進行中ターゲット: なし（release 完了）→ 次 P5 完了評価（残は Class C/B-4 のみ）
 - 公開 URL: **https://habit-stack.givers.work**（live、Clerk prod verified / Neon prod / Stripe live）
-- デプロイ: prod-direct、Build Output API (Node↔Web adapter)、7関数、smoke: health/guest 200・auth gate 401
-- デザイン: design-system 適用済 (00dddf5、theme.css 7.57kB)・視覚レビュー green・本番反映済 (claim C20260609-001 解決)
-- 本番修正: c7ad9f7 (Web handler adapter) / a10a386 (Clerk guest createUser 識別子 CF-016) / d6333b3 (CLERK_PUBLISHABLE_KEY) / 00dddf5 (design 適用) / 94872e4 (header横一列) / 1d326d5 (O31 シェア)
-- audit: AUDIT_20260609_1851 (light+#4) High 0 (O31 解消済) / Low 2 (論点-001/002 §7 未移動)
+- 直近デプロイ (2026-06-12): R20260611-001 計時永続化 + R20260611-002 セルフ削除を本番反映。prod-direct、Build Output API、**8関数**、smoke 5/5 green
+- ⚠️ release 中に本番バグ検出・修正 (C20260612): DELETE /api/account が 405 (ルート不整合 api/account/delete.ts→実ルート/api/account/delete、クライアントは/api/account を呼ぶ) = サーバ自己削除が本番未実行だった → api/account.ts 移設 + メソッドガード + 回帰 U-DEL-10 + smoke 恒久追加で修正 (e33434f)、再デプロイ後 401 で解消
+- スモーク (2026-06-12): / 200 / health 200 / guest 200 (Clerk prod) / sync 401 / **DELETE /api/account 401** (O54 消去権が本番で履行可能に回復)
+- デザイン: design-system 適用済 (00dddf5)・視覚レビュー green・本番反映済
+- audit/secure: AUDIT_20260611_2025 (full, C0/H0/L2) + SECURITY_REVIEW _shared/auth (D20260612_002, C0/H0, O54 充足) = release-pre クリア
 - promote: 告知文ドラフト生成済 (docs/marketing/、投稿は手動) / wording: 校正済 (24527d5) / 残: 実機 B-4 (100円 live tip) 確認のみ
-- 最終更新セッション: D20260609_001_resume_continuous
-- 最終更新時刻: 2026-06-09 14:18
-- 完了フェーズ: [Phase 1 概念設計, Phase 1.5 デザイン, Phase 2 機能設計(全11), Phase 2.5 spec-review(全11), Phase 3 実装(全11), Phase 3.5 E2E(コアジャーニー), release-pre audit/secure]
-- Phase 3 実装: **全11 target 実装完了**（db/types/auth/local-sync/legal/activity-sets/execution/feedback/streak-summary/tip-jar/app-shell）
-  - 累計 116/116 テスト green、typecheck green、**vite build 成功（デプロイ可能 O57）**、E2E コアジャーニー 3/3 green、release-pre audit pass
+- 最終更新セッション: D20260612_001_resume_continuous → D20260612_003_release
+- 最終更新時刻: 2026-06-12 09:05
+- 完了フェーズ: [Phase 1 概念設計, Phase 1.5 デザイン, Phase 2 機能設計(全11), Phase 2.5 spec-review(全11), Phase 3 実装(全11), Phase 3.5 E2E, release-pre audit/secure, **Phase 4 本番デプロイ(計時永続化+セルフ削除 含む)**]
+- Phase 3 実装: **全11 target + revise R20260610/0611-001/002 実装完了**
+  - 累計 177 unit + 8 E2E green、typecheck green、vite build 成功、release-pre audit/secure pass
   - SEC-001〜005 実装で充足、SEC-DEP High closed/Critical accepted-risk(dev-only)
-- 次の推奨コマンド: **/flow:release**（P4.7）— 実キー FILL（Clerk/Neon/Stripe、env-acquisition-guide）→ ローカルスマホ動作確認（課金系含む）→ デプロイ（Class B）。**実キーは人間しか持たない = Class C 1問1答**
-- Release 後: サブドメ確定(論点-002) → /flow:promote(告知文) → P5
-- Open 論点: 論点-002(ドメイン=Release)、論点-003/010(feedback-hub)、論点-009(Clerk確認時)、論点-011(vitest accepted-risk)
+- 次の推奨: **P5 完了評価** — 残作業は実機 B-4 (100円 live tip、Class C 本人実課金確認) のみ。それ以外 (デプロイ/サブドメ/wording/promote 生成/audit/secure) は完了
+- Open 論点: 論点-002(ドメイン=サブドメ確定済 givers.work)、論点-003/010(feedback-hub)、論点-009(Clerk確認時)、論点-011(vitest accepted-risk)
 <!-- AUTO-GENERATED:END scenario-cursor -->
 
 ## 6. 変更履歴
