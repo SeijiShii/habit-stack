@@ -14,7 +14,8 @@
 
 | ファイル | 実行日 | コマンド | 対象 | decision 範囲 | 状態 |
 |---|---|---|---|---|---|
-| [D20260611_002_spec-review_execution_R20260611-001.md](./D20260611_002_spec-review_execution_R20260611-001.md) | 2026-06-11 | /flow:spec-review | execution R20260611-001 (revise) | D20260611-009〜016 | 完了→tdd |
+| [D20260611_003_tdd_execution_revise_R20260611-001.md](./D20260611_003_tdd_execution_revise_R20260611-001.md) | 2026-06-11 | /flow:tdd | execution R20260611-001 (revise) | D20260611-018〜022 | 完了（167 green） |
+| [D20260611_002_spec-review_execution_R20260611-001.md](./D20260611_002_spec-review_execution_R20260611-001.md) | 2026-06-11 | /flow:spec-review | execution R20260611-001 (revise) | D20260611-009〜017 | 完了→tdd |
 | [D20260611_001_revise_execution_R20260611-001.md](./D20260611_001_revise_execution_R20260611-001.md) | 2026-06-11 | /flow:revise | execution R20260611-001 (計時永続化・復帰) | D20260611-001〜008 | 設計完了→spec-review |
 | [D20260610_009_tdd_execution_revise_R20260610-001.md](./D20260610_009_tdd_execution_revise_R20260610-001.md) | 2026-06-10 | /flow:tdd | execution R20260610-001 (revise) | D20260610-031 | 完了 |
 | [D20260610_008_resume_continuous.md](./D20260610_008_resume_continuous.md) | 2026-06-10 | /flow:auto | continuous | D20260610-029〜030 | 進行中 |
