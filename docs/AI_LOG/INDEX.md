@@ -1,8 +1,8 @@
 # AI_LOG インデックス — habit-stack
 
-**最終更新**: 2026-06-11 (audit standard)
-**総セッション数**: 60
-**総 decision 数**: 45
+**最終更新**: 2026-06-11 (revise _shared/auth R20260611-002)
+**総セッション数**: 61
+**総 decision 数**: 48
 
 > 注: 下の「セッション一覧」表は直近セッションのみ列挙（全 60 件は `ls docs/AI_LOG/D*.md` 参照）。
 > AUDIT_20260611_2000 で表の網羅性を Low 指摘済み、再生成は別 bookkeeping。
@@ -17,6 +17,7 @@
 
 | ファイル | 実行日 | コマンド | 対象 | decision 範囲 | 状態 |
 |---|---|---|---|---|---|
+| [D20260611_007_revise__shared_auth_R20260611-002.md](./D20260611_007_revise__shared_auth_R20260611-002.md) | 2026-06-11 | /flow:revise | _shared/auth R20260611-002 | D20260611-033〜035 | 設計完了→tdd |
 | [D20260611_006_audit_standard.md](./D20260611_006_audit_standard.md) | 2026-06-11 | /flow:audit | standard（全体） | D20260611-029〜031 | 完了（Critical 1 / Low 3） |
 | [D20260611_005_e2e_execution_revise_R20260611-001.md](./D20260611_005_e2e_execution_revise_R20260611-001.md) | 2026-06-11 | /flow:e2e | execution R20260611-001 (revise) | D20260611-025〜027 | 完了（E2E 6/6 green） |
 | [D20260611_004_resume_continuous.md](./D20260611_004_resume_continuous.md) | 2026-06-11 | /flow:auto | continuous | D20260611-023〜024 | 進行中 |
@@ -38,6 +39,9 @@
 
 | ID | command | phase | chosen (短縮) | type | ファイル |
 |---|---|---|---|---|---|
+| D20260611-035 | /flow:revise | 後方互換/リリース | 純追加・MIGRATION不要・一括 | auto-recommended | D20260611_007_revise__shared_auth_R20260611-002.md |
+| D20260611-034 | /flow:revise | サーバ削除方式 | 専用DELETE /api/account + deleteAllData物理削除 | auto-recommended | D20260611_007_revise__shared_auth_R20260611-002.md |
+| D20260611-033 | /flow:revise | 改修要望 | O54 セルフ削除UI導線を実装（消去権履行） | auto-recommended | D20260611_007_revise__shared_auth_R20260611-002.md |
 | D20260611-031 | /flow:audit | drift shooting | Critical→/flow:revise _shared/auth で削除導線実装 | auto-recommended | D20260611_006_audit_standard.md |
 | D20260611-030 | /flow:audit | #4 観点反映 | Critical: O54/O12×O22 セルフ削除UI欠落（約束済・履行不能） | auto-recommended | D20260611_006_audit_standard.md |
 | D20260611-029 | /flow:audit | スコープ | standard（#1-#6）、28commits stale 鮮度トリガ | auto-recommended | D20260611_006_audit_standard.md |

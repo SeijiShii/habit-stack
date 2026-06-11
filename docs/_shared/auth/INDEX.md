@@ -22,7 +22,7 @@
 ## サブフォルダ（改修・バグ修正・クレーム判定履歴）
 | パス | 種別 | issue/slug | 状態 | 概要 | INDEX |
 |---|---|---|---|---|---|
-| (なし。`/flow:revise` / `/flow:fix` / `/flow:claim` で生成) |
+| `revise_R20260611-002_20260611_self-service-delete/` | revise | R20260611-002 / self-service-delete | 設計完了→tdd | O54 セルフ削除 UI 導線実装（AccountPage 削除導線 + DELETE /api/account + purgeAllData）。AUDIT_20260611_2000 Critical 起点（プラポリ約束済みだが未配線=「配線待ち」の解消） | `INDEX.md` |
 
 ## 関連
 - 親 concept: `../../concept.md` §1.3.2 auth 行

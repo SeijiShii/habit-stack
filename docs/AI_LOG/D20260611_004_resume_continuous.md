@@ -18,6 +18,7 @@
 | D20260611-023 | retrospective | 前回=不正停止（pace委譲）→ 是正して続行 | auto-recommended |
 | D20260611-024 | 優先度 auto-pick | P4.5 E2E gate → /flow:e2e execution R20260611-001 | auto-recommended |
 | D20260611-028 | 反復2 auto-pick | E2E green 後、P1-P4.5 非該当 + audit 28commits stale → §3.0c 鮮度ゲート /flow:audit --scope=standard | auto-recommended |
+| D20260611-032 | 反復3 auto-pick | audit Critical（O54 セルフ削除UI欠落）→ §3.0c シューティング /flow:revise _shared/auth | auto-recommended |
 
 ## Decisions
 
