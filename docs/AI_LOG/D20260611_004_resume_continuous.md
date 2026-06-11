@@ -21,6 +21,7 @@
 | D20260611-032 | 反復3 auto-pick | audit Critical（O54 セルフ削除UI欠落）→ §3.0c シューティング /flow:revise _shared/auth | auto-recommended |
 | D20260611-036 | 反復4 auto-pick | revise 設計完了（001+002, 101不在）→ P4.2 gate /flow:tdd _shared/auth R20260611-002 | auto-recommended |
 | D20260611-040 | 反復5 auto-pick | tdd 完了（101, 004 E2E あり, 103不在）→ P4.5 gate /flow:e2e _shared/auth R20260611-002 | auto-recommended |
+| D20260611-043 | 反復6 auto-pick | Critical 解消（E2E green）。未デプロイ改修2件あり → 再デプロイ(P4.7)前提の §3.0c release-pre必須監査 /flow:audit --scope=full | auto-recommended |
 
 ## Decisions
 
