@@ -20,6 +20,7 @@
 | D20260611-028 | 反復2 auto-pick | E2E green 後、P1-P4.5 非該当 + audit 28commits stale → §3.0c 鮮度ゲート /flow:audit --scope=standard | auto-recommended |
 | D20260611-032 | 反復3 auto-pick | audit Critical（O54 セルフ削除UI欠落）→ §3.0c シューティング /flow:revise _shared/auth | auto-recommended |
 | D20260611-036 | 反復4 auto-pick | revise 設計完了（001+002, 101不在）→ P4.2 gate /flow:tdd _shared/auth R20260611-002 | auto-recommended |
+| D20260611-040 | 反復5 auto-pick | tdd 完了（101, 004 E2E あり, 103不在）→ P4.5 gate /flow:e2e _shared/auth R20260611-002 | auto-recommended |
 
 ## Decisions
 

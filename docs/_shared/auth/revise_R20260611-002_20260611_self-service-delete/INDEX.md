@@ -2,7 +2,7 @@
 
 **issue / slug**: R20260611-002 / self-service-delete
 **実施日**: 2026-06-11
-**状態**: 実装完了（176 green）→ e2e
+**状態**: E2E green（176 unit + 8 E2E green）→ Critical 解消
 
 <!-- auto-generated-start -->
 
@@ -16,6 +16,7 @@
 | 004 | 004_REVISE_E2E_TEST.md | REVISE_E2E_TEST | 2026-06-11 |
 | 101 | 101_REVISE_IMPL_REPORT.md | IMPL_REPORT | 2026-06-11 |
 | 102 | 102_REVISE_UNIT_TEST_REPORT.md | UNIT_TEST_REPORT | 2026-06-11 |
+| 103 | 103_REVISE_E2E_REPORT.md | E2E_REPORT | 2026-06-11 |
 
 ## 関連
 - 親機能 INDEX: `../INDEX.md`

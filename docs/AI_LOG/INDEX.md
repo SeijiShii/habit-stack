@@ -1,8 +1,8 @@
 # AI_LOG インデックス — habit-stack
 
-**最終更新**: 2026-06-11 (tdd _shared/auth R20260611-002)
-**総セッション数**: 62
-**総 decision 数**: 51
+**最終更新**: 2026-06-11 (e2e _shared/auth R20260611-002 — AUDIT Critical 解消)
+**総セッション数**: 63
+**総 decision 数**: 53
 
 > 注: 下の「セッション一覧」表は直近セッションのみ列挙（全 60 件は `ls docs/AI_LOG/D*.md` 参照）。
 > AUDIT_20260611_2000 で表の網羅性を Low 指摘済み、再生成は別 bookkeeping。
@@ -17,6 +17,7 @@
 
 | ファイル | 実行日 | コマンド | 対象 | decision 範囲 | 状態 |
 |---|---|---|---|---|---|
+| [D20260611_009_e2e__shared_auth_revise_R20260611-002.md](./D20260611_009_e2e__shared_auth_revise_R20260611-002.md) | 2026-06-11 | /flow:e2e | _shared/auth R20260611-002 (revise) | D20260611-041〜042 | 完了（8/8 E2E green） |
 | [D20260611_008_tdd__shared_auth_revise_R20260611-002.md](./D20260611_008_tdd__shared_auth_revise_R20260611-002.md) | 2026-06-11 | /flow:tdd | _shared/auth R20260611-002 (revise) | D20260611-037〜039 | 完了（176 green） |
 | [D20260611_007_revise__shared_auth_R20260611-002.md](./D20260611_007_revise__shared_auth_R20260611-002.md) | 2026-06-11 | /flow:revise | _shared/auth R20260611-002 | D20260611-033〜035 | 設計完了→tdd |
 | [D20260611_006_audit_standard.md](./D20260611_006_audit_standard.md) | 2026-06-11 | /flow:audit | standard（全体） | D20260611-029〜031 | 完了（Critical 1 / Low 3） |
@@ -40,6 +41,8 @@
 
 | ID | command | phase | chosen (短縮) | type | ファイル |
 |---|---|---|---|---|---|
+| D20260611-042 | /flow:e2e | journey 実装 | E-DEL-01/02 ローカルwipe実証、deleteAllDataはunit委譲 | auto-recommended | D20260611_009_e2e__shared_auth_revise_R20260611-002.md |
+| D20260611-041 | /flow:e2e | FW 検出 | Playwright 1.60 + Chromium（ローカル headless Class A） | auto-recommended | D20260611_009_e2e__shared_auth_revise_R20260611-002.md |
 | D20260611-039 | /flow:tdd | /account 描画 | gate せず即描画、onDeleteAllData のみ repos 依存 | auto-recommended | D20260611_008_tdd__shared_auth_revise_R20260611-002.md |
 | D20260611-038 | /flow:tdd | purge 方式 | deleteRemote 廃止、常に試行+失敗許容(local 常時 wipe) | auto-recommended | D20260611_008_tdd__shared_auth_revise_R20260611-002.md |
 | D20260611-037 | /flow:tdd | Phase 軽重 | 全3 Phase メイン直接実装 | auto-recommended | D20260611_008_tdd__shared_auth_revise_R20260611-002.md |
