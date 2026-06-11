@@ -1,8 +1,8 @@
 # AI_LOG インデックス — habit-stack
 
-**最終更新**: 2026-06-10 (fix C20260610-001)
-**総セッション数**: 1
-**総 decision 数**: 9
+**最終更新**: 2026-06-11 (revise execution R20260611-001)
+**総セッション数**: 12
+**総 decision 数**: 39
 
 > このフォルダは AI 主導の自走 / 後追いトレースを目的とする詳細ログ。
 > セッションごとに 1 ファイル、append-only、過去ファイルは削除・編集禁止。
@@ -14,6 +14,7 @@
 
 | ファイル | 実行日 | コマンド | 対象 | decision 範囲 | 状態 |
 |---|---|---|---|---|---|
+| [D20260611_001_revise_execution_R20260611-001.md](./D20260611_001_revise_execution_R20260611-001.md) | 2026-06-11 | /flow:revise | execution R20260611-001 (計時永続化・復帰) | D20260611-001〜008 | 設計完了→spec-review |
 | [D20260610_009_tdd_execution_revise_R20260610-001.md](./D20260610_009_tdd_execution_revise_R20260610-001.md) | 2026-06-10 | /flow:tdd | execution R20260610-001 (revise) | D20260610-031 | 完了 |
 | [D20260610_008_resume_continuous.md](./D20260610_008_resume_continuous.md) | 2026-06-10 | /flow:auto | continuous | D20260610-029〜030 | 進行中 |
 | [D20260610_007_revise_execution_R20260610-001.md](./D20260610_007_revise_execution_R20260610-001.md) | 2026-06-10 | /flow:revise | execution R20260610-001 | D20260610-026〜028 | 完了→tdd |
@@ -29,6 +30,9 @@
 
 | ID | command | phase | chosen (短縮) | type | ファイル |
 |---|---|---|---|---|---|
+| D20260611-008 | /flow:revise | Step 3.1 | 4H: キャップ(R1)と復帰自動終了(R2)を別ルールで両立 | auto-recommended | D20260611_001_revise_execution_R20260611-001.md |
+| D20260611-003 | /flow:revise | Step 3.1 substrate | ハイブリッド(IndexedDB維持+毎秒localStorage HB+15秒push+復元配線) | explicit-choice | D20260611_001_revise_execution_R20260611-001.md |
+| D20260611-001 | /flow:revise | Step 1.2 | 計時状態の永続化・復帰 + 4H放置キャップ/終了 | explicit-choice | D20260611_001_revise_execution_R20260611-001.md |
 | D20260610-016 | /flow:fix | Step 5/7.1 | 修正=表示層限定 / 通常リリース / Postmortem 不要 | auto-recommended | D20260610_002_fix_execution_C20260610-001.md |
 | D20260610-015 | /flow:fix | Step 4.1 Why5 | 根本原因: 計時中ライブ表示が SPEC/テスト未カバー | auto-recommended | D20260610_002_fix_execution_C20260610-001.md |
 | D20260610-009 | /flow:fix | Step 1.3 | severity=medium | explicit-choice | D20260610_002_fix_execution_C20260610-001.md |
@@ -52,6 +56,7 @@
 | 論点-001 | ストリーク/継続率の見せ方（罪悪感回避） | D20260608_001 | D20260608-003 |
 | 論点-002 | 公開ドメイン（サブドメ）確定 | D20260608_001 | — |
 | 論点-003 | feedback-hub 連携（共有シークレット） | D20260608_001 | — |
+| R20260611-001/論点-001 | 計時中の guest→Clerk リンク時の進行中セッション扱い（推奨: 移送せず guest で完了） | D20260611_001 | D20260611-003 |
 
 ## Superseded chain（旧 Open → 新解決）
 
