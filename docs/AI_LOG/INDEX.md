@@ -1,8 +1,8 @@
 # AI_LOG インデックス — habit-stack
 
-**最終更新**: 2026-06-11 (revise execution R20260611-001)
-**総セッション数**: 12
-**総 decision 数**: 39
+**最終更新**: 2026-06-11 (e2e execution R20260611-001)
+**総セッション数**: 13
+**総 decision 数**: 42
 
 > このフォルダは AI 主導の自走 / 後追いトレースを目的とする詳細ログ。
 > セッションごとに 1 ファイル、append-only、過去ファイルは削除・編集禁止。
@@ -14,6 +14,8 @@
 
 | ファイル | 実行日 | コマンド | 対象 | decision 範囲 | 状態 |
 |---|---|---|---|---|---|
+| [D20260611_005_e2e_execution_revise_R20260611-001.md](./D20260611_005_e2e_execution_revise_R20260611-001.md) | 2026-06-11 | /flow:e2e | execution R20260611-001 (revise) | D20260611-025〜027 | 完了（E2E 6/6 green） |
+| [D20260611_004_resume_continuous.md](./D20260611_004_resume_continuous.md) | 2026-06-11 | /flow:auto | continuous | D20260611-023〜024 | 進行中 |
 | [D20260611_003_tdd_execution_revise_R20260611-001.md](./D20260611_003_tdd_execution_revise_R20260611-001.md) | 2026-06-11 | /flow:tdd | execution R20260611-001 (revise) | D20260611-018〜022 | 完了（167 green） |
 | [D20260611_002_spec-review_execution_R20260611-001.md](./D20260611_002_spec-review_execution_R20260611-001.md) | 2026-06-11 | /flow:spec-review | execution R20260611-001 (revise) | D20260611-009〜017 | 完了→tdd |
 | [D20260611_001_revise_execution_R20260611-001.md](./D20260611_001_revise_execution_R20260611-001.md) | 2026-06-11 | /flow:revise | execution R20260611-001 (計時永続化・復帰) | D20260611-001〜008 | 設計完了→spec-review |
@@ -32,6 +34,11 @@
 
 | ID | command | phase | chosen (短縮) | type | ファイル |
 |---|---|---|---|---|---|
+| D20260611-027 | /flow:e2e | リグレッション | core-journey 完了文言を できました に追従 | auto-recommended | D20260611_005_e2e_execution_revise_R20260611-001.md |
+| D20260611-026 | /flow:e2e | スコープ | リロード/ログイン/サマリ 3本実装、4H/cap/15秒は unit 委譲 | auto-recommended | D20260611_005_e2e_execution_revise_R20260611-001.md |
+| D20260611-025 | /flow:e2e | StrictMode 復元バグ | restoredRef 同期gate廃止→appliedRef を async内で立てる（本番致命バグ修正） | auto-recommended | D20260611_005_e2e_execution_revise_R20260611-001.md |
+| D20260611-024 | /flow:auto | Step 3 auto-pick | P4.5 E2E gate → /flow:e2e execution R20260611-001 | auto-recommended | D20260611_004_resume_continuous.md |
+| D20260611-023 | /flow:auto | Step 0.5 retrospective | 前回=不正停止（pace委譲）→是正して続行 | auto-recommended | D20260611_004_resume_continuous.md |
 | D20260611-017 | /flow:spec-review | R8(論点-001解決) | 移送せず + 計時中/account遷移で終了(ログイン限定) | explicit-choice | D20260611_002_spec-review_execution_R20260611-001.md |
 | D20260611-016 | /flow:spec-review | Step 5 | 905 生成 + 001/002/003 反映 | auto-recommended | D20260611_002_spec-review_execution_R20260611-001.md |
 | D20260611-015 | /flow:spec-review | R7 | 4H cap を表示+確定保存値の双方に | auto-recommended | D20260611_002_spec-review_execution_R20260611-001.md |

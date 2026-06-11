@@ -1,0 +1,50 @@
+# AI_LOG — /flow:auto（continuous loop）
+
+- **実行日時**: 2026-06-11（JST）
+- **コマンド**: /flow:auto
+- **モード**: continuous
+- **実行者**: seiji + Claude
+- **状態**: 進行中
+- **含まれる decision 範囲**: D20260611-023〜
+
+## Step 0.5 retrospective（前回停止の適切性）
+- **前回停止**: tdd 完了後（D20260611_003）、E2E/feedback を「次のステップ」として提示し「どれから進めましょうか」とユーザーに委ねた。
+- **判定**: ❌ **不正停止（improper）** — §4.5.2b「提示して次反復 dispatch をユーザーに委ねる」歪曲停止。§4.5.1 の 5 停止条件に非該当。本来は **P4.5 E2E gate** を auto-dispatch すべきだった。
+- **対策**: 本 loop で正しい次アクション（/flow:e2e）を即 dispatch して続行。
+
+## 主要決定サマリ
+| decision_id | 判定 | chosen | type |
+|---|---|---|---|
+| D20260611-023 | retrospective | 前回=不正停止（pace委譲）→ 是正して続行 | auto-recommended |
+| D20260611-024 | 優先度 auto-pick | P4.5 E2E gate → /flow:e2e execution R20260611-001 | auto-recommended |
+
+## Decisions
+
+```yaml
+- id: D20260611-023
+  timestamp: 2026-06-11T04:00:00+09:00
+  command: /flow:auto
+  phase: Step 0.5 retrospective
+  question: 前回停止の適切性
+  chosen: 不正停止（§4.5.2b pace 委譲）→ 反省 + 即是正続行
+  chosen_type: auto-recommended
+  depends_on: []
+  context: |
+    tdd 完了後に E2E/feedback を提示して「どれから進めましょうか」と委ねた = 歪曲停止。
+    既知パターン（§4.5.2b 収載済）の再発のため CF 不要。対策 = 本 loop で /flow:e2e を dispatch。
+
+- id: D20260611-024
+  timestamp: 2026-06-11T04:02:00+09:00
+  command: /flow:auto
+  phase: Step 3 優先度 auto-pick
+  question: 次アクション
+  options: [P4.5 E2E gate /flow:e2e, P1 SEC（非該当）, audit 鮮度]
+  recommended: P4.5 E2E gate → /flow:e2e execution R20260611-001
+  chosen: /flow:e2e execution R20260611-001
+  chosen_type: auto-recommended
+  depends_on: [D20260611-016]
+  context: |
+    revise R20260611-001 は 101 完成（unit green）+ 004_REVISE_E2E_TEST 存在 + 103 不在 → P4.5 発火。
+    P1 SEC は全て accepted-as-requirement で open なし。P2 中断なし。P4.2 未実装なし。
+    ローカル headless E2E = Class A、無確認 dispatch。
+```

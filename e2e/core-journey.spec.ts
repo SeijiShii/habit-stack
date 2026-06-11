@@ -41,7 +41,8 @@ test("コアジャーニー: セット作成 → アイテム → 実行 → 達
   await page.getByRole("button", { name: "次の活動へ" }).click();
   await expect(page.getByTestId("current-item")).toHaveText("英単語");
   await page.getByRole("button", { name: "セット終了" }).click();
-  await expect(page.getByRole("status")).toContainText("やれました");
+  // 完了文言は wording 校正（O42/P4.45, commit 24527d5）で軟化済み。
+  await expect(page.getByRole("status")).toContainText("できました");
 });
 
 test("継続サマリに達成が反映（穴あき許容）", async ({ page }) => {

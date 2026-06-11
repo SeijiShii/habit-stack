@@ -2,7 +2,7 @@
 
 **issue / slug**: R20260611-001 / timing-persistence-resume
 **実施日**: 2026-06-11
-**状態**: 実装完了（unit 167 green、E2E 計画は 004、/flow:e2e 未実施）
+**状態**: E2E green（unit 167 green、E2E 6/6 green、StrictMode 復元バグ修正 D20260611-025）
 
 <!-- auto-generated-start -->
 
@@ -18,6 +18,7 @@
 | 905 | 905_REVISE_SPEC_REVIEW.md | SPEC_REVIEW | 2026-06-11 |
 | 101 | 101_REVISE_IMPL_REPORT.md | IMPL_REPORT | 2026-06-11 |
 | 102 | 102_REVISE_UNIT_TEST_REPORT.md | UNIT_TEST_REPORT | 2026-06-11 |
+| 103 | 103_REVISE_E2E_REPORT.md | E2E_REPORT | 2026-06-11 |
 
 ## 関連
 - 親機能 INDEX: `../INDEX.md`

@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import type { ExecutionRepo } from '../model/executionRepo.js';
-import { decideRecovery } from '../model/recovery.js';
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { ExecutionRepo } from "../model/executionRepo.js";
+import { decideRecovery } from "../model/recovery.js";
 import {
   startSession,
   endCurrentItem,
@@ -10,7 +10,7 @@ import {
   endSession,
   setNote,
   type ExecState,
-} from '../model/executionMachine.js';
+} from "../model/executionMachine.js";
 
 export interface UseExecutionDeps {
   now?: () => string;
@@ -33,28 +33,34 @@ export function useExecution(
   const [state, setState] = useState<ExecState | null>(null);
   // 永続に使う実 id。復元時に found レコードの id へ差し替える（R6）。
   const idRef = useRef(sessionLocalId);
-  const restoredRef = useRef(false);
+  // 復元適用済みフラグ。async 内（cancelled 判定の後）で立てるため、二度目の実マウントを
+  // ブロックしない（旧 restoredRef 不具合の回避）。二重適用に対する防御も兼ねる。
+  const appliedRef = useRef(false);
 
-  // マウント時に 1 回だけ復元（StrictMode 二重マウントは restoredRef で吸収）。
+  // マウント時に進行中セッションを復元する（UC-EX-RESUME / UC-EX-IDLE）。
+  // StrictMode 安全性（R1/P83）: 一度目のマウントの async は cleanup の cancelled=true で中断され、
+  // 二度目（実マウント）の async が appliedRef を立てて 1 度だけ適用する。decideRecovery は純関数、
+  // finalize は冪等 put のため二重実行に安全。
+  // ※ 旧実装は restoredRef を effect 冒頭で同期的に立てて start を gate していたため、cleanup の
+  //   cancel と相まって二度目のマウントが早期 return し復元が一切適用されなかった（D20260611-025）。
   useEffect(() => {
-    if (restoredRef.current) return;
-    restoredRef.current = true;
     let cancelled = false;
     void (async () => {
       const found = await repo.restoreInProgress();
-      if (cancelled || !found) return;
+      if (cancelled || !found || appliedRef.current) return;
+      appliedRef.current = true;
       idRef.current = found.id;
       const dec = decideRecovery({
         state: found.state,
         lastSavedAt: found.lastSavedAt,
         now: now(),
       });
-      if (dec.kind === 'autoEnd') {
+      if (dec.kind === "autoEnd") {
         const ended = endSession(found.state, dec.endedAt);
         setState(ended);
         void repo.persist(found.id, ended, {
           lastSavedAt: dec.endedAt,
-          achievementMode: 'strict',
+          achievementMode: "strict",
         });
       } else {
         setState(found.state);
@@ -63,7 +69,7 @@ export function useExecution(
     return () => {
       cancelled = true;
     };
-    // 復元はマウント時 1 回のみ。
+    // 復元はマウント時のみ。
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
