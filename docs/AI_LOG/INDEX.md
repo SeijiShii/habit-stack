@@ -31,6 +31,7 @@
 
 | ID | command | phase | chosen (短縮) | type | ファイル |
 |---|---|---|---|---|---|
+| D20260611-017 | /flow:spec-review | R8(論点-001解決) | 移送せず + 計時中/account遷移で終了(ログイン限定) | explicit-choice | D20260611_002_spec-review_execution_R20260611-001.md |
 | D20260611-016 | /flow:spec-review | Step 5 | 905 生成 + 001/002/003 反映 | auto-recommended | D20260611_002_spec-review_execution_R20260611-001.md |
 | D20260611-015 | /flow:spec-review | R7 | 4H cap を表示+確定保存値の双方に | auto-recommended | D20260611_002_spec-review_execution_R20260611-001.md |
 | D20260611-014 | /flow:spec-review | R4 | IndexedDB=構造正本 / localStorage=heartbeat+fallback | auto-recommended | D20260611_002_spec-review_execution_R20260611-001.md |

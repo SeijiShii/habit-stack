@@ -66,6 +66,14 @@
 - **種別**: 設計判断項目（auto-pick）
 - **反映先**: 001 §2.4 / §7.1 手順3
 
+### [R8] 計時中のログイン画面遷移でセッション終了（論点-001 解決、seiji 指示） (severity=High)
+- **対象**: 001 §7.1 UC-EX-LOGIN-END / §7.5 / §9 / 002 Phase4
+- **背景**: [論点-001]（計時中 guest→Clerk リンク時の owner 切替）に対し、seiji が「計時画面→ログイン画面遷移＝終了、ふりかえり等は終了しない（終了はログインに限定）」を指示。
+- **決定/採用**: 計時中（running/paused）に `/account`（ログイン画面）へ遷移したら遷移前に `endSession(now)`（達成は有効経過>0 のみ）。`/summary` 等への遷移では終了せず計時継続（復帰で resume）。
+- **設計効果**: owner 切替は `/account` で発生するため、ログイン前に done 化 → **owner 変更を跨ぐ進行中セッションが構造的に発生しない**。移送の要否・P89/P90 の owner 競合が原理的に消滅。
+- **種別**: 設計判断項目（explicit-choice、seiji 決定）
+- **反映先**: 001 §7.1/§7.5/§9、002 §1/Phase4、003 U-LOGIN-01〜03、004 E-LOGIN-01〜03
+
 ### [R7] 4H キャップは表示だけでなく確定保存値にも適用 (severity=Medium, P1/P16)
 - **対象**: 001 §7.4 / 002 Phase1
 - **現状**: cap 導入は明記。ただし「確定 `elapsedSec`（記録値）」への適用は読み手依存になりやすい。
@@ -103,9 +111,10 @@
 | D4 (R3) | 0秒放置の達成算入 | 有効経過>0 の item のみ done | auto-recommended | 001§7.1, 003 |
 | D5 (R4) | 正本/マージ規則 | IndexedDB=構造正本、localStorage=heartbeat+fallback | auto-recommended | 001§2.4/§7.1 |
 | D6 (R7) | 4H cap 適用範囲 | 表示 + 確定保存値の双方 | auto-recommended | 001§7.4, 003 |
+| D7 (R8) | 論点-001 解決 + ログイン遷移終了 | 移送しない + `/account`遷移で終了(ログイン限定) | explicit-choice | 001§7.1/§7.5/§9, 002, 003, 004 |
 
 ## 5. 次のステップ
-- 反映済み 001-003 を確認（`<!-- spec-review R{N} -->` 付与箇所）
-- 残 Class C: SPEC [論点-001]（計時中 guest→Clerk リンク、推奨 A=移送せず guest で完了）— 実装着手前に最終確認可（未回答なら A）
-- 準備ができたら `/flow:tdd execution R20260611-001` で実装着手（Phase1 4Hキャップ→Phase2 ハートビート/migration→Phase3 復元/自動終了）
+- 反映済み 001-004 を確認（`<!-- spec-review R{N} -->` 付与箇所）
+- **残 Class C なし**: [論点-001] は seiji 決定で解決済（R8、移送せず + ログイン遷移で終了）
+- 準備ができたら `/flow:tdd execution R20260611-001` で実装着手（Phase1 4Hキャップ→Phase2 ハートビート/migration→Phase3 復元/自動終了→Phase4 ログイン遷移終了）
 <!-- auto-generated-end -->

@@ -25,6 +25,9 @@
 | U-REC-06 (R3) | 自動終了の達成記録 | 開始直後放置（lastSavedAt≈startedAt、有効経過0秒） | achieved を記録しない（doneItemCount で 0秒 item を除外） |
 | U-REC-07 (R3) | 自動終了の達成記録 | 有効経過 >0 の item あり | achieved=true（>0 秒 item を done に算入） |
 | U-REC-08 (R1) | finalize 冪等 | decideRecovery→finalize を 2 回適用（StrictMode 模擬） | 2 回目も同一結果（put 上書き、重複レコード・二重達成なし） |
+| U-LOGIN-01 (R8) | `shouldEndOnNavigate(toPath, status)` | to=`/account`, status=running | true（終了する） |
+| U-LOGIN-02 (R8) | `shouldEndOnNavigate` | to=`/summary/x`, status=running | false（終了しない、計時継続） |
+| U-LOGIN-03 (R8) | `shouldEndOnNavigate` | to=`/account`, status=done | false（既に done、再終了しない） |
 
 ### 1.2 異常系
 | ID | 対象 | 失敗条件 | 期待振る舞い |

@@ -121,6 +121,12 @@
   - **冪等性**: 自動終了の finalize は clientLocalId 由来 id の put 上書きで冪等。React StrictMode の二重マウント／復元の再実行でも結果は同一（`<!-- spec-review R1 -->`）。`decideRecovery` は純関数、副作用（persist/push）は init 1 回に限定し unmount で interval を解除する。
 - `gap < 4H` の場合は終了せず継続復元。ただし R1 キャップは常時適用。
 
+#### UC-EX-LOGIN-END: ログイン画面遷移での自動終了（論点-001 解決、`<!-- spec-review R8 -->`）
+- 計時中（running / paused）に **ログイン／アカウント画面（`/account`）へ遷移**した場合、**遷移前に現在のセッションを終了**する（`endSession(state, now)` → status=done、達成記録は §7.1 R3 準拠で有効経過>0 の item のみ）。永続（IndexedDB + outbox）+ push。
+- **適用範囲はログイン画面遷移に限定**: サマリ／ふりかえり（`/summary`, `/summary/:setId`）やセット一覧（`/sets`）等への遷移では**終了しない**（計時継続。ExecutionPage は unmount で heartbeat interval が止まるだけで、IndexedDB の running session は保持され、`/run` 復帰時に UC-EX-RESUME で継続復元）。
+- **設計上の効果**: owner 切替（guest→Clerk リンク／サインアウト）はすべて `/account` 画面で発生するため、ログイン前にセッションが done 化される → **owner 変更を跨ぐ進行中セッションが構造的に発生しない**。これにより [論点-001] の移送是非・P89/P90 の owner 競合が原理的に消える。リンクは既存フロー（C20260609-002、`linkWithGoogle` は同一 owner id 維持）が担う。
+- **トリガ実装**: 計時中に遷移先が `/account` の場合に終了させるナビゲーションガード（実装シームは 002 PLAN）。ログイン画面が将来 `/account` から分離された場合は、その login 入口に追従する。
+
 ### 7.2 入出力（新仕様）
 
 #### localStorage ハートビート（新規）
@@ -163,9 +169,10 @@ export const MAX_ACTIVITY_SEC = 4 * 60 * 60; // 14400 = 4H。1活動の経過上
 - **offline-critical**: localStorage / IndexedDB はオフラインでも機能。15秒 push は失敗時 outbox 保持で next-online 再送（既存）。
 - **auth-required / account scope**: 全永続キーは `ownerId` scope（localStorage namespace + IndexedDB getAllByOwner + RLS）。
 - **stateful**: 復元は冪等（clientLocalId 由来 id、再 put 上書き）。
-- **エッジ — アカウント切替/リンク**（depends_on C20260609-002）:
-  - 別アカウントへ切替: 新 ownerId の localStorage キーを参照（旧 owner の snapshot は無視）。
-  - guest → Clerk リンク: 進行中セッションは元の ownerId（guest）で IndexedDB に残り outbox 同期。リンク後の新 ownerId では旧 guest のハートビートを復元しない（owner 不一致で破棄）。**推奨**: 計時中のリンクは稀なため、進行中セッションは guest owner のまま完了させる（cross-owner 移送はしない）。論点 [論点-001] 参照。
+- **エッジ — アカウント切替/リンク**（depends_on C20260609-002、[論点-001] 解決済）:
+  - **計時中のログイン画面遷移は UC-EX-LOGIN-END でセッション終了**されるため、owner 変更時点で進行中セッションは存在しない（移送問題が原理的に発生しない）。
+  - 別アカウントへ切替後: 新 ownerId の localStorage キーを参照（旧 owner の snapshot は owner 不一致で無視）。
+  - 万一 owner 不一致の進行中レコードが残った場合も、復元は owner scope（getAllByOwner / localStorage namespace）で他 owner のデータを拾わない（多重防御）。
 - **background throttling**: ブラウザは非アクティブタブの `setInterval` を最低 1/分に抑制し、端末スリープ中は凍結する。よって「毎秒」は前景時の保証で、放置中はハートビートが止まる→ `gap` が増える→ R2 が捕捉する設計（整合的）。
 
 ---
@@ -180,13 +187,12 @@ export const MAX_ACTIVITY_SEC = 4 * 60 * 60; // 14400 = 4H。1活動の経過上
 
 ## 9. 未決事項
 
-### [論点-001] 計時中のアカウントリンク（guest→Clerk）時の進行中セッション
-- **影響範囲**: §7.5 エッジ、_shared/auth 連携
-- **詰めるべき問い**: 計時中に guest→Clerk リンクが起きた場合、進行中セッションを新 ownerId へ移送するか、guest owner のまま完了させるか
-- **候補案**: (A) 移送しない（guest owner で完了、推奨） / (B) リンク時に進行中セッションの ownerId を付け替えて移送
-- **推奨**: (A)。計時中リンクは稀で、移送は IndexedDB/backend 双方の owner 付替 + clientLocalId 衝突回避が必要で複雑。cross-owner 汚染リスクも避けられる。実装後に実害が出れば (B) を別 revise で検討。
-- **判断期限**: 実装（/flow:tdd）着手前。未回答なら推奨(A)で進行。
-- **担当**: seiji
+> 現時点で未決の論点なし (2026-06-11)。[論点-001] は下記のとおり解決済み。
+
+### [論点-001]（解決済 2026-06-11）計時中のアカウントリンク（guest→Clerk）時の進行中セッション
+- **決定**: **(A) 移送しない** + **計時中のログイン画面（`/account`）遷移でセッションを終了する**（UC-EX-LOGIN-END、§7.1）。サマリ／ふりかえり等への遷移では終了しない（終了はログイン遷移に限定）。
+- **根拠**: ログイン／owner 切替は `/account` 画面で発生する。計時中にそこへ遷移した時点でセッションを done 化すれば、owner 変更を跨ぐ進行中セッションが構造的に発生せず、移送の要否も P89/P90 の owner 競合も原理的に消える。
+- **決定者**: seiji（AI_LOG D20260611-017）
 
 ---
 
