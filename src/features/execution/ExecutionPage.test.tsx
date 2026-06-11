@@ -197,3 +197,91 @@ describe("ExecutionPage 計時中表示 (fix C20260610-001)", () => {
     expect(screen.getByTestId("elapsed").textContent).toBe("00:30");
   });
 });
+
+describe("ExecutionPage 永続化・復帰 (R20260611-001)", () => {
+  const T = (h: number, m = 0) =>
+    `2026-06-08T${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:00.000Z`;
+
+  function renderPage(repo: ExecutionRepo, now: () => string) {
+    render(
+      <ExecutionPage
+        repo={repo}
+        setId="set_1"
+        setName="平日の朝"
+        items={items}
+        sessionLocalId="sess-set_1-2026-06-08"
+        ownerId="owner_1"
+        now={now}
+      />,
+    );
+  }
+
+  it("E-RESUME: 進行中セッションをマウント時に復元（開始ボタンに戻らない）", async () => {
+    const store = await LocalStore.open();
+    const seed = new ExecutionRepo(store, asOwnerId("owner_1"));
+    const { startSession } = await import("./model/executionMachine.js");
+    await seed.persist(
+      "sess-set_1-2026-06-08",
+      startSession("set_1", ["i1", "i2"], T(9)),
+      {
+        lastSavedAt: T(9, 30),
+      },
+    );
+
+    const repo = new ExecutionRepo(
+      await LocalStore.open(),
+      asOwnerId("owner_1"),
+    );
+    renderPage(repo, () => T(10)); // gap 30 分 < 4H → resume
+    await waitFor(() =>
+      expect(screen.getByTestId("current-item").textContent).toBe("ストレッチ"),
+    );
+    expect(screen.queryByRole("button", { name: "開始" })).toBeNull();
+  });
+
+  it("E-IDLE: 4H 超放置はマウント時に自動終了（lastSavedAt で done）", async () => {
+    const store = await LocalStore.open();
+    const seed = new ExecutionRepo(store, asOwnerId("owner_1"));
+    const { startSession } = await import("./model/executionMachine.js");
+    await seed.persist(
+      "sess-set_1-2026-06-08",
+      startSession("set_1", ["i1"], T(9)),
+      {
+        lastSavedAt: T(9, 30),
+      },
+    );
+
+    const repo = new ExecutionRepo(
+      await LocalStore.open(),
+      asOwnerId("owner_1"),
+    );
+    renderPage(repo, () => T(14)); // gap = 14:00 - 9:30 = 4.5H >= 4H → autoEnd
+    await waitFor(() => expect(screen.getByRole("status")).toBeTruthy());
+    expect(screen.queryByTestId("elapsed")).toBeNull(); // ライブタイマー非表示
+  });
+
+  it("E-IDLE: 達成は有効経過>0 のみ（lastSavedAt で確定、30 分は達成）", async () => {
+    const store = await LocalStore.open();
+    const seed = new ExecutionRepo(store, asOwnerId("owner_1"));
+    const { startSession } = await import("./model/executionMachine.js");
+    await seed.persist(
+      "sess-set_1-2026-06-08",
+      startSession("set_1", ["i1"], T(9)),
+      {
+        lastSavedAt: T(9, 30),
+      },
+    );
+    const repo = new ExecutionRepo(
+      await LocalStore.open(),
+      asOwnerId("owner_1"),
+    );
+    renderPage(repo, () => T(14));
+    await waitFor(() => expect(screen.getByRole("status")).toBeTruthy());
+    const check = await LocalStore.open();
+    await waitFor(async () =>
+      expect(
+        await check.get("daily_achievement", "owner_1:set_1:2026-06-08"),
+      ).toMatchObject({ achieved: true }),
+    );
+  });
+});

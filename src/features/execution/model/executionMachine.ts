@@ -1,6 +1,6 @@
-import { elapsedSec, diffSec } from './elapsed.js';
+import { cappedElapsedSec, diffSec } from "./elapsed.js";
 
-export type ExecStatus = 'running' | 'paused' | 'done';
+export type ExecStatus = "running" | "paused" | "done";
 
 export interface ItemExec {
   itemId: string;
@@ -28,7 +28,7 @@ const newRec = (itemId: string, now: string): ItemExec => ({
   endedAt: null,
   elapsedSec: 0,
   pausedTotalSec: 0,
-  note: '',
+  note: "",
 });
 
 const current = (s: ExecState): ItemExec => s.records[s.records.length - 1]!;
@@ -38,11 +38,15 @@ const withCurrent = (s: ExecState, rec: ItemExec): ExecState => ({
 });
 
 /** 実行開始（先頭アイテムの記録を開始、status=running）。 */
-export function startSession(setId: string, itemIds: string[], now: string): ExecState {
-  if (itemIds.length === 0) throw new Error('アイテムがありません');
+export function startSession(
+  setId: string,
+  itemIds: string[],
+  now: string,
+): ExecState {
+  if (itemIds.length === 0) throw new Error("アイテムがありません");
   return {
     setId,
-    status: 'running',
+    status: "running",
     itemIds,
     index: 0,
     startedAt: now,
@@ -59,24 +63,27 @@ export function endCurrentItem(s: ExecState, now: string): ExecState {
   return withCurrent(s, {
     ...rec,
     endedAt: now,
-    elapsedSec: elapsedSec(rec.startedAt, now, rec.pausedTotalSec),
+    elapsedSec: cappedElapsedSec(rec.startedAt, now, rec.pausedTotalSec),
   });
 }
 
 /** 一時停止（pause 開始時刻を保持）。 */
 export function pause(s: ExecState, now: string): ExecState {
-  if (s.status !== 'running') return s;
-  return { ...s, status: 'paused', pauseStartedAt: now };
+  if (s.status !== "running") return s;
+  return { ...s, status: "paused", pauseStartedAt: now };
 }
 
 /** 同じ活動を再開（pause 分を pausedTotalSec に加算）。 */
 export function resumeSame(s: ExecState, now: string): ExecState {
-  if (s.status !== 'paused') return s;
+  if (s.status !== "paused") return s;
   const pausedFor = s.pauseStartedAt ? diffSec(s.pauseStartedAt, now) : 0;
   const rec = current(s);
   return {
-    ...withCurrent(s, { ...rec, pausedTotalSec: rec.pausedTotalSec + pausedFor }),
-    status: 'running',
+    ...withCurrent(s, {
+      ...rec,
+      pausedTotalSec: rec.pausedTotalSec + pausedFor,
+    }),
+    status: "running",
     pauseStartedAt: null,
   };
 }
@@ -90,7 +97,7 @@ export function nextItem(s: ExecState, now: string): ExecState {
   }
   return {
     ...ended,
-    status: 'running',
+    status: "running",
     index: idx,
     pauseStartedAt: null,
     records: [...ended.records, newRec(ended.itemIds[idx]!, now)],
@@ -100,7 +107,7 @@ export function nextItem(s: ExecState, now: string): ExecState {
 /** セット終了（現アイテム未終了なら終了、status=done）。 */
 export function endSession(s: ExecState, now: string): ExecState {
   const ended = endCurrentItem(s, now);
-  return { ...ended, status: 'done', endedAt: now, pauseStartedAt: null };
+  return { ...ended, status: "done", endedAt: now, pauseStartedAt: null };
 }
 
 /** 今日メモを現アイテムに設定。 */

@@ -1,8 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ExecutionRepo } from "./model/executionRepo.js";
 import { useExecution } from "./hooks/useExecution.js";
-import { elapsedSec } from "./model/elapsed.js";
-import type { ItemExec, ExecStatus } from "./model/executionMachine.js";
+import { cappedElapsedSec } from "./model/elapsed.js";
+import { saveHeartbeat, clearHeartbeat } from "./model/heartbeat.js";
+import type {
+  ItemExec,
+  ExecStatus,
+  ExecState,
+} from "./model/executionMachine.js";
+
+/** バックエンド永続（outbox flush）の周期。毎秒 localStorage に対し 15 秒（R20260611-001）。 */
+const BACKEND_FLUSH_EVERY_SEC = 15;
 
 export interface ExecItem {
   id: string;
@@ -15,6 +23,8 @@ export interface ExecutionPageProps {
   setName: string;
   items: ExecItem[];
   sessionLocalId: string;
+  /** 現在の owner id。localStorage ハートビートを account-scoped に保存するために使う。 */
+  ownerId?: string;
   now?: () => string;
 }
 
@@ -38,6 +48,7 @@ export function ExecutionPage({
   setName,
   items,
   sessionLocalId,
+  ownerId,
   now,
 }: ExecutionPageProps) {
   const exec = useExecution(repo, sessionLocalId, { now });
@@ -48,13 +59,41 @@ export function ExecutionPage({
   // 計時中（running / paused）は 1 秒ごとに再描画して現在時刻をライブ更新する。
   // 経過時間は paused 中 liveElapsed が pause 時点で凍結するため進まない（現在時刻だけ進む）。
   // 記録はタイムスタンプ差分方式のまま（このタイマーは表示専用、記録には影響しない）。
+  // 併せて: 毎秒 localStorage ハートビート保存 + 15 秒ごと backend flush（R20260611-001）。
   const [, setTick] = useState(0);
   const isTiming = s?.status === "running" || s?.status === "paused";
+  // interval から最新の state / id を読むための ref（stale closure 回避）。
+  const stateRef = useRef<ExecState | null>(s);
+  stateRef.current = s;
+  const tickRef = useRef(0);
   useEffect(() => {
     if (!isTiming) return;
-    const id = setInterval(() => setTick((t) => t + 1), 1000);
+    const id = setInterval(() => {
+      setTick((t) => t + 1);
+      tickRef.current += 1;
+      const cur = stateRef.current;
+      if (!cur) return;
+      const at = nowIso();
+      // 毎秒: localStorage ハートビート（account-scoped）。
+      if (ownerId) {
+        saveHeartbeat(ownerId, {
+          sessionLocalId: exec.activeId.current,
+          lastSavedAt: at,
+          snapshot: cur,
+        });
+      }
+      // 15 秒ごと: backend へ lastSavedAt 付きで再永続（outbox 投入、push は sync driver 依存）。
+      if (tickRef.current % BACKEND_FLUSH_EVERY_SEC === 0) {
+        void repo.persist(exec.activeId.current, cur, { lastSavedAt: at });
+      }
+    }, 1000);
     return () => clearInterval(id);
-  }, [isTiming]);
+  }, [isTiming, ownerId, repo, exec.activeId, nowIso]);
+
+  // セッション done でハートビートを消す（放置判定に古いセッションを残さない）。
+  useEffect(() => {
+    if (s?.status === "done" && ownerId) clearHeartbeat(ownerId);
+  }, [s?.status, ownerId]);
 
   if (!s) {
     return (
@@ -85,12 +124,12 @@ export function ExecutionPage({
   const liveElapsed = (rec: ItemExec, status: ExecStatus): number => {
     if (rec.endedAt) return rec.elapsedSec;
     if (status === "paused")
-      return elapsedSec(
+      return cappedElapsedSec(
         rec.startedAt,
         s.pauseStartedAt ?? nowIso(),
         rec.pausedTotalSec,
       );
-    return elapsedSec(rec.startedAt, nowIso(), rec.pausedTotalSec);
+    return cappedElapsedSec(rec.startedAt, nowIso(), rec.pausedTotalSec);
   };
 
   return (

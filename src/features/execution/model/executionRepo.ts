@@ -1,10 +1,42 @@
-import { LocalStore, type LocalRecord } from '../../../services/sync/localStore.js';
-import type { OwnerId } from '../../../types/domain.js';
-import { doneItemCount, type ExecState } from './executionMachine.js';
+import {
+  LocalStore,
+  type LocalRecord,
+} from "../../../services/sync/localStore.js";
+import type { OwnerId } from "../../../types/domain.js";
+import {
+  doneItemCount,
+  endSession,
+  type ExecState,
+  type ExecStatus,
+  type ItemExec,
+} from "./executionMachine.js";
 
 /** YYYY-MM-DD（ユーザーローカル日付）。 */
 export function localDate(iso: string): string {
   return iso.slice(0, 10);
+}
+
+/** persist のオプション。lastSavedAt（ハートビート）+ 達成記録モード。 */
+export interface PersistOpts {
+  /** 進行中セッションの最終生存時刻（backend last_saved_at へ伝播）。 */
+  lastSavedAt?: string | null;
+  /**
+   * 'auto'（既定）= doneItemCount（既存挙動）。
+   * 'strict' = 有効経過>0 の item のみ達成算入（自動終了経路、spec-review R3）。
+   */
+  achievementMode?: "auto" | "strict";
+}
+
+/** 有効経過>0 の item 数（strict 達成判定、0 秒放置を継続に算入しない）。 */
+function strictDoneCount(state: ExecState): number {
+  return state.records.filter((r) => r.elapsedSec > 0).length;
+}
+
+/** 復元結果。id は found レコードの clientLocalId を採用（spec-review R6、日跨ぎ重複防止）。 */
+export interface RestoreResult {
+  id: string;
+  state: ExecState;
+  lastSavedAt: string | null;
 }
 
 /**
@@ -22,8 +54,17 @@ export class ExecutionRepo {
     this.now = deps.now ?? (() => new Date().toISOString());
   }
 
-  /** ExecState を session + records としてローカル保存。 */
-  async persist(sessionLocalId: string, state: ExecState): Promise<void> {
+  /**
+   * ExecState を session + records としてローカル保存。
+   * session レコードは itemIds/index/pauseStartedAt も保持し、ExecState を損失なく復元可能にする
+   * （IndexedDB=構造正本、spec-review R4）。これらは backend スキーマに列がないため Drizzle upsert で
+   * 無視される（既存 deletedAt と同様、backend 互換）。lastSavedAt のみ last_saved_at 列へ伝播。
+   */
+  async persist(
+    sessionLocalId: string,
+    state: ExecState,
+    opts: PersistOpts = {},
+  ): Promise<void> {
     const t = this.now();
     const session: LocalRecord = {
       id: sessionLocalId,
@@ -33,10 +74,14 @@ export class ExecutionRepo {
       startedAt: state.startedAt,
       endedAt: state.endedAt,
       status: state.status,
+      itemIds: state.itemIds,
+      index: state.index,
+      pauseStartedAt: state.pauseStartedAt,
+      lastSavedAt: opts.lastSavedAt ?? null,
       updatedAt: t,
       deletedAt: null,
     };
-    await this.store.put('execution_session', session);
+    await this.store.put("execution_session", session);
 
     for (const rec of state.records) {
       const id = `${sessionLocalId}:${rec.itemId}`;
@@ -54,17 +99,29 @@ export class ExecutionRepo {
         updatedAt: t,
         deletedAt: null,
       };
-      await this.store.put('execution_record', record);
+      await this.store.put("execution_record", record);
     }
 
-    // 達成日記録（穴あき許容: 1 アイテム以上実行で achieved=true）
-    const count = doneItemCount(state);
+    // 達成日記録（穴あき許容: 1 アイテム以上実行で achieved=true）。
+    // strict モード（自動終了経路）は有効経過>0 のみ算入し、0 秒放置を継続に入れない（R3）。
+    const count =
+      opts.achievementMode === "strict"
+        ? strictDoneCount(state)
+        : doneItemCount(state);
     if (count >= 1) {
-      await this.recordAchievement(state.setId, localDate(state.startedAt), count);
+      await this.recordAchievement(
+        state.setId,
+        localDate(state.startedAt),
+        count,
+      );
     }
   }
 
-  async recordAchievement(setId: string, date: string, itemDoneCount: number): Promise<void> {
+  async recordAchievement(
+    setId: string,
+    date: string,
+    itemDoneCount: number,
+  ): Promise<void> {
     const id = `${this.ownerId}:${setId}:${date}`;
     const record: LocalRecord = {
       id,
@@ -77,12 +134,70 @@ export class ExecutionRepo {
       updatedAt: this.now(),
       deletedAt: null,
     };
-    await this.store.put('daily_achievement', record);
+    await this.store.put("daily_achievement", record);
   }
 
   /** 進行中（status != done）の session を復元する（アプリ再起動時、SPEC E3）。 */
   async findInProgress(): Promise<LocalRecord | undefined> {
-    const sessions = await this.store.getAllByOwner('execution_session', this.ownerId);
-    return sessions.find((s) => s.status !== 'done');
+    const sessions = await this.store.getAllByOwner(
+      "execution_session",
+      this.ownerId,
+    );
+    return sessions.find((s) => s.status !== "done");
+  }
+
+  /**
+   * 進行中セッションを ExecState として損失なく復元する（UC-EX-RESUME、R6/R4）。
+   * id は found レコードの clientLocalId を採用（日付スタンプ id の再計算による重複生成を防ぐ）。
+   */
+  async restoreInProgress(): Promise<RestoreResult | undefined> {
+    const session = await this.findInProgress();
+    if (!session) return undefined;
+    const id = String(session.clientLocalId ?? session.id);
+    const allRecs = await this.store.getAllByOwner(
+      "execution_record",
+      this.ownerId,
+    );
+    const records: ItemExec[] = allRecs
+      .filter((r) => r.sessionId === id)
+      .sort((a, b) => String(a.startedAt).localeCompare(String(b.startedAt)))
+      .map((r) => ({
+        itemId: String(r.itemId),
+        startedAt: String(r.startedAt),
+        endedAt: (r.endedAt as string | null) ?? null,
+        elapsedSec: Number(r.elapsedSec ?? 0),
+        pausedTotalSec: Number(r.pausedTotalSec ?? 0),
+        note: String(r.note ?? ""),
+      }));
+    const state: ExecState = {
+      setId: String(session.setId),
+      status: session.status as ExecStatus,
+      itemIds: (session.itemIds as string[]) ?? records.map((r) => r.itemId),
+      index: Number(session.index ?? Math.max(0, records.length - 1)),
+      startedAt: String(session.startedAt),
+      endedAt: (session.endedAt as string | null) ?? null,
+      records,
+      pauseStartedAt: (session.pauseStartedAt as string | null) ?? null,
+    };
+    const lastSavedAt =
+      (session.lastSavedAt as string | null) ??
+      (session.updatedAt as string | null) ??
+      null;
+    return { id, state, lastSavedAt };
+  }
+
+  /**
+   * 進行中セッションがあれば now で終了する（UC-EX-LOGIN-END、R8）。
+   * ログイン画面遷移時に呼ぶ。達成は strict（有効経過>0 のみ）。進行中がなければ no-op。
+   */
+  async endInProgressNow(now: string): Promise<ExecState | undefined> {
+    const found = await this.restoreInProgress();
+    if (!found) return undefined;
+    const ended = endSession(found.state, now);
+    await this.persist(found.id, ended, {
+      lastSavedAt: now,
+      achievementMode: "strict",
+    });
+    return ended;
   }
 }

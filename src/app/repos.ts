@@ -1,14 +1,16 @@
-import { useEffect, useMemo, useState } from 'react';
-import { LocalStore } from '../services/sync/localStore.js';
-import { SetsRepo } from '../features/activity-sets/model/setsRepo.js';
-import { ExecutionRepo } from '../features/execution/model/executionRepo.js';
-import { SummaryRepo } from '../features/streak-summary/model/summaryRepo.js';
-import { useOwner } from '../hooks/useOwner.js';
+import { useEffect, useMemo, useState } from "react";
+import { LocalStore } from "../services/sync/localStore.js";
+import { SetsRepo } from "../features/activity-sets/model/setsRepo.js";
+import { ExecutionRepo } from "../features/execution/model/executionRepo.js";
+import { SummaryRepo } from "../features/streak-summary/model/summaryRepo.js";
+import { useOwner } from "../hooks/useOwner.js";
 
 export interface Repos {
   sets: SetsRepo;
   execution: ExecutionRepo;
   summary: SummaryRepo;
+  /** 現在の owner id（account-scoped なローカル永続キーに使う）。 */
+  ownerId: string;
 }
 
 /** LocalStore を開き、owner 確立後に各 repo を提供する（匿名でも owner あり）。 */
@@ -32,6 +34,7 @@ export function useRepos(): Repos | null {
       sets: new SetsRepo(store, ownerId),
       execution: new ExecutionRepo(store, ownerId),
       summary: new SummaryRepo(store, ownerId),
+      ownerId,
     };
   }, [store, ownerId]);
 }

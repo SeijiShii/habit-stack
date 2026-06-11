@@ -13,5 +13,26 @@ export function elapsedSec(
 
 /** 2 つの ISO 時刻の差（秒、負値は 0）。pause 時間の算出に使う。 */
 export function diffSec(from: string, to: string): number {
-  return Math.max(0, Math.floor((new Date(to).getTime() - new Date(from).getTime()) / 1000));
+  return Math.max(
+    0,
+    Math.floor((new Date(to).getTime() - new Date(from).getTime()) / 1000),
+  );
+}
+
+/** 1 活動の最大計時時間（秒）。4H。「口が開いたまま」放置の暴走を防ぐ上限（R20260611-001 R1）。 */
+export const MAX_ACTIVITY_SEC = 4 * 60 * 60;
+
+/**
+ * 経過秒を 1 活動 4H で上限クランプした値。表示（liveElapsed）と確定保存値（endCurrentItem）の双方で使う。
+ * 計算値・保存値の二重で 4H 上限を保証する（spec-review R7）。
+ */
+export function cappedElapsedSec(
+  startedAt: string,
+  endedAt: string,
+  pausedTotalSec: number,
+): number {
+  return Math.min(
+    elapsedSec(startedAt, endedAt, pausedTotalSec),
+    MAX_ACTIVITY_SEC,
+  );
 }

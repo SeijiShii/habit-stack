@@ -1,6 +1,14 @@
-import type { ReactElement } from "react";
+import { useEffect, type ReactElement } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Routes, Route, useNavigate, useParams, Link } from "react-router-dom";
+import {
+  Routes,
+  Route,
+  useNavigate,
+  useParams,
+  useLocation,
+  Link,
+} from "react-router-dom";
+import { isLoginPath } from "./features/execution/model/recovery.js";
 import type { SetRecord } from "./features/activity-sets/model/setsRepo.js";
 import { AppLayout } from "./components/AppLayout.js";
 import { HomePage } from "./pages/HomePage.js";
@@ -116,6 +124,7 @@ function RunInner({
         setName={setName}
         items={list}
         sessionLocalId={sessionLocalId}
+        ownerId={repos.ownerId}
       />
       <nav aria-label="実行後">
         <Link to={`/summary/${setId}`}>継続を見る</Link>
@@ -135,12 +144,28 @@ function SummaryRoute({ repos }: { repos: Repos }) {
   );
 }
 
+/**
+ * 計時中にログイン/アカウント画面（/account）へ遷移したら進行中セッションを終了する
+ * （UC-EX-LOGIN-END、R20260611-001 論点-001）。ふりかえり/サマリ等への遷移では終了しない。
+ * owner 切替はこの画面で起きるため、ログイン前に done 化して owner を跨ぐ進行中セッションを無くす。
+ */
+function LoginEndGuard({ repos }: { repos: Repos }) {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    if (isLoginPath(pathname)) {
+      void repos.execution.endInProgressNow(new Date().toISOString());
+    }
+  }, [pathname, repos]);
+  return null;
+}
+
 export function App() {
   const repos = useRepos();
   const gate = (el: (r: Repos) => ReactElement) =>
     repos ? el(repos) : <Loading />;
   return (
     <AppLayout>
+      {repos && <LoginEndGuard repos={repos} />}
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route
