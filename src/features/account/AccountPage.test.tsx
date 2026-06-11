@@ -49,12 +49,48 @@ describe("AccountPage", () => {
 
   it("keyless（linkGoogle 無し）: 連携ボタンを出さずローカル利用の旨を表示", () => {
     wrap(base, <AccountPage />);
-    expect(screen.queryByRole("button", { name: "Google で引き継ぐ" })).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: "Google で引き継ぐ" }),
+    ).toBeNull();
     expect(screen.getByText(/ゲストとして利用中/)).toBeTruthy();
   });
 
   it("未ロード時は読み込み中を表示", () => {
     wrap({ ...base, isLoaded: false }, <AccountPage />);
     expect(screen.getByText("読み込み中…")).toBeTruthy();
+  });
+
+  it("U-DEL-04: 削除→確認「削除する」で onDeleteAllData + onDeleted を呼ぶ", async () => {
+    const onDeleteAllData = vi.fn(async () => {});
+    const onDeleted = vi.fn();
+    wrap(
+      base,
+      <AccountPage onDeleteAllData={onDeleteAllData} onDeleted={onDeleted} />,
+    );
+
+    // 一段階目: 削除を開始（即削除しない）
+    fireEvent.click(screen.getByRole("button", { name: "全データを削除" }));
+    expect(onDeleteAllData).not.toHaveBeenCalled();
+    // 確認 UI が出る
+    expect(screen.getByRole("alert")).toBeTruthy();
+    // 二段階目: 確定
+    fireEvent.click(screen.getByRole("button", { name: "削除する" }));
+    await waitFor(() => expect(onDeleteAllData).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(onDeleted).toHaveBeenCalledTimes(1));
+  });
+
+  it("U-DEL-05: 削除→「キャンセル」で onDeleteAllData を呼ばない", () => {
+    const onDeleteAllData = vi.fn(async () => {});
+    wrap(base, <AccountPage onDeleteAllData={onDeleteAllData} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "全データを削除" }));
+    fireEvent.click(screen.getByRole("button", { name: "キャンセル" }));
+    expect(onDeleteAllData).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "全データを削除" })).toBeTruthy();
+  });
+
+  it("削除導線は onDeleteAllData 未注入時は表示しない", () => {
+    wrap(base, <AccountPage />);
+    expect(screen.queryByRole("button", { name: "全データを削除" })).toBeNull();
   });
 });

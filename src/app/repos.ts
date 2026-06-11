@@ -11,6 +11,8 @@ export interface Repos {
   summary: SummaryRepo;
   /** 現在の owner id（account-scoped なローカル永続キーに使う）。 */
   ownerId: string;
+  /** LocalStore 本体（O54 セルフサービス削除の wipeOwner 等に使う）。 */
+  store: LocalStore;
 }
 
 /** LocalStore を開き、owner 確立後に各 repo を提供する（匿名でも owner あり）。 */
@@ -35,6 +37,7 @@ export function useRepos(): Repos | null {
       execution: new ExecutionRepo(store, ownerId),
       summary: new SummaryRepo(store, ownerId),
       ownerId,
+      store,
     };
   }, [store, ownerId]);
 }
