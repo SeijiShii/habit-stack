@@ -3,7 +3,7 @@
 - **実行日時**: 2026-06-12（JST）
 - **コマンド**: /flow:auto（引数なし = continuous）
 - **対象**: habit-stack 全体
-- **状態**: 進行中
+- **状態**: 完了（反復3、release 完了 + ルート不整合バグ修正、残は B-4 実課金確認のみ → P5 human gate で停止）
 - **含まれる decision 範囲**: D20260612-001〜
 
 ## Decision 一覧
@@ -89,3 +89,22 @@
     §1.0c ケース ii で 1問確認 → ユーザーは本番 prod 直行を選択（176 unit+8 E2E green +
     release-pre 監査クリア + owner-scoped 削除で十分カバー、法令ギャップ修正を最速反映）。
     Phase 2 ローカル確認は §3.4 post-deploy スモークに統合。
+
+```yaml
+- id: D20260612-013
+  timestamp: 2026-06-12T09:08:00+09:00
+  command: /flow:auto
+  phase: Step 3 反復3 優先度 auto-pick（release 完了後）
+  question: release 完了後の次アクション
+  options: [P4.8 promote（生成済）, P5 完了評価, idle audit/secure]
+  recommended: P5 完了評価
+  chosen: P5 完了評価へ
+  chosen_type: auto-recommended
+  depends_on: [D20260612-012]
+  context: |
+    release 完了（未デプロイ改修2件を本番反映、ルート不整合バグ C20260612 を検出・修正・再デプロイ、
+    smoke 5/5 green）。P4.8 promote = 告知文ドラフト生成済（docs/marketing/、投稿は手動 Class C）。
+    wording 校正済。design 視覚レビュー green。audit/secure release-pre クリア（fresh）。
+    残作業 = 実機 B-4（100円 live tip 実課金確認）= Class C 本人確認のみ。
+    → §4.5.1#0 no-key/Class-A 変種を確認: 新規 no-key 作業なし（全 target 実装+E2E green、
+    audit/secure fresh、デプロイ済、bug 修正済）。残は B-4 実課金 = Class C → P5 完了評価へ。
