@@ -51,3 +51,41 @@
     SECURITY_REVIEW_20260608 以降に新 endpoint DELETE /api/account（R20260611-002）が追加 =
     secure 鮮度トリガ「api/ に新 endpoint・新外部入力」該当。lockfile 変更なし（新規 deps なし）。
     secure = Class A auto-execute。通過後 P4.7 /flow:release（未デプロイ改修2件の再デプロイ）へ。
+
+```yaml
+- id: D20260612-007
+  timestamp: 2026-06-12T08:40:00+09:00
+  command: /flow:auto
+  phase: Step 3 反復2 優先度 auto-pick
+  question: secure 完了後の次アクション
+  options: [P4.7 Release gate /flow:release, P5 完了, idle audit]
+  recommended: P4.7 Release gate → /flow:release（未デプロイ改修2件の再デプロイ）
+  chosen: /flow:release
+  chosen_type: auto-recommended
+  depends_on: [D20260612-006]
+  context: |
+    release-pre 必須監査クリア（audit full AUDIT_20260611_2025 C0/H0 + secure D20260612_002 C0/H0、
+    以降の commit は監査/secure ドキュメント自身のみ = コード差分なし）。
+    P1 SEC open なし / P2 中断なし / P3.7・P4.2・P4.4・P4.45・P4.46・P4.5 全通過。
+    未デプロイ改修 2 件（R20260611-001 計時永続化 + R20260611-002 セルフ削除 = 本番の法令ギャップ修正）
+    が HEAD にあり、本番 https://habit-stack.givers.work は旧コード → P4.7 発火。
+    実キーは live 済（FILL 不要見込み）。デプロイ実行の瞬間のみ Class B 1-decision pause。
+
+```yaml
+- id: D20260612-008
+  timestamp: 2026-06-12T08:50:00+09:00
+  command: /flow:release
+  phase: §1.0 live 判定 + §1.0c deploy target
+  question: deploy target（preview 先行 vs 本番 prod 直行）
+  options: [preview 先行, 本番 prod 直行]
+  recommended: preview 先行（新サーバ endpoint + 破壊的削除のため）
+  chosen: 本番 prod 直行（ユーザー明示選択）
+  chosen_type: explicit-choice
+  depends_on: [D20260612-007]
+  context: |
+    ① .env.production.local 実 read: CLERK_SECRET_KEY=sk_live_ / STRIPE_SECRET_KEY=sk_live_ /
+    DATABASE_URL=postgres → live 化済、test→live swap skip。
+    未デプロイ改修 2 件（R20260611-001 計時永続化 + R20260611-002 セルフ削除 DELETE /api/account）。
+    §1.0c ケース ii で 1問確認 → ユーザーは本番 prod 直行を選択（176 unit+8 E2E green +
+    release-pre 監査クリア + owner-scoped 削除で十分カバー、法令ギャップ修正を最速反映）。
+    Phase 2 ローカル確認は §3.4 post-deploy スモークに統合。
