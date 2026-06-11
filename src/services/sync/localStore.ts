@@ -127,7 +127,10 @@ export class LocalStore {
     await tx.done;
   }
 
-  /** owner 配下の全ローカルデータを消す（O54 セルフサービス削除のローカル側）。 */
+  /**
+   * owner 配下の全ローカルデータを消す（O54 セルフサービス削除のローカル側）。
+   * entity ストアに加え、当該 owner の未送信 outbox も消す（削除後に再 push で復活させない）。
+   */
   async wipeOwner(ownerId: string): Promise<void> {
     for (const entity of ENTITY_STORES) {
       const recs = (await this.db.getAllFromIndex(
@@ -137,6 +140,20 @@ export class LocalStore {
       )) as LocalRecord[];
       const tx = this.db.transaction(entity, "readwrite");
       await Promise.all(recs.map((r) => tx.store.delete(r.id)));
+      await tx.done;
+    }
+    // owner の未送信 outbox を除去（payload.ownerId で判定）。
+    const items = (await this.db.getAll(OUTBOX)) as (OutboxItem & {
+      seq: number;
+    })[];
+    const ownSeqs = items
+      .filter(
+        (it) => (it.payload as LocalRecord | undefined)?.ownerId === ownerId,
+      )
+      .map((it) => it.seq);
+    if (ownSeqs.length > 0) {
+      const tx = this.db.transaction(OUTBOX, "readwrite");
+      await Promise.all(ownSeqs.map((s) => tx.store.delete(s)));
       await tx.done;
     }
   }
