@@ -2,7 +2,7 @@
 
 **issue / slug**: R20260613-001 / reflect-overview-streak-fix
 **実施日**: 2026-06-13
-**状態**: 実装完了 (2026-06-13)
+**状態**: 実装完了 + E2E green (2026-06-13)
 
 <!-- auto-generated-start -->
 
@@ -16,6 +16,7 @@
 | 005 | 005_REVISE_MIGRATION.md | REVISE_MIGRATION | 2026-06-13 |
 | 101 | 101_REVISE_IMPL_REPORT.md | IMPL_REPORT | 2026-06-13 |
 | 102 | 102_REVISE_UNIT_TEST_REPORT.md | UNIT_TEST_REPORT | 2026-06-13 |
+| 103 | 103_REVISE_E2E_REPORT.md | E2E_REPORT | 2026-06-13 |
 
 ## 関連
 - 親機能 INDEX: `../INDEX.md`

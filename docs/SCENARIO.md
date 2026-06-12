@@ -67,8 +67,8 @@
 ## 5. 現在地カーソル
 
 <!-- AUTO-GENERATED:BEGIN scenario-cursor -->
-- 現在フェーズ: Phase 4 (公開準備) — **未デプロイ改修2件を本番反映済**、残=実機 B-4 (100円 live tip) 確認のみ
-- 進行中ターゲット: なし（release 完了）→ 次 P5 完了評価（残は Class C/B-4 のみ）
+- 現在フェーズ: Phase 5 (公開後運用) — **未デプロイ改修 1 件**: revise R20260613-001 (振り返り総覧+streak ローカル日付是正+達成日 migration、unit 197 + E2E 12/12 green) → 次 = /flow:release で本番反映。残: 実機 B-4 (100円 live tip) 確認
+- 進行中ターゲット: streak-summary revise R20260613-001（実装+E2E 完了、デプロイ待ち）
 - 公開 URL: **https://habit-stack.givers.work**（live、Clerk prod verified / Neon prod / Stripe live）
 - 直近デプロイ (2026-06-12): R20260611-001 計時永続化 + R20260611-002 セルフ削除を本番反映。prod-direct、Build Output API、**8関数**、smoke 5/5 green
 - ⚠️ release 中に本番バグ検出・修正 (C20260612): DELETE /api/account が 405 (ルート不整合 api/account/delete.ts→実ルート/api/account/delete、クライアントは/api/account を呼ぶ) = サーバ自己削除が本番未実行だった → api/account.ts 移設 + メソッドガード + 回帰 U-DEL-10 + smoke 恒久追加で修正 (e33434f)、再デプロイ後 401 で解消
@@ -76,8 +76,8 @@
 - デザイン: design-system 適用済 (00dddf5)・視覚レビュー green・本番反映済
 - audit/secure: AUDIT_20260611_2025 (full, C0/H0/L2) + SECURITY_REVIEW _shared/auth (D20260612_002, C0/H0, O54 充足) = release-pre クリア
 - promote: 告知文ドラフト生成済 (docs/marketing/、投稿は手動) / wording: 校正済 (24527d5) / 残: 実機 B-4 (100円 live tip) 確認のみ
-- 最終更新セッション: D20260612_001_resume_continuous → D20260612_003_release
-- 最終更新時刻: 2026-06-12 09:05
+- 最終更新セッション: D20260613_002_resume_continuous → D20260613_004_e2e
+- 最終更新時刻: 2026-06-13 11:20
 - 完了フェーズ: [Phase 1 概念設計, Phase 1.5 デザイン, Phase 2 機能設計(全11), Phase 2.5 spec-review(全11), Phase 3 実装(全11), Phase 3.5 E2E, release-pre audit/secure, **Phase 4 本番デプロイ(計時永続化+セルフ削除 含む)**]
 - Phase 3 実装: **全11 target + revise R20260610/0611-001/002 実装完了**
   - 累計 177 unit + 8 E2E green、typecheck green、vite build 成功、release-pre audit/secure pass

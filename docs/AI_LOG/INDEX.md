@@ -1,8 +1,8 @@
 # AI_LOG インデックス — habit-stack
 
-**最終更新**: 2026-06-13 (tdd streak-summary revise R20260613-001 — 197 unit green)
-**総セッション数**: 69
-**総 decision 数**: 77
+**最終更新**: 2026-06-13 (e2e streak-summary revise R20260613-001 — 12/12 E2E green)
+**総セッション数**: 70
+**総 decision 数**: 81
 
 > 注: 下の「セッション一覧」表は直近セッションのみ列挙（全 60 件は `ls docs/AI_LOG/D*.md` 参照）。
 > AUDIT_20260611_2000 で表の網羅性を Low 指摘済み、再生成は別 bookkeeping。
@@ -17,6 +17,7 @@
 
 | ファイル | 実行日 | コマンド | 対象 | decision 範囲 | 状態 |
 |---|---|---|---|---|---|
+| [D20260613_004_e2e_streak-summary_revise_R20260613-001.md](./D20260613_004_e2e_streak-summary_revise_R20260613-001.md) | 2026-06-13 | /flow:e2e | streak-summary R20260613-001 (revise) | D20260613-019〜021 | 完了（E2E 12/12 green、新規4） |
 | [D20260613_003_tdd_streak-summary_revise_R20260613-001.md](./D20260613_003_tdd_streak-summary_revise_R20260613-001.md) | 2026-06-13 | /flow:tdd | streak-summary R20260613-001 (revise) | D20260613-014〜017 | 完了（197 green、4 Phase） |
 | [D20260613_002_resume_continuous.md](./D20260613_002_resume_continuous.md) | 2026-06-13 | /flow:auto | continuous（revise 後 dispatch） | D20260613-012〜013 | 進行中 |
 | [D20260613_001_revise_streak-summary_R20260613-001.md](./D20260613_001_revise_streak-summary_R20260613-001.md) | 2026-06-13 | /flow:revise | streak-summary R20260613-001 (振り返り総覧+streak是正) | D20260613-001〜011 | 設計完了→spec-review/tdd |
