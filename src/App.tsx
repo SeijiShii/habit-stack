@@ -21,6 +21,7 @@ import { SetListPage } from "./features/activity-sets/SetListPage.js";
 import { SetEditPage } from "./features/activity-sets/SetEditPage.js";
 import { ExecutionPage } from "./features/execution/ExecutionPage.js";
 import { SummaryPage } from "./features/streak-summary/SummaryPage.js";
+import { SummaryOverviewPage } from "./features/streak-summary/SummaryOverviewPage.js";
 import { AccountPage } from "./features/account/AccountPage.js";
 import { purgeAllData } from "./services/auth/selfDelete.js";
 import { localDateOf } from "./services/time/localDate.js";
@@ -137,6 +138,17 @@ function RunInner({
   );
 }
 
+function SummaryOverviewRoute({ repos }: { repos: Repos }) {
+  const navigate = useNavigate();
+  return (
+    <SummaryOverviewPage
+      setsRepo={repos.sets}
+      summaryRepo={repos.summary}
+      onSelectSet={(id) => navigate(`/summary/${id}`)}
+    />
+  );
+}
+
 function SummaryRoute({ repos }: { repos: Repos }) {
   return (
     <WithSet repos={repos}>
@@ -191,11 +203,9 @@ export function App() {
         />
         <Route
           path="/summary"
-          element={
-            <main>
-              <p>セット一覧から選んでください。</p>
-            </main>
-          }
+          element={gate((r) => (
+            <SummaryOverviewRoute repos={r} />
+          ))}
         />
         <Route
           path="/summary/:setId"
