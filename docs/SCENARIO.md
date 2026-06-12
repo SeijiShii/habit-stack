@@ -73,7 +73,7 @@
 - 直近デプロイ (2026-06-12): R20260611-001 計時永続化 + R20260611-002 セルフ削除を本番反映。prod-direct、Build Output API、**8関数**、smoke 5/5 green
 - ⚠️ release 中に本番バグ検出・修正 (C20260612): DELETE /api/account が 405 (ルート不整合 api/account/delete.ts→実ルート/api/account/delete、クライアントは/api/account を呼ぶ) = サーバ自己削除が本番未実行だった → api/account.ts 移設 + メソッドガード + 回帰 U-DEL-10 + smoke 恒久追加で修正 (e33434f)、再デプロイ後 401 で解消
 - スモーク (2026-06-12): / 200 / health 200 / guest 200 (Clerk prod) / sync 401 / **DELETE /api/account 401** (O54 消去権が本番で履行可能に回復)
-- デザイン: design-system 適用済 (00dddf5)・視覚レビュー green・本番反映済
+- デザイン: design-system 適用済 (00dddf5)・視覚レビュー green（2026-06-13 総覧画面含む再レビュー、details カード化）
 - audit/secure: AUDIT_20260611_2025 (full, C0/H0/L2) + SECURITY_REVIEW _shared/auth (D20260612_002, C0/H0, O54 充足) = release-pre クリア
 - promote: 告知文ドラフト生成済 (docs/marketing/、投稿は手動) / wording: 校正済 (24527d5) / 残: 実機 B-4 (100円 live tip) 確認のみ
 - 最終更新セッション: D20260613_002_resume_continuous → D20260613_004_e2e
