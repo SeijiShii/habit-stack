@@ -1,4 +1,4 @@
-import type { ContinuationRate } from '../../../types/domain.js';
+import type { ContinuationRate } from "../../../types/domain.js";
 
 export interface AchievementDay {
   date: string; // YYYY-MM-DD
@@ -35,15 +35,24 @@ export function enumerateDates(start: string, end: string): string[] {
  * 穴あき許容（1 アイテム以上実行 = 達成、achievements に存在）。
  * 未達は咎めず空ドットで中立表現（[論点-001] / charter §2.2）。
  */
-export function summarize(achievements: AchievementDay[], dates: string[]): Summary {
+export function summarize(
+  achievements: AchievementDay[],
+  dates: string[],
+): Summary {
   const achievedSet = new Set(achievements.map((a) => a.date));
-  const dots: Dot[] = dates.map((date) => ({ date, achieved: achievedSet.has(date) }));
+  const dots: Dot[] = dates.map((date) => ({
+    date,
+    achieved: achievedSet.has(date),
+  }));
   const achievedDays = dots.filter((d) => d.achieved).length;
   const totalDays = dots.length;
 
-  // 直近から連続達成（末尾から遡る）
+  // 直近から連続達成（末尾から遡る）。末尾=今日のみ未達を許容し（今日まだやって
+  // いないだけ）、前日から数える（途切れを咎めない、R20260613-001）。
   let currentStreak = 0;
-  for (let i = dots.length - 1; i >= 0; i--) {
+  let start = dots.length - 1;
+  if (start >= 0 && !dots[start]!.achieved) start--;
+  for (let i = start; i >= 0; i--) {
     if (dots[i]!.achieved) currentStreak++;
     else break;
   }
