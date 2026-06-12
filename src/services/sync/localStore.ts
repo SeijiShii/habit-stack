@@ -110,6 +110,18 @@ export class LocalStore {
     } satisfies Omit<OutboxItem, "seq">);
   }
 
+  /** クライアント内メタ値（migration フラグ等、同期対象外）。 */
+  async getMeta(key: string): Promise<unknown> {
+    const rec = (await this.db.get(META, key)) as
+      | { key: string; value: unknown }
+      | undefined;
+    return rec?.value;
+  }
+
+  async setMeta(key: string, value: unknown): Promise<void> {
+    await this.db.put(META, { key, value });
+  }
+
   /** サーバ由来の変更をローカルへ適用する（outbox には積まない、pull 用）。 */
   async applyRemote(entity: SyncEntity, record: LocalRecord): Promise<void> {
     await this.db.put(entity, record);

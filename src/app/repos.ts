@@ -3,6 +3,7 @@ import { LocalStore } from "../services/sync/localStore.js";
 import { SetsRepo } from "../features/activity-sets/model/setsRepo.js";
 import { ExecutionRepo } from "../features/execution/model/executionRepo.js";
 import { SummaryRepo } from "../features/streak-summary/model/summaryRepo.js";
+import { rebuildAchievements } from "../services/sync/migrations/rebuildAchievements.js";
 import { useOwner } from "../hooks/useOwner.js";
 
 export interface Repos {
@@ -29,6 +30,15 @@ export function useRepos(): Repos | null {
       alive = false;
     };
   }, []);
+
+  // 達成日のローカル日付再構築（R20260613-001、owner ごと 1 回・冪等）。
+  // 集計より先に走らなくても次回表示で正しくなるため非同期 fire-and-forget。
+  useEffect(() => {
+    if (!store || !ownerId) return;
+    void rebuildAchievements(store, ownerId).catch(() => {
+      // 失敗時はフラグ未設定のまま → 次回ロードで再実行（005_REVISE_MIGRATION §5）
+    });
+  }, [store, ownerId]);
 
   return useMemo(() => {
     if (!store || !ownerId) return null;
