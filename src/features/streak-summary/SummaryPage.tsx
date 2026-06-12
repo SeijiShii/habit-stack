@@ -4,6 +4,7 @@ import type { SummaryRepo } from "./model/summaryRepo.js";
 import { summarize, enumerateDates } from "./model/summarize.js";
 import { AchievementDots, RateGauge } from "./components.js";
 import { ShareButton } from "./ShareButton.js";
+import { localDateOf } from "../../services/time/localDate.js";
 
 const SHARE_URL =
   typeof window !== "undefined"
@@ -32,7 +33,7 @@ function rangeFor(today: string, days: number): { start: string; end: string } {
 }
 
 export function SummaryPage({ repo, setId, setName, today }: SummaryPageProps) {
-  const todayStr = today ?? new Date().toISOString().slice(0, 10);
+  const todayStr = today ?? localDateOf(new Date());
   const [days, setDays] = useState<number>(7);
   const { start, end } = useMemo(
     () => rangeFor(todayStr, days),

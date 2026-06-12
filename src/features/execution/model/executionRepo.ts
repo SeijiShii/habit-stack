@@ -2,6 +2,7 @@ import {
   LocalStore,
   type LocalRecord,
 } from "../../../services/sync/localStore.js";
+import { localDateOf } from "../../../services/time/localDate.js";
 import type { OwnerId } from "../../../types/domain.js";
 import {
   doneItemCount,
@@ -11,9 +12,9 @@ import {
   type ItemExec,
 } from "./executionMachine.js";
 
-/** YYYY-MM-DD（ユーザーローカル日付）。 */
+/** YYYY-MM-DD（ユーザーローカル日付。UTC slice ではなく端末 TZ で導出、R20260613-001）。 */
 export function localDate(iso: string): string {
-  return iso.slice(0, 10);
+  return localDateOf(new Date(iso));
 }
 
 /** persist のオプション。lastSavedAt（ハートビート）+ 達成記録モード。 */

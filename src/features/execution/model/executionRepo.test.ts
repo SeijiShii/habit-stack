@@ -67,8 +67,9 @@ describe("ExecutionRepo", () => {
     expect(found?.id).toBe("sess_run");
   });
 
-  it("localDate", () => {
-    expect(localDate("2026-06-08T23:59:00.000Z")).toBe("2026-06-08");
+  it("localDate: 端末ローカル日付を返す（TZ 依存境界は localDate.test.ts で検証）", () => {
+    // 12:00Z は UTC-11〜+11 の全 TZ で同一日付（TZ 非依存ケース）。
+    expect(localDate("2026-06-08T12:00:00.000Z")).toBe("2026-06-08");
   });
 
   it("U-REC-05: restoreInProgress は ExecState を損失なく復元 + found id を採用", async () => {

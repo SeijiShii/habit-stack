@@ -23,6 +23,7 @@ import { ExecutionPage } from "./features/execution/ExecutionPage.js";
 import { SummaryPage } from "./features/streak-summary/SummaryPage.js";
 import { AccountPage } from "./features/account/AccountPage.js";
 import { purgeAllData } from "./services/auth/selfDelete.js";
+import { localDateOf } from "./services/time/localDate.js";
 import { asOwnerId } from "./types/domain.js";
 import { useRepos, type Repos } from "./app/repos.js";
 
@@ -117,7 +118,7 @@ function RunInner({
       </main>
     );
   }
-  const sessionLocalId = `sess-${setId}-${new Date().toISOString().slice(0, 10)}`;
+  const sessionLocalId = `sess-${setId}-${localDateOf(new Date())}`;
   return (
     <>
       <ExecutionPage
