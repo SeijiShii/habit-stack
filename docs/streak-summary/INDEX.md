@@ -1,7 +1,7 @@
 # streak-summary ドキュメントインデックス
 
-**最終更新**: 2026-06-08 16:10
-**生成元**: /flow:concept (初期化)
+**最終更新**: 2026-06-13
+**生成元**: /flow:revise R20260613-001
 
 <!-- auto-generated-start -->
 
@@ -21,7 +21,8 @@
 ## サブフォルダ（改修・バグ修正・クレーム判定履歴）
 | パス | 種別 | issue/slug | 状態 | 概要 | INDEX |
 |---|---|---|---|---|---|
-| (なし。`/flow:revise` / `/flow:fix` / `/flow:claim` で生成) |
+| revise_O31_20260609_share-button/ | revise | O31/share-button | 実装完了 | シェアボタン追加 (O31 公開周知導線) | [INDEX](./revise_O31_20260609_share-button/INDEX.md) |
+| revise_R20260613-001_20260613_reflect-overview-streak-fix/ | revise | R20260613-001/reflect-overview-streak-fix | 設計完了 | 振り返り総覧(ドロップダウン+折りたたみ+合計時間) + streak ローカル日付是正 + 達成日再構築 migration | [INDEX](./revise_R20260613-001_20260613_reflect-overview-streak-fix/INDEX.md) |
 
 ## 関連
 - 親 concept: `../concept.md` §1.3.1 streak-summary 行

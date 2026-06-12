@@ -1,8 +1,8 @@
 # AI_LOG インデックス — habit-stack
 
-**最終更新**: 2026-06-12 (secure _shared/auth — release-pre 後半クリア)
-**総セッション数**: 66
-**総 decision 数**: 60
+**最終更新**: 2026-06-13 (revise streak-summary R20260613-001 — 振り返り総覧 + streak ローカル日付是正)
+**総セッション数**: 67
+**総 decision 数**: 71
 
 > 注: 下の「セッション一覧」表は直近セッションのみ列挙（全 60 件は `ls docs/AI_LOG/D*.md` 参照）。
 > AUDIT_20260611_2000 で表の網羅性を Low 指摘済み、再生成は別 bookkeeping。
@@ -17,6 +17,7 @@
 
 | ファイル | 実行日 | コマンド | 対象 | decision 範囲 | 状態 |
 |---|---|---|---|---|---|
+| [D20260613_001_revise_streak-summary_R20260613-001.md](./D20260613_001_revise_streak-summary_R20260613-001.md) | 2026-06-13 | /flow:revise | streak-summary R20260613-001 (振り返り総覧+streak是正) | D20260613-001〜011 | 設計完了→spec-review/tdd |
 | [D20260612_002_secure__shared_auth.md](./D20260612_002_secure__shared_auth.md) | 2026-06-12 | /flow:secure | _shared/auth（release-pre 後半） | D20260612-003〜006 | 完了（C0/H0/Info1、O54 充足、prod deps 0 脆弱性） |
 | [D20260612_001_resume_continuous.md](./D20260612_001_resume_continuous.md) | 2026-06-12 | /flow:auto | continuous | D20260612-001〜 | 進行中 |
 | [D20260611_010_audit_full.md](./D20260611_010_audit_full.md) | 2026-06-11 | /flow:audit | full（release-pre） | D20260611-044 | 完了（C0/H0/L2、Critical解消確認） |
@@ -44,6 +45,10 @@
 
 | ID | command | phase | chosen (短縮) | type | ファイル |
 |---|---|---|---|---|---|
+| D20260613-010 | /flow:revise | migration 方式 | execution_record から localDateOf 再導出→upsert+余剰tombstone（冪等） | auto-recommended | D20260613_001_revise_streak-summary_R20260613-001.md |
+| D20260613-009 | /flow:revise | 総覧ページ設計 | /summary=ドロップダウン遷移+details折りたたみ+全期間累計時間 | auto-recommended | D20260613_001_revise_streak-summary_R20260613-001.md |
+| D20260613-004 | /flow:revise | 根本原因 | streak不正確=localDateのUTC slice（コメントと実装乖離）+today-pending欠落 | auto-recommended | D20260613_001_revise_streak-summary_R20260613-001.md |
+| D20260613-001 | /flow:revise | 改修要望 | 3要望（行き止まり/streak/総覧）を1 reviseに束ねる | explicit-choice | D20260613_001_revise_streak-summary_R20260613-001.md |
 | D20260611-042 | /flow:e2e | journey 実装 | E-DEL-01/02 ローカルwipe実証、deleteAllDataはunit委譲 | auto-recommended | D20260611_009_e2e__shared_auth_revise_R20260611-002.md |
 | D20260611-041 | /flow:e2e | FW 検出 | Playwright 1.60 + Chromium（ローカル headless Class A） | auto-recommended | D20260611_009_e2e__shared_auth_revise_R20260611-002.md |
 | D20260611-039 | /flow:tdd | /account 描画 | gate せず即描画、onDeleteAllData のみ repos 依存 | auto-recommended | D20260611_008_tdd__shared_auth_revise_R20260611-002.md |
