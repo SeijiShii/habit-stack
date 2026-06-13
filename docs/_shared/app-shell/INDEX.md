@@ -22,7 +22,7 @@
 | パス | 種別 | issue/slug | 状態 | 概要 | INDEX |
 |---|---|---|---|---|---|
 | claim_C20260609-001_unstyled-ui/ | claim | C20260609-001 / unstyled-ui | 判定完了 | 素の未スタイル UI クレーム判定 | [INDEX](./claim_C20260609-001_unstyled-ui/INDEX.md) |
-| revise_R20260613-002_20260613_title-logo/ | revise | R20260613-002 / title-logo | 設計完了 | アプリタイトル左にロゴ追加、幅不足時はロゴのみ縮退（エリプシス解消、BrandLogo + CSS container query） | [INDEX](./revise_R20260613-002_20260613_title-logo/INDEX.md) |
+| revise_R20260613-002_20260613_title-logo/ | revise | R20260613-002 / title-logo | 実装完了（unit green、E2E 未） | アプリタイトル左にロゴ追加、幅不足時はロゴのみ縮退（エリプシス解消、BrandLogo + CSS container query） | [INDEX](./revise_R20260613-002_20260613_title-logo/INDEX.md) |
 
 ## 関連
 - 親 concept: `../../concept.md` §1.3.2 app-shell 行
