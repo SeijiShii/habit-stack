@@ -36,3 +36,32 @@ export function cappedElapsedSec(
     MAX_ACTIVITY_SEC,
   );
 }
+
+/** sessionElapsedSec が必要とする状態の最小形（ExecState のサブセット、循環 import 回避）。 */
+export interface SessionElapsedState {
+  status: "running" | "paused" | "done";
+  pauseStartedAt: string | null;
+  records: {
+    startedAt: string;
+    endedAt: string | null;
+    elapsedSec: number;
+    pausedTotalSec: number;
+  }[];
+}
+
+/**
+ * セット全体（セッション）の経過秒 = 全 record の合計（R20260613-004）。
+ * 終了済み record は確定 elapsedSec、進行中 record は now との差分でライブ算出する。
+ * paused 中は進行中分を pauseStartedAt 時点で凍結する。各 record は cappedElapsedSec
+ * （0 下限 / 1 活動 4H 上限）を適用する。
+ */
+export function sessionElapsedSec(
+  state: SessionElapsedState,
+  now: string,
+): number {
+  return state.records.reduce((sum, rec) => {
+    if (rec.endedAt) return sum + rec.elapsedSec;
+    const end = state.status === "paused" ? (state.pauseStartedAt ?? now) : now;
+    return sum + cappedElapsedSec(rec.startedAt, end, rec.pausedTotalSec);
+  }, 0);
+}

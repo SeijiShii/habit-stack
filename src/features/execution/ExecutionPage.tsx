@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import type { ExecutionRepo } from "./model/executionRepo.js";
 import { useExecution } from "./hooks/useExecution.js";
-import { cappedElapsedSec } from "./model/elapsed.js";
+import { cappedElapsedSec, sessionElapsedSec } from "./model/elapsed.js";
+import { formatDuration } from "../../services/time/localDate.js";
 import { saveHeartbeat, clearHeartbeat } from "./model/heartbeat.js";
 import type {
   ItemExec,
@@ -139,6 +140,9 @@ export function ExecutionPage({
         <section aria-label="実行中">
           <p data-testid="current-item">{currentName}</p>
           <p data-testid="elapsed">{mmss(liveElapsed(currentRec, s.status))}</p>
+          <p data-testid="set-elapsed">
+            セット合計 {formatDuration(sessionElapsedSec(s, nowIso()))}
+          </p>
           <p data-testid="started-at">開始 {hhmmss(currentRec.startedAt)}</p>
           <p data-testid="current-time">現在 {hhmmss(nowIso())}</p>
           <textarea

@@ -137,6 +137,22 @@ describe("ExecutionPage 計時中表示 (fix C20260610-001)", () => {
     expect(screen.getByTestId("elapsed").textContent).toBe("01:05");
   });
 
+  it("R-SET1: 計時中にセット合計時間が表示されライブ更新される", async () => {
+    let clock = Date.parse("2026-06-10T09:00:00.000Z");
+    const now = () => new Date(clock).toISOString();
+    await startTimed(now, "sess_set1");
+
+    // 開始直後は 0分
+    expect(screen.getByTestId("set-elapsed").textContent).toContain("0分");
+
+    // 125 秒経過 → 2分
+    act(() => {
+      clock += 125_000;
+      vi.advanceTimersByTime(1000);
+    });
+    expect(screen.getByTestId("set-elapsed").textContent).toContain("2分");
+  });
+
   it("R5: 一時停止中は経過が凍結する", async () => {
     let clock = Date.parse("2026-06-10T09:00:00.000Z");
     const now = () => new Date(clock).toISOString();
@@ -258,6 +274,7 @@ describe("ExecutionPage 永続化・復帰 (R20260611-001)", () => {
     renderPage(repo, () => T(14)); // gap = 14:00 - 9:30 = 4.5H >= 4H → autoEnd
     await waitFor(() => expect(screen.getByRole("status")).toBeTruthy());
     expect(screen.queryByTestId("elapsed")).toBeNull(); // ライブタイマー非表示
+    expect(screen.queryByTestId("set-elapsed")).toBeNull(); // done では合計表示も非表示
   });
 
   it("E-IDLE: 達成は有効経過>0 のみ（lastSavedAt で確定、30 分は達成）", async () => {
