@@ -3,8 +3,8 @@
 - **実行日時**: 2026-06-13（JST）
 - **コマンド**: /flow:auto（continuous loop）
 - **実行者**: seiji + Claude
-- **状態**: 完了（P4.2 revise×3 実装 + P4.4 Design green → P4.45 Wording gate で正当 pause）
-- **含まれる decision 範囲**: 前回停止ふりかえり / 優先度判定 / 各反復の auto-pick / Wording gate pause
+- **状態**: 完了（revise×3 を design→impl→unit→視覚→wording→E2E まで全 green。P4.7 Release gate = Class B/C 境界で正当停止）
+- **含まれる decision 範囲**: 前回停止ふりかえり / 優先度判定 / 各反復の auto-pick / Wording / E2E / Release gate 境界停止
 
 ## 主要決定サマリ
 
@@ -28,9 +28,9 @@
 - 反復4: P4.4 → /flow:design --review-only（ヘッダ縮退 360/320/1024 視覚 green）完了
 - 反復5: P4.45 Wording gate → 正当 pause（新規コピー「セット合計」= Class C 人間判断、auto-execute せず提示）
 
-## 残ゲート（pause 後）
-- P4.45 Wording: 新規 UI 文言「セット合計」の voice 確認（Class C、/flow:wording or 受理）
-- P4.5 E2E: R20260613-002/003/004 の 004 E2E 計画（103 未）。Wording 解決後に /flow:e2e
+## 残ゲート（最終停止後）
+- P4.7 Release（Class B/C、ユーザー判断）: ① デプロイ（Class B）/ ② Google ログイン OAuth 設定（GCP custom OAuth + Clerk prod social connection、Class C、既知の宿題 D20260610_006）
+- release へ進む場合は §3.0c release-pre 必須監査（/flow:audit --scope=full → /flow:secure、HEAD は最新 AUDIT より 11 commits 先）を先に通す
 
 ## 生成・更新したアーティファクト
 - 3 revise の実装コード + 101/102 + INDEX（各 docs(flow:tdd) commit 済）
@@ -74,4 +74,16 @@
   chosen_type: auto-recommended
   depends_on: [D20260613-050]
   context: 前回 wording(D20260609_008) 以降に UI/コピー変更（新規「セット合計」）。policy 上 wording は auto-execute せず提示+pause（auto-pick-policy §1.5.5b）。E2E(P4.5) は下位ゲートで Wording 後に /flow:e2e
+
+- id: D20260613-058
+  timestamp: 2026-06-13T18:20:00+09:00
+  command: /flow:auto
+  phase: Step 3 優先度判定（E2E green 後）+ §4.5.1 condition 2
+  question: 全 dev ゲート green 後の次アクション
+  options: [Release gate へ（release-pre audit→/flow:release）, Class B/C 境界で正当停止]
+  recommended: Class B/C 境界で正当停止 — 残りはデプロイ(Class B)+Google OAuth(Class C)で user 判断必須。ユーザーの explicit deliverable（3 UI 修正）は完遂
+  chosen: Release gate（P4.7）境界で正当停止し Step 5.1 で次の一手を提示
+  chosen_type: auto-recommended
+  depends_on: [D20260613-055]
+  context: P4.2/4.4/4.45/4.5 全 green。残り P4.7 は deploy(B)+Google OAuth 設定(C)。§4.5.1 condition 2（Class B/C 到達）= 正当停止。歪曲停止ではない（work 完遂・context/pace 理由でない）
 ```

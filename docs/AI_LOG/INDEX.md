@@ -1,8 +1,8 @@
 # AI_LOG インデックス — habit-stack
 
-**最終更新**: 2026-06-13 (UI 改修バッチ 3 件を実装+視覚レビュー green — /flow:auto。Wording gate で正当 pause、E2E 残)
-**総セッション数**: 78
-**総 decision 数**: 108
+**最終更新**: 2026-06-13 (UI 改修 3 件を design→impl→unit→視覚→wording→E2E まで全 green — /flow:auto。P4.7 Release gate=Class B/C 境界で正当停止)
+**総セッション数**: 80
+**総 decision 数**: 116
 
 > 注: 下の「セッション一覧」表は直近セッションのみ列挙（全 60 件は `ls docs/AI_LOG/D*.md` 参照）。
 > AUDIT_20260611_2000 で表の網羅性を Low 指摘済み、再生成は別 bookkeeping。
@@ -17,6 +17,8 @@
 
 | ファイル | 実行日 | コマンド | 対象 | decision 範囲 | 状態 |
 |---|---|---|---|---|---|
+| [D20260613_015_e2e_ui-revise.md](./D20260613_015_e2e_ui-revise.md) | 2026-06-13 | /flow:e2e | UI 改修 3 件 E2E（ヘッダ/ドット/合計時間） | D20260613-055〜057 | 完了（E2E 17/17 green） |
+| [D20260613_014_wording_ui.md](./D20260613_014_wording_ui.md) | 2026-06-13 | /flow:wording | UI 改修後の文言校正 | D20260613-053〜054 | 完了（「合計時間」確定） |
 | [D20260613_013_design_review.md](./D20260613_013_design_review.md) | 2026-06-13 | /flow:design | UI 改修後の視覚レビュー（ヘッダ縮退） | D20260613-050〜051 | 完了（視覚 green） |
 | [D20260613_012_tdd_execution_revise_R20260613-004.md](./D20260613_012_tdd_execution_revise_R20260613-004.md) | 2026-06-13 | /flow:tdd | execution R20260613-004 (set-total-time) | D20260613-047〜049 | 完了（unit 207 green） |
 | [D20260613_011_tdd_streak-summary_revise_R20260613-003.md](./D20260613_011_tdd_streak-summary_revise_R20260613-003.md) | 2026-06-13 | /flow:tdd | streak-summary R20260613-003 (remove-dots) | D20260613-044〜046 | 完了（unit 200 green） |
