@@ -5,9 +5,19 @@
  */
 export function localDateOf(d: Date): string {
   const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
   return `${y}-${m}-${day}`;
+}
+
+const WEEKDAYS_JA = ["日", "月", "火", "水", "木", "金", "土"];
+
+/** ISO 文字列を端末ローカルの「M/D(曜)」表示にする（活動の記録の見出し用）。 */
+export function formatDateLabel(iso: string): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  return `${d.getMonth() + 1}/${d.getDate()}(${WEEKDAYS_JA[d.getDay()]})`;
 }
 
 /** 累計秒を「H時間M分」表示にする（1 時間未満は「M分」、0 は「0分」）。 */

@@ -143,17 +143,23 @@ function SummaryOverviewRoute({ repos }: { repos: Repos }) {
   return (
     <SummaryOverviewPage
       setsRepo={repos.sets}
-      summaryRepo={repos.summary}
       onSelectSet={(id) => navigate(`/summary/${id}`)}
     />
   );
 }
 
 function SummaryRoute({ repos }: { repos: Repos }) {
+  const navigate = useNavigate();
   return (
     <WithSet repos={repos}>
       {(set) => (
-        <SummaryPage repo={repos.summary} setId={set.id} setName={set.name} />
+        <SummaryPage
+          repo={repos.summary}
+          setsRepo={repos.sets}
+          setId={set.id}
+          setName={set.name}
+          onSelectSet={(id) => navigate(`/summary/${id}`)}
+        />
       )}
     </WithSet>
   );
