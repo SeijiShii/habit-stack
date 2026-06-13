@@ -457,12 +457,12 @@ legend {
   padding: 0 var(--space-2);
 }
 
-/* ---- フッタ（法務リンク、O55） ---- */
-footer[aria-label='法務情報'] {
+/* ---- フッタ（法務リンク + 他サービス送客、O55 / O62） ---- */
+footer[aria-label='フッター'] {
   border-top: 1px solid var(--color-border);
   margin-top: var(--space-7);
 }
-footer[aria-label='法務情報'] nav {
+footer[aria-label='フッター'] nav {
   max-width: 640px;
   margin: 0 auto;
   display: flex;
@@ -470,9 +470,12 @@ footer[aria-label='法務情報'] nav {
   gap: var(--space-4);
   padding: var(--space-5) var(--space-4);
 }
-footer[aria-label='法務情報'] a {
+footer[aria-label='フッター'] nav[aria-label='ほかのサービス'] {
+  padding-top: 0;
+}
+footer[aria-label='フッター'] a {
   color: var(--color-text-muted);
-  font-size: 13px;
+  font-size: 12px;
 }
 
 /* ---- 法務（特商法 dl） ---- */
