@@ -5,7 +5,8 @@ export interface AchievementDay {
   itemDoneCount: number;
 }
 
-export interface Dot {
+/** 日ごとの達成有無（達成日数・連続日数の算出に使う内部表現）。 */
+interface Dot {
   date: string;
   achieved: boolean;
 }
@@ -13,7 +14,6 @@ export interface Dot {
 export interface Summary extends ContinuationRate {
   /** 直近から連続して達成した日数（手応え、途切れを咎めない）。 */
   currentStreak: number;
-  dots: Dot[];
   isEmpty: boolean;
 }
 
@@ -62,7 +62,6 @@ export function summarize(
     totalDays,
     rate: totalDays === 0 ? 0 : achievedDays / totalDays,
     currentStreak,
-    dots,
     isEmpty: achievedDays === 0,
   };
 }

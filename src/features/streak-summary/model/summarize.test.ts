@@ -51,8 +51,8 @@ describe("summarize", () => {
       dates,
     );
     expect(s.currentStreak).toBe(1); // 末尾 10 のみ連続（9 が抜け）
-    // 未達は dots で achieved=false（中立、咎めない）
-    expect(s.dots.find((d) => d.date === "2026-06-09")?.achieved).toBe(false);
+    // 抜けた 09 は達成日数に数えない（08/10 のみ = 2、中立・咎めない）
+    expect(s.achievedDays).toBe(2);
   });
 
   it("E1: 達成ゼロは isEmpty=true, rate=0", () => {

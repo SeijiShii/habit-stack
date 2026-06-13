@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { SummaryRepo } from "./model/summaryRepo.js";
 import { summarize, enumerateDates } from "./model/summarize.js";
-import { AchievementDots, RateGauge } from "./components.js";
+import { RateGauge } from "./components.js";
 import { ShareButton } from "./ShareButton.js";
 import { localDateOf } from "../../services/time/localDate.js";
 
@@ -77,7 +77,6 @@ export function SummaryPage({ repo, setId, setName, today }: SummaryPageProps) {
             totalDays={summary.totalDays}
           />
           <p data-testid="streak">{summary.currentStreak}日つづいています</p>
-          <AchievementDots dots={summary.dots} />
         </>
       )}
 
