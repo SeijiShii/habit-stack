@@ -1,8 +1,8 @@
 # AI_LOG インデックス — habit-stack
 
-**最終更新**: 2026-06-13 (e2e streak-summary revise R20260613-001 — 12/12 E2E green)
-**総セッション数**: 70
-**総 decision 数**: 81
+**最終更新**: 2026-06-13 (revise UI バッチ 3 件設計完了 — app-shell R20260613-002 / streak-summary R20260613-003 / execution R20260613-004)
+**総セッション数**: 73
+**総 decision 数**: 94
 
 > 注: 下の「セッション一覧」表は直近セッションのみ列挙（全 60 件は `ls docs/AI_LOG/D*.md` 参照）。
 > AUDIT_20260611_2000 で表の網羅性を Low 指摘済み、再生成は別 bookkeeping。
@@ -17,6 +17,10 @@
 
 | ファイル | 実行日 | コマンド | 対象 | decision 範囲 | 状態 |
 |---|---|---|---|---|---|
+| [D20260613_008_revise_execution_R20260613-004.md](./D20260613_008_revise_execution_R20260613-004.md) | 2026-06-13 | /flow:revise | execution R20260613-004 (set-total-time) | D20260613-034〜038 | 設計完了→spec-review/tdd |
+| [D20260613_007_revise_streak-summary_R20260613-003.md](./D20260613_007_revise_streak-summary_R20260613-003.md) | 2026-06-13 | /flow:revise | streak-summary R20260613-003 (remove-dots) | D20260613-030〜033 | 設計完了→spec-review/tdd |
+| [D20260613_006_revise__shared_app-shell_R20260613-002.md](./D20260613_006_revise__shared_app-shell_R20260613-002.md) | 2026-06-13 | /flow:revise | _shared/app-shell R20260613-002 (title-logo) | D20260613-026〜029 | 設計完了→spec-review/tdd |
+| [D20260613_005_design_streak-summary_review.md](./D20260613_005_design_streak-summary_review.md) | 2026-06-13 | /flow:design | streak-summary 視覚レビュー | D20260613-022〜025 | 完了 |
 | [D20260613_004_e2e_streak-summary_revise_R20260613-001.md](./D20260613_004_e2e_streak-summary_revise_R20260613-001.md) | 2026-06-13 | /flow:e2e | streak-summary R20260613-001 (revise) | D20260613-019〜021 | 完了（E2E 12/12 green、新規4） |
 | [D20260613_003_tdd_streak-summary_revise_R20260613-001.md](./D20260613_003_tdd_streak-summary_revise_R20260613-001.md) | 2026-06-13 | /flow:tdd | streak-summary R20260613-001 (revise) | D20260613-014〜017 | 完了（197 green、4 Phase） |
 | [D20260613_002_resume_continuous.md](./D20260613_002_resume_continuous.md) | 2026-06-13 | /flow:auto | continuous（revise 後 dispatch） | D20260613-012〜013 | 進行中 |
@@ -48,6 +52,13 @@
 
 | ID | command | phase | chosen (短縮) | type | ファイル |
 |---|---|---|---|---|---|
+| D20260613-038 | /flow:revise | 付記:Google ログイン調査 | コード/UI/単体は実装済、本番未稼働は OAuth 設定(Class C)未了→/flow:release 領域 | auto-recommended | D20260613_008_revise_execution_R20260613-004.md |
+| D20260613-035 | /flow:revise | 合計算出設計 | sessionElapsedSec 純関数を elapsed.ts に追加、formatDuration で表記統一 | auto-recommended | D20260613_008_revise_execution_R20260613-004.md |
+| D20260613-034 | /flow:revise | 改修方針(execution) | 計時画面に set-elapsed=全 record 合計（確定+live）を表示 | auto-recommended | D20260613_008_revise_execution_R20260613-004.md |
+| D20260613-031 | /flow:revise | dots 削除範囲 | 表示+Summary.dots+AchievementDots/Dot 削除（内部達成判定計算は維持） | auto-recommended | D20260613_007_revise_streak-summary_R20260613-003.md |
+| D20260613-030 | /flow:revise | 改修方針(streak) | 達成日ドット（丸）廃止、率バー+連続日数で代替 | auto-recommended | D20260613_007_revise_streak-summary_R20260613-003.md |
+| D20260613-027 | /flow:revise | 改修方針(app-shell) | ロゴ+タイトル、狭幅はロゴのみ縮退（CSS、BrandLogo インライン SVG） | auto-recommended | D20260613_006_revise__shared_app-shell_R20260613-002.md |
+| D20260613-026 | /flow:revise | 改修構成 | 3 機能（app-shell/streak-summary/execution）それぞれに独立 revise | explicit-choice | D20260613_006_revise__shared_app-shell_R20260613-002.md |
 | D20260613-010 | /flow:revise | migration 方式 | execution_record から localDateOf 再導出→upsert+余剰tombstone（冪等） | auto-recommended | D20260613_001_revise_streak-summary_R20260613-001.md |
 | D20260613-009 | /flow:revise | 総覧ページ設計 | /summary=ドロップダウン遷移+details折りたたみ+全期間累計時間 | auto-recommended | D20260613_001_revise_streak-summary_R20260613-001.md |
 | D20260613-004 | /flow:revise | 根本原因 | streak不正確=localDateのUTC slice（コメントと実装乖離）+today-pending欠落 | auto-recommended | D20260613_001_revise_streak-summary_R20260613-001.md |
