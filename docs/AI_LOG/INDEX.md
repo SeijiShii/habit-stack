@@ -1,8 +1,8 @@
 # AI_LOG インデックス — habit-stack
 
-**最終更新**: 2026-06-13 (revise UI バッチ 3 件設計完了 — app-shell R20260613-002 / streak-summary R20260613-003 / execution R20260613-004)
-**総セッション数**: 73
-**総 decision 数**: 94
+**最終更新**: 2026-06-13 (UI 改修バッチ 3 件を実装+視覚レビュー green — /flow:auto。Wording gate で正当 pause、E2E 残)
+**総セッション数**: 78
+**総 decision 数**: 108
 
 > 注: 下の「セッション一覧」表は直近セッションのみ列挙（全 60 件は `ls docs/AI_LOG/D*.md` 参照）。
 > AUDIT_20260611_2000 で表の網羅性を Low 指摘済み、再生成は別 bookkeeping。
@@ -17,7 +17,12 @@
 
 | ファイル | 実行日 | コマンド | 対象 | decision 範囲 | 状態 |
 |---|---|---|---|---|---|
-| [D20260613_008_revise_execution_R20260613-004.md](./D20260613_008_revise_execution_R20260613-004.md) | 2026-06-13 | /flow:revise | execution R20260613-004 (set-total-time) | D20260613-034〜038 | 設計完了→spec-review/tdd |
+| [D20260613_013_design_review.md](./D20260613_013_design_review.md) | 2026-06-13 | /flow:design | UI 改修後の視覚レビュー（ヘッダ縮退） | D20260613-050〜051 | 完了（視覚 green） |
+| [D20260613_012_tdd_execution_revise_R20260613-004.md](./D20260613_012_tdd_execution_revise_R20260613-004.md) | 2026-06-13 | /flow:tdd | execution R20260613-004 (set-total-time) | D20260613-047〜049 | 完了（unit 207 green） |
+| [D20260613_011_tdd_streak-summary_revise_R20260613-003.md](./D20260613_011_tdd_streak-summary_revise_R20260613-003.md) | 2026-06-13 | /flow:tdd | streak-summary R20260613-003 (remove-dots) | D20260613-044〜046 | 完了（unit 200 green） |
+| [D20260613_010_tdd__shared_app-shell_revise_R20260613-002.md](./D20260613_010_tdd__shared_app-shell_revise_R20260613-002.md) | 2026-06-13 | /flow:tdd | _shared/app-shell R20260613-002 (title-logo) | D20260613-041〜043 | 完了（unit 200 green） |
+| [D20260613_009_resume_continuous.md](./D20260613_009_resume_continuous.md) | 2026-06-13 | /flow:auto | continuous（UI 改修 3 件実装ドライブ） | D20260613-039〜040, 052 | 完了（Wording gate で pause） |
+| [D20260613_008_revise_execution_R20260613-004.md](./D20260613_008_revise_execution_R20260613-004.md) | 2026-06-13 | /flow:revise | execution R20260613-004 (set-total-time) | D20260613-034〜038 | 実装完了（unit green） |
 | [D20260613_007_revise_streak-summary_R20260613-003.md](./D20260613_007_revise_streak-summary_R20260613-003.md) | 2026-06-13 | /flow:revise | streak-summary R20260613-003 (remove-dots) | D20260613-030〜033 | 設計完了→spec-review/tdd |
 | [D20260613_006_revise__shared_app-shell_R20260613-002.md](./D20260613_006_revise__shared_app-shell_R20260613-002.md) | 2026-06-13 | /flow:revise | _shared/app-shell R20260613-002 (title-logo) | D20260613-026〜029 | 設計完了→spec-review/tdd |
 | [D20260613_005_design_streak-summary_review.md](./D20260613_005_design_streak-summary_review.md) | 2026-06-13 | /flow:design | streak-summary 視覚レビュー | D20260613-022〜025 | 完了 |
