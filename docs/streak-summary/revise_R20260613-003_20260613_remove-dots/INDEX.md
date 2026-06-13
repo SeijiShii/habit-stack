@@ -2,7 +2,7 @@
 
 **issue / slug**: R20260613-003 / remove-dots
 **実施日**: 2026-06-13
-**状態**: 設計完了
+**状態**: 実装完了（unit 200/200 green、E2E 未）
 
 <!-- auto-generated-start -->
 
@@ -14,6 +14,8 @@
 | 002 | 002_REVISE_PLAN.md | 変更計画 | 2026-06-13 |
 | 003 | 003_REVISE_UNIT_TEST.md | 単体テスト計画 | 2026-06-13 |
 | 004 | 004_REVISE_E2E_TEST.md | E2E テスト計画 | 2026-06-13 |
+| 101 | 101_REVISE_IMPL_REPORT.md | 実装レポート | 2026-06-13 |
+| 102 | 102_REVISE_UNIT_TEST_REPORT.md | 単体テストレポート | 2026-06-13 |
 
 ## 関連
 - 親機能 INDEX: `../INDEX.md`

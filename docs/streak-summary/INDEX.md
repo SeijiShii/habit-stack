@@ -23,7 +23,7 @@
 |---|---|---|---|---|---|
 | revise_O31_20260609_share-button/ | revise | O31/share-button | 実装完了 | シェアボタン追加 (O31 公開周知導線) | [INDEX](./revise_O31_20260609_share-button/INDEX.md) |
 | revise_R20260613-001_20260613_reflect-overview-streak-fix/ | revise | R20260613-001/reflect-overview-streak-fix | E2E green (2026-06-13) | 振り返り総覧(ドロップダウン+折りたたみ+合計時間) + streak ローカル日付是正 + 達成日再構築 migration | [INDEX](./revise_R20260613-001_20260613_reflect-overview-streak-fix/INDEX.md) |
-| revise_R20260613-003_20260613_remove-dots/ | revise | R20260613-003/remove-dots | 設計完了 | ふりかえり画面の達成日ドット（丸）表示を廃止（縦並び崩れ解消、率バー+連続日数で代替、dead code 整理） | [INDEX](./revise_R20260613-003_20260613_remove-dots/INDEX.md) |
+| revise_R20260613-003_20260613_remove-dots/ | revise | R20260613-003/remove-dots | 実装完了（unit green、E2E 未） | ふりかえり画面の達成日ドット（丸）表示を廃止（縦並び崩れ解消、率バー+連続日数で代替、dead code 整理） | [INDEX](./revise_R20260613-003_20260613_remove-dots/INDEX.md) |
 
 ## 関連
 - 親 concept: `../concept.md` §1.3.1 streak-summary 行
