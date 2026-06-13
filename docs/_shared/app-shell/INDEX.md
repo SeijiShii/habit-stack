@@ -23,6 +23,7 @@
 |---|---|---|---|---|---|
 | claim_C20260609-001_unstyled-ui/ | claim | C20260609-001 / unstyled-ui | 判定完了 | 素の未スタイル UI クレーム判定 | [INDEX](./claim_C20260609-001_unstyled-ui/INDEX.md) |
 | revise_R20260613-002_20260613_title-logo/ | revise | R20260613-002 / title-logo | テスト完了（unit+E2E green） | アプリタイトル左にロゴ追加、幅不足時はロゴのみ縮退（エリプシス解消、BrandLogo + CSS container query） | [INDEX](./revise_R20260613-002_20260613_title-logo/INDEX.md) |
+| revise_R20260613-005_20260613_other-apps-backlink/ | revise | R20260613-005 / other-apps-backlink | 設計完了 | footer に「他のアプリ」back-link 追加 → givers.work（shipyard）誘導（O62 相互送客） | [INDEX](./revise_R20260613-005_20260613_other-apps-backlink/INDEX.md) |
 
 ## 関連
 - 親 concept: `../../concept.md` §1.3.2 app-shell 行
