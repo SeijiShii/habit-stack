@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { LegalFooter } from "./LegalFooter.js";
+import { BrandLogo } from "./BrandLogo.js";
 
 /** 入口の「これは何？」リード文（O41、冷たいリンク流入者向け）。 */
 function WhatIsThis() {
@@ -24,7 +25,14 @@ export function AppLayout({
     <div>
       <header>
         <nav aria-label="メイン">
-          <Link to="/">つみあげルーティン</Link>
+          <Link
+            to="/"
+            className="brand-link"
+            aria-label="つみあげルーティン（ホーム）"
+          >
+            <BrandLogo />
+            <span className="brand-name">つみあげルーティン</span>
+          </Link>
           <Link to="/sets">セット</Link>
           <Link to="/summary">継続</Link>
           <Link to="/account">アカウント</Link>

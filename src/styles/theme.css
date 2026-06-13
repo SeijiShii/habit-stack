@@ -523,3 +523,38 @@ section.share textarea {
 .num {
   font-variant-numeric: tabular-nums;
 }
+
+/* ブランド（ロゴ + アプリ名）。狭幅ではアプリ名を隠してロゴのみにする（エリプシス回避、R20260613-002）。 */
+nav[aria-label="メイン"] {
+  container-type: inline-size;
+}
+.brand-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 600;
+  color: var(--color-primary);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.brand-logo {
+  flex: 0 0 auto;
+}
+.brand-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* ヘッダ幅が狭いときはアプリ名を隠してロゴのみ（ロゴは常に表示）。 */
+@container (max-width: 360px) {
+  .brand-name {
+    display: none;
+  }
+}
+/* container query 未対応環境向けフォールバック。 */
+@supports not (container-type: inline-size) {
+  @media (max-width: 380px) {
+    .brand-name {
+      display: none;
+    }
+  }
+}
