@@ -141,7 +141,7 @@ export function ExecutionPage({
           <p data-testid="current-item">{currentName}</p>
           <p data-testid="elapsed">{mmss(liveElapsed(currentRec, s.status))}</p>
           <p data-testid="set-elapsed">
-            セット合計 {formatDuration(sessionElapsedSec(s, nowIso()))}
+            合計時間 {formatDuration(sessionElapsedSec(s, nowIso()))}
           </p>
           <p data-testid="started-at">開始 {hhmmss(currentRec.startedAt)}</p>
           <p data-testid="current-time">現在 {hhmmss(nowIso())}</p>
