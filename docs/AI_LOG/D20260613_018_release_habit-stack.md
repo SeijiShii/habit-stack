@@ -4,8 +4,8 @@
 - **コマンド**: /flow:release（/flow:auto P4.7 Release gate から dispatch）
 - **対象**: habit-stack（live 化済、UI 改修バッチ R20260613-002/003/004 を本番反映 + Google ログイン OAuth 設定）
 - **実行者**: seiji + Claude
-- **状態**: Class C human gate で pause（Google OAuth = ユーザーのダッシュボード操作待ち）
-- **含まれる decision 範囲**: live 判定 / Google social OAuth 検出 / 再デプロイ target
+- **状態**: Track A（UI 改修 4 件）本番デプロイ完了。Track B（Google OAuth 設定）は Class C でユーザー操作待ち
+- **含まれる decision 範囲**: live 判定 / Google social OAuth 検出 / 再デプロイ target / prod 直行デプロイ + post-deploy smoke
 
 ## 主要決定サマリ
 
@@ -55,8 +55,20 @@ Google ログインの本番稼働には、ユーザーしか実行できない 
   question: UI 改修 + OAuth を preview 先行か本番直行か
   options: [preview 先行, 本番直行]
   recommended: preview 先行（OAuth 設定とセットで実 social sign-in を 1 回確認したい）
-  chosen: （ユーザー判断待ち、pause 中）
-  chosen_type: open
+  chosen: 本番 prod 直行（ユーザー選択、UI は表示系 + unit 209/E2E 19 green）
+  chosen_type: explicit-choice
   depends_on: [D20260613-064]
-  context: UI 改修は表示系 + unit/E2E green だが Google OAuth は実ログインを踏むまで確認不能
+  context: UI 改修は表示系 + unit/E2E green。Google OAuth は Clerk/GCP dashboard 設定でデプロイ非依存のため UI を先行本番化
+
+- id: D20260613-074
+  timestamp: 2026-06-13T19:20:00+09:00
+  command: /flow:release
+  phase: Phase 3 デプロイ + §3.4 post-deploy smoke
+  question: 本番デプロイ + スモーク結果
+  options: []
+  recommended: scripts/deploy-prod.sh で prebuilt prod deploy → smoke
+  chosen: デプロイ成功（https://habit-stack.givers.work aliased READY）。smoke green = / 200 / health 200 / guest 200（O22）/ 他のアプリ link href=givers.work + header brand を headless 確認
+  chosen_type: auto-recommended
+  depends_on: [D20260613-066]
+  context: UI 改修 4 件（R20260613-002/003/004/005）本番反映完了。Track B（Google OAuth 設定）は Class C で別途ユーザー操作待ち。観測: GET /api/sync が 200（要確認だが本 UI デプロイ非関連、別途）
 ```
