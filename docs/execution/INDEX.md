@@ -21,7 +21,7 @@
 ## サブフォルダ（改修・バグ修正・クレーム判定履歴）
 | パス | 種別 | issue/slug | 状態 | 概要 | INDEX |
 |---|---|---|---|---|---|
-| `revise_R20260613-004_20260613_set-total-time/` | revise | R20260613-004 / set-total-time | 設計完了 | セット全体の経過時間を計時画面に表示（全 record 合計、sessionElapsedSec 純関数 + formatDuration で振り返りと統一） | `INDEX.md` |
+| `revise_R20260613-004_20260613_set-total-time/` | revise | R20260613-004 / set-total-time | 実装完了（unit green、E2E 未） | セット全体の経過時間を計時画面に表示（全 record 合計、sessionElapsedSec 純関数 + formatDuration で振り返りと統一） | `INDEX.md` |
 | `revise_R20260611-001_20260611_timing-persistence-resume/` | revise | R20260611-001 / timing-persistence-resume | E2E green | 計時状態の永続化・復帰（毎秒localStorage+15秒backend, account-scoped）+ 4H放置キャップ/自動終了 + ログイン遷移終了。unit 167 + E2E 6/6 green、StrictMode 復元バグ修正、last_saved_at migration 0001 | `INDEX.md` |
 | `revise_R20260610-001_20260610_exec-buttons-simplify/` | revise | R20260610-001 / exec-buttons-simplify | 実装完了 | 実行画面の「終了」ボタン削除 + 「次の活動へ」表記統一（表示層のみ、135 green） | `INDEX.md` |
 | `claim_C20260610-001_20260610_timer-frozen-display/` | claim | C20260610-001 / timer-frozen-display | 判定完了→fix | 計時中の経過時間が 00:00 で固まる→**バグ判定**。開始/現在時刻表示も同梱 | `001_TRIAGE.md` |
