@@ -4,7 +4,7 @@
 - **コマンド**: /flow:auto（continuous）
 - **対象**: 直前の /flow:revise 3件（R20260614-001/002/003）の flow finalize
 - **実行者**: seiji + Claude
-- **状態**: 進行中（E2E green → §3.0c release-pre 監査へ）
+- **状態**: 完了（no-key/Class-A 出し尽くし → P4.7 Release gate=Class B deploy で正当 pause、§4.5.1 条件2）
 - **含まれる decision 範囲**: 前回停止ふりかえり / P4.2 finalize（commit + 101/102）/ Wording gate 判定
 
 ## 主要決定サマリ
@@ -95,4 +95,17 @@
   chosen_type: auto-recommended
   depends_on: [D20260614-026]
   context: release-pre ハードゲート。HEAD≠最新AUDIT参照commit のため無条件で full 監査。
+
+- id: D20260614-029
+  timestamp: 2026-06-14T19:15:00+09:00
+  command: /flow:auto
+  phase: P4.7 Release gate（loop 終端）
+  question: no-key/Class-A 枯渇後の次アクション
+  chosen: |
+    §4.5.1#0 ゲート: no-key/Class-A 変種すべて消化済（実装/unit/E2E/docs/commit/release-pre監査）。
+    新規 env var 0 = 実キー FILL 不要。残るは本番デプロイ（Class B）のみ → §4.5.1 条件2 で正当 pause。
+    次アクション = /flow:release（Phase 2 実機確認は任意 → Phase 3 デプロイ Class B 明示確認）。
+  chosen_type: auto-recommended
+  depends_on: [D20260614-028]
+  context: 歪曲停止ではなく Class B 到達の正当 pause。デプロイ判断は人間（タイミング/バッチ）。
 ```
