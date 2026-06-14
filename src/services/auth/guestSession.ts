@@ -44,3 +44,30 @@ export async function issueGuestTicket(
 
   return { ticket: token.token, userId: user.id };
 }
+
+/**
+ * 既存ゲスト userId に対して新しいサインインチケットを発行する（同一 userId 維持、CF-20260614-002）。
+ * フロントが redeem（`signIn.create({strategy:'ticket'})`）すると first-factor を再検証するため、
+ * Clerk reverification（aged session の step-up 403）window 内に戻る。createUser しないので
+ * userId は変わらず、ローカルデータの所有も保たれる（reassignOwner 不要）。
+ * 連携（createExternalAccount）直前のセッション fresh 化に使う。
+ */
+export async function refreshGuestTicket(
+  opts: GuestSessionOptions,
+  userId: string,
+): Promise<{ ticket: string; userId: string }> {
+  if (!opts.secretKey) {
+    throw new Error("CLERK_SECRET_KEY が必要です");
+  }
+  const clerk =
+    opts.client ??
+    createClerkClient({
+      secretKey: opts.secretKey,
+      publishableKey: opts.publishableKey,
+    });
+  const token = await clerk.signInTokens.createSignInToken({
+    userId,
+    expiresInSeconds: opts.ticketTtlSec ?? 600,
+  });
+  return { ticket: token.token, userId };
+}

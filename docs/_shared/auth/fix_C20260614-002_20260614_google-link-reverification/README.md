@@ -7,7 +7,12 @@
 - **基準 SPEC**: ../001__shared_auth_SPEC.md §3（linkWithGoogle）
 - **起点クレーム**: ../claim_C20260614-002_20260614_google-login-no-op/001_TRIAGE.md §7・§8（root cause 確定）
 - **バグレポート**: 本番 /account「Google で引き継ぐ」が PC（fresh）では動くが aged guest session（スマホ）で無反応。`POST /v1/me/external_accounts → 403 "additional verification"`（chrome://inspect で確認）
-- **状態**: 実装完了（unit green）。CODE 修正（catch + 可視化）実装済・auth suite 32 tests green / tsc clean。残 = Clerk Dashboard reverification 緩和（PRIMARY 機能修正、Class C）+ aged guest 実機 smoke
+- **状態**: 実装完了（unit green、全 230 tests）。**機能修正（session fresh 化）+ CODE（catch+可視化）両方を実装**。
+  - **追記（更新）**: WebSearch で確認の結果、Clerk reverification は createExternalAccount への**組込み FAPI 保護**（levels strict_mfa/strict/moderate/lax、`useReverification` で扱う想定だが **factor 無しゲストは re-verify 不能**）であり、**Dashboard の単純な OFF トグルは無い**。よって PRIMARY は「Dashboard 緩和」ではなく**コードで連携直前にセッションを fresh 化**する方式に変更し実装した:
+    - server `api/auth/guest.ts` + `refreshGuestTicket`: 既存セッションがあれば**同一 userId** に新 ticket を発行（createUser しない=churn なし=reassignOwner 不要）。
+    - client `AuthProvider.linkGoogle`: 連携直前に新 ticket を redeem（`signIn.create({strategy:'ticket'})`+`setActive`）して first-factor を再検証 → reverification window 内 → `createExternalAccount` 成功。
+    - fallback: なお失敗時は AccountPage が `role="alert"` で可視化（無言失敗撲滅）。
+  - 残 = 本番デプロイ + aged guest 実機 smoke（release §3.4 #4.5）。
 
 ## このフォルダのドキュメント
 - `000_調査レポート.md` — 症状/期待/影響/AI_LOG タイムライン（リモートデバッグで 403 確定）
