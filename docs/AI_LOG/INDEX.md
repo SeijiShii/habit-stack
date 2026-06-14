@@ -1,8 +1,8 @@
 # AI_LOG インデックス — habit-stack
 
-**最終更新**: 2026-06-14 (/flow:revise 3 件 — 計時中セッション可視化/導線 R20260614-001・活動 1:N period 中断除外 R20260614-002(claim C20260614-001 起点)・ふりかえりページネーション R20260614-003。全 226 unit green / tsc clean)
-**総セッション数**: 85
-**総 decision 数**: 137
+**最終更新**: 2026-06-15 (/flow:revise — _shared/auth R20260615-001 account-switch-stop-sync: アカウント切替時の計時停止条件緩和 + 確認 + デバイス⇔アカウント同期ポリシー + 強制停止データ消失是正。設計完了)
+**総セッション数**: 86（表記載は直近のみ。D20260614_006〜011 等は未掲載、`ls docs/AI_LOG/D*.md` 参照）
+**総 decision 数**: 145（D20260615-001〜008 を加算。中間セッション分は別 bookkeeping）
 
 > 注: 下の「セッション一覧」表は直近セッションのみ列挙（全 60 件は `ls docs/AI_LOG/D*.md` 参照）。
 > AUDIT_20260611_2000 で表の網羅性を Low 指摘済み、再生成は別 bookkeeping。
@@ -17,6 +17,7 @@
 
 | ファイル | 実行日 | コマンド | 対象 | decision 範囲 | 状態 |
 |---|---|---|---|---|---|
+| [D20260615_001_revise__shared_auth_R20260615-001.md](./D20260615_001_revise__shared_auth_R20260615-001.md) | 2026-06-15 | /flow:revise | _shared/auth R20260615-001 (account-switch-stop-sync) | D20260615-001〜008 | 設計完了（実装待ち） |
 | [D20260614_005_revise_streak-summary_R20260614-003.md](./D20260614_005_revise_streak-summary_R20260614-003.md) | 2026-06-14 | /flow:revise | streak-summary R20260614-003 (furikaeri-pagination) | D20260614-019〜021 | 実装完了（unit green） |
 | [D20260614_004_revise_execution_R20260614-002.md](./D20260614_004_revise_execution_R20260614-002.md) | 2026-06-14 | /flow:claim→/flow:revise | execution C20260614-001→R20260614-002 (activity-periods) | D20260614-016〜018 | 実装完了（unit green） |
 | [D20260614_003_revise_execution_R20260614-001.md](./D20260614_003_revise_execution_R20260614-001.md) | 2026-06-14 | /flow:revise | execution R20260614-001 (running-session-visible-nav) | D20260614-012〜015 | 実装完了（unit green） |
