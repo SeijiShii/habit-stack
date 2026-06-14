@@ -25,7 +25,7 @@
 | `claim_C20260614-002_20260614_google-login-no-op/` | claim | C20260614-002 / google-login-no-op | 判定完了→fix分岐 | Google ログインボタン無反応。当初の本番設定欠落仮説は実機リモートデバッグで否定 → 確定原因=**Clerk reverification 403（aged guest session）**。→ fix_C20260614-002 へ分岐 | `001_TRIAGE.md` §7 |
 | `fix_C20260614-002_20260614_google-link-reverification/` | fix | C20260614-002 / google-link-reverification | 実装完了(unit green) | aged guest session の `createExternalAccount` が Clerk reverification で 403。**機能修正=連携直前に同一 userId でセッション fresh 化**（refreshGuestTicket + signIn.create ticket、reverification window 回避、churn なし）+ CODE=403 catch+可視化。全 230 tests green | `001_ROOT_CAUSE.md` |
 | `revise_R20260611-002_20260611_self-service-delete/` | revise | R20260611-002 / self-service-delete | E2E green | O54 セルフ削除 UI 導線実装（AccountPage 削除導線 + DELETE /api/account + purgeAllData + wipeOwner outbox 拡張）。176 unit + 8 E2E green。AUDIT_20260611_2000 Critical 解消（「配線待ち」の完了） | `INDEX.md` |
-| `revise_R20260615-001_20260615_account-switch-stop-sync/` | revise | R20260615-001 / account-switch-stop-sync | 設計完了（実装待ち） | アカウント切替（Google ログイン/サインアウト）を契機に計時停止条件を緩和（`/account` 閲覧では止めない）＋確認ダイアログ＋強制停止時データ消失是正。同期ポリシー: 未連携ログイン=保持アップロード / 既存データ持ち=デバイス上書き / サインアウト=デバイス wipe（サーバ保持）。LoginEndGuard 撤去・wipeOwner 再利用・migration 不要 | `INDEX.md` |
+| `revise_R20260615-001_20260615_account-switch-stop-sync/` | revise | R20260615-001 / account-switch-stop-sync | 実装完了（unit 245 green） | アカウント切替（Google ログイン/サインアウト）を契機に計時停止条件を緩和（`/account` 閲覧では止めない）＋確認ダイアログ＋強制停止時データ消失是正。同期ポリシー: 未連携ログイン=保持アップロード / 既存データ持ち=デバイス上書き / サインアウト=デバイス wipe（サーバ保持）。LoginEndGuard 撤去・wipeOwner 再利用・migration 不要 | `INDEX.md` |
 
 ## 関連
 - 親 concept: `../../concept.md` §1.3.2 auth 行

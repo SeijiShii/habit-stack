@@ -2,7 +2,7 @@
 
 **issue / slug**: R20260615-001 / account-switch-stop-sync
 **実施日**: 2026-06-15
-**状態**: 設計完了（実装待ち）
+**状態**: 実装完了（unit 245 green / tsc clean）
 
 <!-- auto-generated-start -->
 
@@ -14,6 +14,9 @@
 | 002 | 002_REVISE_PLAN.md | 変更計画書（LoginEndGuard 撤去 / 確認ゲート / wipeOwner 再利用 / 4 Phase） | 2026-06-15 |
 | 003 | 003_REVISE_UNIT_TEST.md | 単体テスト計画（確認分岐 / wipe / 上書き / 保持） | 2026-06-15 |
 | 004 | 004_REVISE_E2E_TEST.md | E2E 計画（緩和/確認/上書き/削除 + リグレッション + 表示残存観点） | 2026-06-15 |
+| 905 | 905_REVISE_SPEC_REVIEW.md | 設計レビュー（R1-R6、P91 追加） | 2026-06-15 |
+| 101 | 101_REVISE_IMPL_REPORT.md | 実装レポート | 2026-06-15 |
+| 102 | 102_REVISE_UNIT_TEST_REPORT.md | 単体テストレポート（245 green） | 2026-06-15 |
 
 ## 関連
 - 親機能 INDEX: `../INDEX.md`
