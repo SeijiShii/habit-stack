@@ -10,6 +10,7 @@ import {
   type ExecState,
   type ExecStatus,
   type ItemExec,
+  type Period,
 } from "./executionMachine.js";
 
 /** YYYY-MM-DD（ユーザーローカル日付。UTC slice ではなく端末 TZ で導出、R20260613-001）。 */
@@ -94,6 +95,9 @@ export class ExecutionRepo {
         itemId: rec.itemId,
         startedAt: rec.startedAt,
         endedAt: rec.endedAt,
+        // periods は 1:N 計時区間の SoT（R20260614-002）。IndexedDB=構造正本（R4）。
+        // backend スキーマに列が無くても itemIds 等と同様に upsert で無視され互換を保つ。
+        periods: rec.periods,
         elapsedSec: rec.elapsedSec,
         pausedTotalSec: rec.pausedTotalSec,
         note: rec.note,
@@ -162,14 +166,24 @@ export class ExecutionRepo {
     const records: ItemExec[] = allRecs
       .filter((r) => r.sessionId === id)
       .sort((a, b) => String(a.startedAt).localeCompare(String(b.startedAt)))
-      .map((r) => ({
-        itemId: String(r.itemId),
-        startedAt: String(r.startedAt),
-        endedAt: (r.endedAt as string | null) ?? null,
-        elapsedSec: Number(r.elapsedSec ?? 0),
-        pausedTotalSec: Number(r.pausedTotalSec ?? 0),
-        note: String(r.note ?? ""),
-      }));
+      .map((r) => {
+        const startedAt = String(r.startedAt);
+        const endedAt = (r.endedAt as string | null) ?? null;
+        // periods が無い legacy レコードは単一ペアから合成する（R20260614-002 後方互換）。
+        const periods: Period[] =
+          Array.isArray(r.periods) && r.periods.length
+            ? (r.periods as Period[])
+            : [{ startedAt, endedAt }];
+        return {
+          itemId: String(r.itemId),
+          startedAt,
+          endedAt,
+          periods,
+          elapsedSec: Number(r.elapsedSec ?? 0),
+          pausedTotalSec: Number(r.pausedTotalSec ?? 0),
+          note: String(r.note ?? ""),
+        };
+      });
     const state: ExecState = {
       setId: String(session.setId),
       status: session.status as ExecStatus,

@@ -31,6 +31,9 @@ export function useExecution(
 ) {
   const now = deps.now ?? (() => new Date().toISOString());
   const [state, setState] = useState<ExecState | null>(null);
+  // 進行中セッションの復元判定が完了したか（found/none いずれも settle で true）。
+  // セット詳細「開始」からの auto-start は「復元の結果 進行中が無い」ことを確認してから行う（R20260614-001）。
+  const [restored, setRestored] = useState(false);
   // 永続に使う実 id。復元時に found レコードの id へ差し替える（R6）。
   const idRef = useRef(sessionLocalId);
   // 復元適用済みフラグ。async 内（cancelled 判定の後）で立てるため、二度目の実マウントを
@@ -47,24 +50,28 @@ export function useExecution(
     let cancelled = false;
     void (async () => {
       const found = await repo.restoreInProgress();
-      if (cancelled || !found || appliedRef.current) return;
-      appliedRef.current = true;
-      idRef.current = found.id;
-      const dec = decideRecovery({
-        state: found.state,
-        lastSavedAt: found.lastSavedAt,
-        now: now(),
-      });
-      if (dec.kind === "autoEnd") {
-        const ended = endSession(found.state, dec.endedAt);
-        setState(ended);
-        void repo.persist(found.id, ended, {
-          lastSavedAt: dec.endedAt,
-          achievementMode: "strict",
+      if (cancelled) return;
+      if (found && !appliedRef.current) {
+        appliedRef.current = true;
+        idRef.current = found.id;
+        const dec = decideRecovery({
+          state: found.state,
+          lastSavedAt: found.lastSavedAt,
+          now: now(),
         });
-      } else {
-        setState(found.state);
+        if (dec.kind === "autoEnd") {
+          const ended = endSession(found.state, dec.endedAt);
+          setState(ended);
+          void repo.persist(found.id, ended, {
+            lastSavedAt: dec.endedAt,
+            achievementMode: "strict",
+          });
+        } else {
+          setState(found.state);
+        }
       }
+      // 復元判定の settle を通知（進行中なし=found undefined のときも true）。
+      setRestored(true);
     })();
     return () => {
       cancelled = true;
@@ -89,6 +96,8 @@ export function useExecution(
 
   return {
     state,
+    /** 進行中セッションの復元判定が settle したか（auto-start のゲートに使う）。 */
+    restored,
     /** 永続に使う実 id（復元時に found id へ差し替わる）。15秒 flush 等で使う。 */
     activeId: idRef,
     start: useCallback(

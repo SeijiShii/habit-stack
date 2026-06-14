@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import type { ExecutionRepo } from "./model/executionRepo.js";
 import { useExecution } from "./hooks/useExecution.js";
-import { cappedElapsedSec, sessionElapsedSec } from "./model/elapsed.js";
+import {
+  cappedElapsedSec,
+  periodsElapsedSec,
+  sessionElapsedSec,
+} from "./model/elapsed.js";
 import { formatDuration } from "../../services/time/localDate.js";
 import { saveHeartbeat, clearHeartbeat } from "./model/heartbeat.js";
 import type {
@@ -26,6 +30,11 @@ export interface ExecutionPageProps {
   sessionLocalId: string;
   /** 現在の owner id。localStorage ハートビートを account-scoped に保存するために使う。 */
   ownerId?: string;
+  /**
+   * セット詳細「開始」からの遷移時 true。進行中が無ければ復元 settle 後に自動で計時開始し、
+   * 中間の「開始」ゲートを挟まない（R20260614-001）。
+   */
+  autoStart?: boolean;
   now?: () => string;
 }
 
@@ -50,6 +59,7 @@ export function ExecutionPage({
   items,
   sessionLocalId,
   ownerId,
+  autoStart,
   now,
 }: ExecutionPageProps) {
   const exec = useExecution(repo, sessionLocalId, { now });
@@ -96,7 +106,30 @@ export function ExecutionPage({
     if (s?.status === "done" && ownerId) clearHeartbeat(ownerId);
   }, [s?.status, ownerId]);
 
+  // セット詳細「開始」からの遷移（autoStart）時、復元 settle 後に進行中が無ければ自動で計時開始する。
+  // 進行中（同セット）があれば exec.state が復元されるため start は走らず、そのまま再開になる（R20260614-001）。
+  const autoStartedRef = useRef(false);
+  useEffect(() => {
+    if (!autoStart || !exec.restored || exec.state || autoStartedRef.current)
+      return;
+    if (items.length === 0) return;
+    autoStartedRef.current = true;
+    exec.start(
+      setId,
+      items.map((i) => i.id),
+    );
+  }, [autoStart, exec.restored, exec.state, exec.start, setId, items]);
+
   if (!s) {
+    // autoStart 中は中間「開始」ボタンを出さず、自動開始まで穏やかに待つ。
+    if (autoStart) {
+      return (
+        <main aria-labelledby="exec-title">
+          <h1 id="exec-title">{setName}</h1>
+          <p aria-busy="true">準備中…</p>
+        </main>
+      );
+    }
     return (
       <main aria-labelledby="exec-title">
         <h1 id="exec-title">{setName}</h1>
@@ -124,13 +157,13 @@ export function ExecutionPage({
   // 一時停止中は pause 開始時点で凍結、終了済みは確定値を表示。
   const liveElapsed = (rec: ItemExec, status: ExecStatus): number => {
     if (rec.endedAt) return rec.elapsedSec;
-    if (status === "paused")
-      return cappedElapsedSec(
-        rec.startedAt,
-        s.pauseStartedAt ?? nowIso(),
-        rec.pausedTotalSec,
-      );
-    return cappedElapsedSec(rec.startedAt, nowIso(), rec.pausedTotalSec);
+    const openEnd =
+      status === "paused" ? (s.pauseStartedAt ?? nowIso()) : nowIso();
+    // periods があれば SoT に live 算出（中断は period の隙間で除外、R20260614-002）。
+    if (rec.periods && rec.periods.length) {
+      return periodsElapsedSec(rec.periods, openEnd);
+    }
+    return cappedElapsedSec(rec.startedAt, openEnd, rec.pausedTotalSec);
   };
 
   return (

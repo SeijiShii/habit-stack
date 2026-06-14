@@ -83,6 +83,28 @@ describe("ExecutionPage (UC4)", () => {
     expect(screen.queryByRole("button", { name: "次を開始" })).toBeNull();
   });
 
+  it("AS1: autoStart で中間「開始」ボタンを挟まず自動で計時開始する (R20260614-001)", async () => {
+    const repo = new ExecutionRepo(
+      await LocalStore.open(),
+      asOwnerId("owner_1"),
+    );
+    render(
+      <ExecutionPage
+        repo={repo}
+        setId="set_1"
+        setName="平日の朝"
+        items={items}
+        sessionLocalId="sess_as1"
+        autoStart
+      />,
+    );
+    // クリックせずに自動で計時開始（進行中なし → 復元 settle 後に start）。
+    await waitFor(() =>
+      expect(screen.getByTestId("current-item").textContent).toBe("ストレッチ"),
+    );
+    expect(screen.queryByRole("button", { name: "開始" })).toBeNull();
+  });
+
   it("開始後にメモ入力できる", async () => {
     await setup();
     const user = userEvent.setup();

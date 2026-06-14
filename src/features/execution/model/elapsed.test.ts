@@ -3,6 +3,8 @@ import {
   elapsedSec,
   diffSec,
   cappedElapsedSec,
+  confirmedPeriodsSec,
+  periodsElapsedSec,
   sessionElapsedSec,
   MAX_ACTIVITY_SEC,
 } from "./elapsed.js";
@@ -55,6 +57,29 @@ describe("cappedElapsedSec (R1: 1活動 最大4H)", () => {
   });
   it("U-R1-E1: 負値は 0", () => {
     expect(cappedElapsedSec(T(13), T(9), 0)).toBe(0);
+  });
+});
+
+describe("confirmedPeriodsSec / periodsElapsedSec (R20260614-002: 1:N period)", () => {
+  const P = (s: string, e: string | null) => ({ startedAt: s, endedAt: e });
+
+  it("confirmed: 閉じた period 長の合計（開いた period は含めない）", () => {
+    expect(confirmedPeriodsSec([P(T(9), T(9, 2)), P(T(9, 5), T(9, 8))])).toBe(
+      300,
+    );
+    // 中断（隙間 9:02-9:05）は除外。
+    expect(confirmedPeriodsSec([P(T(9), T(9, 2)), P(T(9, 5), null)])).toBe(120);
+  });
+  it("confirmed: 4H クランプ", () => {
+    expect(confirmedPeriodsSec([P(T(0), T(5))])).toBe(MAX_ACTIVITY_SEC);
+  });
+  it("live: 開いた period は openEnd で閉じて算入", () => {
+    expect(
+      periodsElapsedSec([P(T(9), T(9, 2)), P(T(9, 5), null)], T(9, 6)),
+    ).toBe(120 + 60);
+  });
+  it("live: 中断中（開いた period 無し）は閉じた合計＝凍結", () => {
+    expect(periodsElapsedSec([P(T(9), T(9, 2))], T(9, 30))).toBe(120);
   });
 });
 

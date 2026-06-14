@@ -63,22 +63,42 @@ function WithSet({
 
 function SetsRoute({ repos }: { repos: Repos }) {
   const navigate = useNavigate();
+  // 計時中（進行中）セッションの有無を取得（owner グローバル単一）。
+  const inProgress = useQuery({
+    queryKey: ["in-progress-session"],
+    queryFn: () => repos.execution.findInProgress(),
+  });
+  const ipSetId = inProgress.data ? String(inProgress.data.setId) : null;
   return (
     <SetListPage
       repo={repos.sets}
-      onOpenSet={(id) => navigate(`/sets/${id}`)}
+      inProgressSetId={ipSetId}
+      // 進行中セットを選んだら活動画面（/run）へ戻す。それ以外は通常どおり詳細へ。
+      onOpenSet={(id) =>
+        navigate(id === ipSetId ? `/run/${id}` : `/sets/${id}`)
+      }
     />
   );
 }
 
 function SetDetailRoute({ repos }: { repos: Repos }) {
+  const navigate = useNavigate();
   return (
     <WithSet repos={repos}>
       {(set) => (
         <>
           <SetEditPage repo={repos.sets} set={set} />
           <nav aria-label="セット操作">
-            <Link to={`/run/${set.id}`}>実行する</Link>
+            {/* 中間ページを挟まず、押下で活動画面へ遷移し自動で計時開始する（R20260614-001）。 */}
+            <button
+              type="button"
+              className="btn-primary"
+              onClick={() =>
+                navigate(`/run/${set.id}`, { state: { autoStart: true } })
+              }
+            >
+              開始
+            </button>
             <Link to={`/summary/${set.id}`}>継続を見る</Link>
           </nav>
         </>
@@ -104,11 +124,39 @@ function RunInner({
   setId: string;
   setName: string;
 }) {
+  const { state } = useLocation();
+  const autoStart =
+    (state as { autoStart?: boolean } | null)?.autoStart === true;
   const items = useQuery({
     queryKey: ["activity-items", setId],
     queryFn: () => repos.sets.listItems(setId),
   });
-  if (items.isLoading) return <Loading />;
+  // 進行中（owner グローバル単一）セッションの有無 + セット名解決用。
+  const inProgress = useQuery({
+    queryKey: ["in-progress-session"],
+    queryFn: () => repos.execution.findInProgress(),
+  });
+  const sets = useQuery({
+    queryKey: ["activity-sets"],
+    queryFn: () => repos.sets.listSets(),
+  });
+  if (items.isLoading || inProgress.isLoading) return <Loading />;
+
+  // 別のセットが計時中なら二重開始させず、計時中のセットへ誘導する（幽霊セッション根絶、R20260614-001）。
+  const ip = inProgress.data;
+  if (ip && String(ip.setId) !== setId) {
+    const ipName =
+      sets.data?.find((s) => s.id === String(ip.setId))?.name ?? "別のセット";
+    return (
+      <main aria-labelledby="run-busy-title">
+        <h1 id="run-busy-title">{setName}</h1>
+        <p>「{String(ipName)}」が計時中です。先にそちらを終えてください。</p>
+        <Link to={`/run/${ip.setId}`}>計時中のセットへ</Link>
+        <Link to="/sets">セット一覧へ</Link>
+      </main>
+    );
+  }
+
   const list = (items.data ?? []).map((i) => ({ id: i.id, name: i.name }));
   if (list.length === 0) {
     return (
@@ -129,6 +177,7 @@ function RunInner({
         items={list}
         sessionLocalId={sessionLocalId}
         ownerId={repos.ownerId}
+        autoStart={autoStart}
       />
       <nav aria-label="実行後">
         <Link to={`/summary/${setId}`}>継続を見る</Link>

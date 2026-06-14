@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { SummaryRepo } from "./model/summaryRepo.js";
 import { summarize, enumerateDates } from "./model/summarize.js";
@@ -37,6 +37,9 @@ const PERIODS = [
 ] as const;
 type PeriodKey = (typeof PERIODS)[number]["key"];
 
+/** 活動の記録の 1 ページあたり最大行数（R20260614）。 */
+const PAGE_SIZE = 10;
+
 function rangeFor(today: string, days: number): { start: string; end: string } {
   const d = new Date(`${today}T00:00:00.000Z`);
   d.setUTCDate(d.getUTCDate() - (days - 1));
@@ -53,6 +56,11 @@ export function SummaryPage({
 }: SummaryPageProps) {
   const todayStr = today ?? localDateOf(new Date());
   const [period, setPeriod] = useState<PeriodKey>("7");
+  // 活動の記録は 10 件/ページでページネーション（R20260614）。セット切替で先頭へ戻す。
+  const [page, setPage] = useState(0);
+  useEffect(() => {
+    setPage(0);
+  }, [setId]);
 
   const q = useQuery({
     queryKey: ["summary-detail", setId],
@@ -138,7 +146,44 @@ export function SummaryPage({
         </>
       )}
 
-      <ActivityTable activities={q.data?.activities ?? []} />
+      {(() => {
+        const activities = q.data?.activities ?? [];
+        const pageCount = Math.max(1, Math.ceil(activities.length / PAGE_SIZE));
+        const cur = Math.min(page, pageCount - 1);
+        const pageItems = activities.slice(
+          cur * PAGE_SIZE,
+          cur * PAGE_SIZE + PAGE_SIZE,
+        );
+        return (
+          <>
+            <ActivityTable activities={pageItems} />
+            {activities.length > PAGE_SIZE && (
+              <nav
+                aria-label="活動の記録ページ"
+                style={{ display: "flex", gap: 12, alignItems: "center" }}
+              >
+                <button
+                  type="button"
+                  disabled={cur <= 0}
+                  onClick={() => setPage((p) => Math.max(0, p - 1))}
+                >
+                  前へ
+                </button>
+                <span data-testid="page-indicator">
+                  {cur + 1} / {pageCount}
+                </span>
+                <button
+                  type="button"
+                  disabled={cur >= pageCount - 1}
+                  onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
+                >
+                  次へ
+                </button>
+              </nav>
+            )}
+          </>
+        );
+      })()}
 
       <ShareButton url={SHARE_URL} defaultText={SHARE_TEXT} />
     </main>

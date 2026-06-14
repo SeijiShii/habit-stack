@@ -37,6 +37,39 @@ export function cappedElapsedSec(
   );
 }
 
+/** 1 計時区間の最小形（executionMachine.Period のサブセット、循環 import 回避）。 */
+export interface PeriodLike {
+  startedAt: string;
+  endedAt: string | null;
+}
+
+/**
+ * 閉じた period 長の合計（確定経過秒、4H クランプ）。開いた period（endedAt=null）は含めない。
+ * 中断（pause）で period を閉じる設計のため、中断時間は period 間の隙間として自然に除外される（R20260614-002）。
+ */
+export function confirmedPeriodsSec(periods: PeriodLike[]): number {
+  const total = periods.reduce(
+    (sum, p) => (p.endedAt ? sum + diffSec(p.startedAt, p.endedAt) : sum),
+    0,
+  );
+  return Math.min(total, MAX_ACTIVITY_SEC);
+}
+
+/**
+ * periods のライブ経過秒（4H クランプ）。開いた period は openEnd で閉じて計算する。
+ * 中断中（開いた period が無い）は閉じた period の合計＝凍結値になる（R20260614-002）。
+ */
+export function periodsElapsedSec(
+  periods: PeriodLike[],
+  openEnd: string,
+): number {
+  const total = periods.reduce(
+    (sum, p) => sum + diffSec(p.startedAt, p.endedAt ?? openEnd),
+    0,
+  );
+  return Math.min(total, MAX_ACTIVITY_SEC);
+}
+
 /** sessionElapsedSec が必要とする状態の最小形（ExecState のサブセット、循環 import 回避）。 */
 export interface SessionElapsedState {
   status: "running" | "paused" | "done";
@@ -46,6 +79,8 @@ export interface SessionElapsedState {
     endedAt: string | null;
     elapsedSec: number;
     pausedTotalSec: number;
+    /** periods があればこれを SoT に live 算出（無ければ legacy の startedAt/endedAt/pausedTotalSec）。 */
+    periods?: PeriodLike[];
   }[];
 }
 
@@ -62,6 +97,10 @@ export function sessionElapsedSec(
   return state.records.reduce((sum, rec) => {
     if (rec.endedAt) return sum + rec.elapsedSec;
     const end = state.status === "paused" ? (state.pauseStartedAt ?? now) : now;
+    // periods があれば SoT に live 算出（中断は period の隙間で自然に除外）。
+    if (rec.periods && rec.periods.length) {
+      return sum + periodsElapsedSec(rec.periods, end);
+    }
     return sum + cappedElapsedSec(rec.startedAt, end, rec.pausedTotalSec);
   }, 0);
 }
