@@ -29,8 +29,12 @@
 | `App.tsx` `LoginEndGuard` (224-232) | `isLoginPath(pathname)` で `endInProgressNow` を発火 | **撤去**（path 起因の自動停止を廃止） | 互換（停止契機の移動。データ形状不変） |
 | `AccountPage.tsx` `onLink` (54-66) | `linkGoogle()` を即実行 | 進行中があれば確認ダイアログ→OK で停止（保存）→`linkGoogle()`。キャンセルで中止 | 互換（確認ステップ追加） |
 | `AccountPage.tsx` `onSignOut` (68-76) | `signOut()` を即実行 | 進行中があれば確認→OK で停止（保存）→`signOut()`。キャンセルで中止 | 互換（確認ステップ追加） |
-| `AuthProvider.tsx` `signOut` (186-188) | `clerk.signOut()` のみ | `clerk.signOut()` 後にデバイスのローカルデータを wipe（`clearLocalData`） | 互換（副作用追加。サーバ無傷） |
-| `AuthProvider.tsx` signInWithGoogle fallback (90-116) | owner 切替のみ（旧 guest データ orphan） | 既存アカウントへ切替時、デバイスのゲストローカルデータを wipe（上書き = account データ pull） | 互換（副作用追加） |
+| `AuthProvider.tsx` `signOut` (186-188) | `clerk.signOut()` のみ | `clerk.signOut()` は据え置き。デバイス wipe は **App 層で合成**して AccountPage に注入（下記参照） | 互換（副作用追加。サーバ無傷） |
+| **`App.tsx`（signOut 配線）** ※spec-review R1 | （なし。AccountPage が useOwner().signOut を直接呼ぶ） | `onSignOut = async () => { const oid = repos.ownerId; await ownerSignOut(); await repos.store.wipeOwner(oid); }` を AccountPage に注入（既存 `purgeAllData` 注入と同パターン）。**ownerId は signOut 前に捕捉**（signOut 後は新ゲストへ切替わるため） | 互換（配線追加） |
+| `AuthProvider.tsx` signInWithGoogle fallback (90-116) | owner 切替のみ（旧 guest データ orphan） | 既存アカウントへ切替時、視覚上の上書きは **owner スコープ read 分離で自動成立**（新 owner は account データのみ表示）。物理 cleanup は app 初期化時に非 current-owner ローカルを wipe（spec-review R2） | 互換（副作用追加） |
+<!-- spec-review R1: signOut wipe は AuthProvider(LocalStore 非到達)でなく App 層で合成。ownerId は signOut 前に捕捉 -->
+<!-- spec-review R2: 上書きは read 分離で視覚成立、物理 wipe は OAuth リダイレクトで同期不能のため app init cleanup へ -->
+<!-- spec-review R1: `clearLocalData` は新設せず既存 `wipeOwner(ownerId)` を再利用（local-sync API 追加不要） -->
 | `localStore`（local-sync） | `clear` 系は wipeOwner(outbox) 等限定 | **`clearLocalData(ownerId?)`** を提供（owner 指定または全 owner のローカルエンティティを物理削除、サーバ非干渉） | 互換（API 追加） |
 | `AccountPage` props | `onDeleteAllData?`, `onDeleted?` | 進行中確認のため `findInProgress`（または `hasInProgress`）解決手段を注入 / `onConfirmStop` 注入 | 互換（optional prop 追加） |
 
@@ -100,8 +104,9 @@
   - 連携先 Google が未使用（未連携）→ `createExternalAccount`（同一 userId 維持）で連携成立 → デバイスのゲストデータは owner を保ったままアカウントに帰属し、同期キューで**サーバへアップロード**される（保持）。
   - guest churn（別 userId のゲスト生成）を抑止し、データを orphan 化させない（C20260614-002 の refreshGuestTicket 経路を維持）。id が変わる経路では `reassignOwner` で付け替え（既存 dataOps）。
 - **UC-ACCT-OVERWRITE（既存データ持ち Google ログイン = 上書き）**
-  - 連携先 Google が既存ユーザー → `createExternalAccount` 失敗 → `signInWithGoogle` fallback で既存ユーザーへサインイン（owner 切替）。
-  - **デバイスのゲストローカルデータを wipe** し、既存アカウントのサーバデータを pull してデバイスを再構成（= 上書き）。デバイスにゲストデータと account データが混在しないようにする。
+  - 連携先 Google が既存ユーザー → `createExternalAccount` 失敗 → `signInWithGoogle` fallback で既存ユーザーへサインイン（owner 切替）。判定は createExternalAccount 成否（Clerk/BE 由来、FE state 非依存、P25）。
+  - **視覚上の上書き**は owner スコープ read 分離で自動成立（新 owner は `getAllByOwner` で account データのみ表示、guest データは非表示）。既存アカウントのサーバデータは同期キューで pull される。
+  - **物理 cleanup**（旧 guest ローカルの実削除）は OAuth リダイレクトで同一 JS コンテキスト同期実行が不能なため、**app 初期化時に「current owner 以外のローカルデータを wipe」** する opportunistic 方式で行う（spec-review R2、[論点-003]）。当面 orphan を許容しても owner 絞りで混在表示は起きない。
 - **UC-ACCT-SIGNOUT（サインアウト = デバイス削除）**
   - `clerk.signOut()` でセッション破棄 → **デバイスのローカル IndexedDB データを wipe**（`clearLocalData`）。
   - アカウント（サーバ）データは保持。再ログインで復元可能。
@@ -113,9 +118,12 @@
   - props 追加（例）`hasInProgress?: () => Promise<boolean>` または `inProgressProbe`、`confirmStopMessage`。
   - `onLink` / `onSignOut` は「進行中確認 → （あれば）確認ダイアログ → 停止（保存）→ アクション」の順に再構成。確認 UI は既存の `confirming` パターン（削除導線で実装済）に倣う。
 - `AuthProvider`:
-  - `signOut = async () => { await clerk.signOut(); await clearLocalData(); }`（wipe は best-effort、失敗してもサインアウトは完了）。
-  - signInWithGoogle fallback 経路で `clearLocalData(guestOwnerId)` を実行してから account データ pull。
-- `localStore.clearLocalData(ownerId?)`: 指定 owner（省略時は全 owner）のローカルエンティティストアを物理削除。outbox / meta も対象。**サーバ API は呼ばない**（ローカル限定）。
+  - `signOut = async () => { await clerk.signOut(); }`（Clerk 破棄のみに据え置き。AuthProvider は LocalStore 非到達のため wipe は持たない、spec-review R1）。
+  - signInWithGoogle fallback はリダイレクト遷移するため経路内 wipe は行わない（spec-review R2）。
+- `App.tsx`（配線、spec-review R1）:
+  - `onSignOut = async () => { const oid = repos.ownerId; await ownerSignOut(); await repos.store.wipeOwner(oid); }` を AccountPage に注入（既存 `purgeAllData` 注入と同パターン、wipe は best-effort）。
+  - 上書きの物理 cleanup は app 初期化時に `current owner 以外のローカル` を wipe（[論点-003]）。
+- 既存 `LocalStore.wipeOwner(ownerId)` を再利用（owner 配下のローカルエンティティ + outbox を物理削除、**サーバ API は呼ばない**）。`clearLocalData` は新設しない（P19）。
 - `App.tsx`: `LoginEndGuard` 削除（`isLoginPath` 起因の停止は廃止）。停止は AccountPage 経由のみ。
 
 ### 7.3 データモデル（新仕様）
@@ -154,9 +162,21 @@
 
 ### [論点-002] 上書き時のサーバ pull 完了待ち UX
 - **影響範囲**: signInWithGoogle fallback → account データ pull
-- **詰めるべき問い**: 上書き（wipe → pull）中の表示（ローディング / 空表示の一瞬）をどう見せるか。
+- **詰めるべき問い**: 上書き（切替 → pull）中の表示（ローディング / 空表示の一瞬）をどう見せるか。
 - **推奨**: 既存の同期キュー（非ブロッキング）に委ね、pull 完了までは空 or 既存ローディングで自然に埋まる方針。専用 UI は `/flow:design` 段階で必要なら追加（auto-pick、Class A）。
 - **判断期限**: design 段階
+
+### [論点-003] 上書きパスの物理 cleanup タイミング（spec-review R2）
+- **影響範囲**: app 初期化 / signInWithGoogle fallback / wipeOwner
+- **詰めるべき問い**: 旧 guest ローカルデータの物理削除を (a) app init で「current owner 以外を wipe」 / (b) 当面 orphan 許容（owner 絞りで非表示なので実害なし）/ (c) /sso-callback 帰還時に検出して wipe、のどれにするか。
+- **推奨**: 案(a) app init cleanup。owner スコープ read 分離で混在表示は起きないため緊急度は低いが、ストレージ肥大と「サインアウトでデバイス削除」要望との一貫性のため init で非 current-owner を掃除する。
+- **判断期限**: tdd Phase 3 / **担当**: 実装時に IndexedDB の owner 横断列挙可否を確認（auto-pick、AI_LOG 記録）
+
+### [論点-004] 既存アカウントだがデータ空のサインイン（spec-review R5）
+- **影響範囲**: UC-ACCT-OVERWRITE
+- **詰めるべき問い**: 既存 Clerk user だがレコード 0 件のアカウントにサインインした場合、guest データを上書き（消す）か、空アカウントには guest データを引き継ぐか。
+- **推奨**: account=SoT で一貫し「既存ユーザーサインイン=常に owner 切替（空でも device は account を映す）」。要望5の「データが既に存在する場合」を厳密判定せず、createExternalAccount 成否（=新規連携 or 既存サインイン）で分岐（BE/Clerk 由来、P25）。空アカウントへの引き継ぎが必要なら別途要望化。
+- **判断期限**: tdd 着手時（auto-pick、AI_LOG 記録）
 
 ## 10. 更新履歴
 | 日付 | 変更概要 | 実行者 |

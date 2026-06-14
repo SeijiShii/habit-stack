@@ -18,9 +18,10 @@
 |---|---|---|---|
 | `src/App.tsx` | `LoginEndGuard`（224-232）と `<LoginEndGuard>` 配置（256）を撤去。`isLoginPath` import も execution 側で他用途なければ整理 | 中（停止契機の喪失を AccountPage 側で確実に代替する必要） | §2.1, §2.2 |
 | `src/features/account/AccountPage.tsx` | `onLink` / `onSignOut` を「進行中確認 → 確認ダイアログ →（OK）停止保存 → アクション /（キャンセル）中止」に再構成。確認 UI は既存 `confirming` パターン踏襲。進行中検出 seam（props 注入）を追加 | 中 | §2.1, §2.2, §7.1, §7.2 |
-| `src/components/auth/AuthProvider.tsx` | `signOut` に `clerk.signOut()` 後の `store.wipeOwner(ownerId)`（best-effort）を追加。signInWithGoogle fallback（既存データ持ちログイン）経路で旧 guest owner の `wipeOwner` → account データ pull（上書き）を配線 | 中（owner 解決タイミング・wipe 対象 owner の取り違え注意） | §2.2, §7.1, §7.2 |
-| `src/services/auth/ownerContext.tsx` | 必要なら OwnerState に進行中確認/wipe 連携の seam を足す（または AccountPage に repos を直接配線）。最小化方針 | 低 | §2.2 |
-| `src/App.tsx`（AccountPage 配線部 290-304） | AccountPage に進行中検出（`repos.execution.findInProgress`）と停止（`endInProgressNow`）を注入 | 低 | §7.2 |
+| `src/components/auth/AuthProvider.tsx` | `signOut` は `clerk.signOut()` のまま据え置き（**AuthProvider は LocalStore 非到達のため wipe を持たせない**、spec-review R1）。signInWithGoogle fallback はリダイレクト遷移するため経路内 wipe しない（R2） | 低 | §2.2 |
+| `src/App.tsx`（signOut 配線、**spec-review R1**） | `onSignOut = async () => { const oid = repos.ownerId; await ownerSignOut(); await repos.store.wipeOwner(oid); }` を AccountPage に注入（既存 `purgeAllData` 注入と同パターン）。**ownerId は signOut 前に捕捉**。app 初期化で非 current-owner ローカルを cleanup（上書き物理削除、R2/[論点-003]） | 中 | §2.2, §7.1, §7.2 |
+| `src/services/auth/ownerContext.tsx` | 変更最小（signOut の wipe 合成は App 層で行うため OwnerState 追加は不要）。進行中確認は AccountPage に `repos.execution` 系を注入 | 低 | §2.2 |
+| `src/App.tsx`（AccountPage 配線部 290-304） | AccountPage に進行中検出（`repos.execution.findInProgress`）+ 停止（`endInProgressNow`）+ デバイス wipe（`repos.store.wipeOwner`）を注入（purgeAllData と同様に App が握る repos.store/ownerId を使用） | 低 | §7.2 |
 | `_shared/local-sync` SPEC §6 | cross-owner replace ポリシー（アップロード/上書き/削除）が last-write-wins と直交である旨を追記（ドキュメントのみ） | 低 | §7.5 |
 
 ## 2. 新規ファイル一覧
@@ -36,7 +37,7 @@
 |---|---|---|
 | （ファイル削除なし） | — | — |
 | `App.tsx` 内 `LoginEndGuard` コンポーネント（コード片） | path 起因の強制停止を廃止 | AccountPage の確認付き停止ゲート |
-| `recovery.ts` `isLoginPath`（他に利用がなければ） | 停止契機が path 非依存になり不要化の可能性 | 利用箇所確認後に判断（残すなら無害） |
+| `recovery.ts` `isLoginPath`（**残置確定**、spec-review R4） | LoginEndGuard 撤去後は production caller ゼロだが、pure fn + recovery.test 済で無害・再利用余地あり → **削除しない**。LoginEndGuard 利用のみ撤去 | recovery.test 維持 |
 
 ## 4. マイグレーション要否
 
@@ -53,15 +54,15 @@
 - ゴール: `/account` 閲覧では停止しない。ログイン/サインアウト押下時のみ、進行中があれば確認→OK で `endInProgressNow`（保存）→アクション、キャンセルで中止。
 - テスト: 「閲覧では endInProgressNow が呼ばれない」「切替押下＋進行中で確認表示」「OK で停止保存→アクション」「キャンセルで未停止・未切替」。
 
-### Phase 2: サインアウト時デバイス削除（要望6）
-- 対象: `AuthProvider.tsx` signOut
-- ゴール: `clerk.signOut()` 後に `wipeOwner(ownerId)`。サーバ非干渉。best-effort。
-- テスト: signOut で wipeOwner が現 owner に対し呼ばれる / wipe 失敗でもサインアウト完了。
+### Phase 2: サインアウト時デバイス削除（要望6、**App 層配線** spec-review R1）
+- 対象: `App.tsx`（onSignOut 合成）+ AccountPage（注入受け）
+- ゴール: `const oid = repos.ownerId; await ownerSignOut(); await repos.store.wipeOwner(oid);`。サーバ非干渉、best-effort。ownerId は signOut 前に捕捉。
+- テスト: onSignOut で wipeOwner が（signOut 前に捕捉した）現 owner に対し呼ばれる / wipe 失敗でもサインアウト完了。
 
-### Phase 3: 既存データ持ちログイン時の上書き（要望5）
-- 対象: `AuthProvider.tsx` signInWithGoogle fallback
-- ゴール: 既存ユーザー切替時に旧 guest owner を `wipeOwner` → account データ pull（デバイス上書き）。
-- テスト: fallback 経路で旧 guest の wipeOwner が呼ばれる / 連携（新規）経路では wipe しない（保持）。
+### Phase 3: 既存データ持ちログイン時の上書き（要望5、**read 分離 + init cleanup** spec-review R2）
+- 対象: app 初期化（非 current-owner ローカル cleanup）+ owner スコープ read 分離の確認
+- ゴール: 既存ユーザーサインイン後、device は account データのみ表示（getAllByOwner）。旧 guest ローカルは app init の cleanup で物理削除（[論点-003] 案 a）。fallback 経路内での同期 wipe はしない（リダイレクトで不能）。
+- テスト: 連携（新規）経路では wipe/cleanup しない（保持、U-07）/ 別 owner サインイン後は旧 guest データが getAllByOwner に出ない / init cleanup が非 current-owner を削除。
 
 ### Phase 4: 未連携ログイン時の保持・アップロード検証（要望4）
 - 対象: linkGoogle（createExternalAccount 同一 userId）/ guest churn 抑止の回帰

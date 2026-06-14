@@ -14,9 +14,9 @@
 | U-02 | AccountPage onLink（進行中あり・OK） | findInProgress=session、押下→確認 OK | endInProgressNow(now) 呼出（保存）→ その後 linkGoogle 実行 |
 | U-03 | AccountPage onSignOut（進行中あり・OK） | findInProgress=session、押下→確認 OK | endInProgressNow → signOut 実行 |
 | U-04 | AccountPage onSignOut（進行中なし） | findInProgress=undefined | 確認なしで signOut |
-| U-05 | AuthProvider signOut | clerk.signOut mock | clerk.signOut 後に store.wipeOwner(現 ownerId) が呼ばれる |
-| U-06 | signInWithGoogle fallback（既存ユーザー） | createExternalAccount 失敗→fallback | 旧 guest ownerId に対し wipeOwner が呼ばれてから account 切替（上書き） |
-| U-07 | linkGoogle（未連携・新規連携成立） | createExternalAccount 成功（同一 userId） | wipeOwner は呼ばれない（データ保持）。owner 不変で作成済みデータが getAllByOwner に残る |
+| U-05 | App onSignOut 合成（spec-review R1） | ownerSignOut + store mock | signOut 前に捕捉した ownerId に対し store.wipeOwner が呼ばれる（AuthProvider でなく App 層合成） |
+| U-06 | 既存ユーザーサインイン後の表示（spec-review R2） | owner=B へ切替後 | getAllByOwner(B) のみ表示。旧 guest(A) データは非表示。app init cleanup で A のローカルが wipe される |
+| U-07 | linkGoogle（未連携・新規連携成立、**保持 no-wipe ロックイン** P11/R3） | createExternalAccount 成功（同一 userId） | wipeOwner/cleanup は呼ばれない（データ保持）。owner 不変で作成済みデータが getAllByOwner に残る |
 | U-08 | endInProgressNow（保存） | 進行中 running セッション | session.status='done' + records 永続（既存挙動の回帰固定、strict 達成） |
 
 ### 1.2 異常系
@@ -38,8 +38,8 @@
 
 | ID | 対象 | 修正前 | 修正後 | 理由 |
 |---|---|---|---|---|
-| M-01 | App / LoginEndGuard 既存テスト | `/account` 遷移で endInProgressNow が呼ばれることを検証 | 「呼ばれないこと」を検証（または当該テスト削除し U-14 に置換） | 停止契機を path から明示アクションへ移行 |
-| M-02 | AuthProvider signOut 既存テスト | clerk.signOut のみ検証 | clerk.signOut + wipeOwner 呼出を検証 | サインアウト時デバイス削除追加 |
+| M-01 | App.test（path 停止）※spec-review R4 | 既存 App.test は `/account` 到達・描画のみ assert（**path 停止は未 assert**）→ 「修正」より **U-14（非停止）新規追加が主**。既存に壊れる assert はほぼ無い | U-14 を追加し path 停止廃止を固定 | 停止契機を path→明示アクションへ。`isLoginPath`/recovery.test は残置 |
+| M-02 | AccountPage signOut 既存テスト（spec-review R1） | AccountPage が useOwner().signOut を直接呼ぶ前提 | App 注入の `onSignOut`（wipe 合成）経由を検証。AuthProvider.signOut 自体は clerk.signOut のまま | wipe 配線を App 層へ移動 |
 | M-03 | AccountPage onLink/onSignOut 既存テスト | 押下で即 linkGoogle/signOut | 進行中なし時のみ即実行、ありは確認経由 | 確認ゲート追加 |
 
 ## 3. 削除テストケース
