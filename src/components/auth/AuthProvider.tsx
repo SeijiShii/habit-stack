@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import {
   ClerkProvider,
   useAuth,
@@ -36,9 +36,12 @@ function ClerkOwnerBridge({
   const { signIn, setActive } = useSignIn();
   const { user } = useUser();
   const clerk = useClerk();
+  // 連携前の意図的な session fresh 化中（signOut→re-sign-in）は、下の自動ゲスト生成 effect の
+  // 割り込みを抑止する（割り込むと別 userId のゲストが作られ所有データが churn する、CF-20260614-002）。
+  const refreshingRef = useRef(false);
 
   useEffect(() => {
-    if (!isLoaded || isSignedIn || !signIn) return;
+    if (!isLoaded || isSignedIn || !signIn || refreshingRef.current) return;
     let cancelled = false;
     void (async () => {
       const ticket = await fetchGuestTicket();
@@ -70,11 +73,16 @@ function ClerkOwnerBridge({
   const linkGoogle = user
     ? async () => {
         // 連携直前にゲストセッションを張り直して reverification window 内に戻す（同一 userId、CF-20260614-002）。
-        // server が現セッションの userId に対し fresh ticket を発行。redeem が first-factor を再検証し、
-        // aged guest session の createExternalAccount 403（"additional verification"）を回避する。
+        // Clerk は single-session 中 signIn.create が 400 になるため、
+        //   ① 現セッションで fresh ticket を取得（server が同一 userId に発行）
+        //   ② refreshingRef を立てて自動ゲスト生成を抑止
+        //   ③ signOut → signIn.create({ticket}) → setActive で first-factor を再検証（fva リセット）
+        // ticket は同一 userId なので所有データは保たれる（reassignOwner 不要）。
         try {
           const ticket = await fetchGuestTicket();
           if (ticket && signIn && setActive) {
+            refreshingRef.current = true;
+            await clerk.signOut();
             const res = await signIn.create({ strategy: "ticket", ticket });
             if (res.status === "complete" && res.createdSessionId) {
               await setActive({ session: res.createdSessionId });
@@ -82,6 +90,8 @@ function ClerkOwnerBridge({
           }
         } catch {
           // refresh 失敗は致命でない。続行し、なお 403 なら AccountPage が可視化する。
+        } finally {
+          refreshingRef.current = false;
         }
         const freshUser = clerk.user ?? user;
         await linkWithGoogle(
