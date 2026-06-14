@@ -23,6 +23,18 @@ export interface AccountPageProps {
   onDeleteAllData?: () => Promise<void>;
   /** 削除完了後の遷移（既定: トップへリロードしてフレッシュなゲスト状態に戻す）。 */
   onDeleted?: () => void;
+  /**
+   * App が合成するサインアウト（Clerk signOut + デバイスのローカル wipe、R20260615-001 / spec-review R1）。
+   * 未注入なら useOwner().signOut を使う（wipe なし）。デバイス削除は LocalStore に到達できる App 層で配線する。
+   */
+  onSignOut?: () => Promise<void>;
+  /**
+   * 計時中（進行中）セッションがあるか（R20260615-001）。アカウント切替（ログイン/サインアウト）の直前に確認し、
+   * 進行中があれば「計時中の活動を停止しますか」を出す。未注入なら確認せず即切替（後方互換）。
+   */
+  probeInProgress?: () => Promise<boolean>;
+  /** 進行中セッションを保存して停止する（endInProgressNow）。確認 OK 時に呼ぶ。 */
+  onStopInProgress?: () => Promise<void>;
 }
 
 /**
@@ -37,11 +49,26 @@ export interface AccountPageProps {
 export function AccountPage({
   onDeleteAllData,
   onDeleted,
+  onSignOut,
+  probeInProgress,
+  onStopInProgress,
 }: AccountPageProps = {}): ReactElement {
-  const { isLoaded, isLinked, email, linkGoogle, signOut } = useOwner();
+  const {
+    isLoaded,
+    isLinked,
+    email,
+    linkGoogle,
+    signOut: ctxSignOut,
+  } = useOwner();
+  // App 合成の signOut（wipe 込み）を優先。未注入なら context の signOut。
+  const signOut = onSignOut ?? ctxSignOut;
   const [busy, setBusy] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [linkError, setLinkError] = useState<string | null>(null);
+  // アカウント切替（ログイン/サインアウト）の保留種別。進行中があるときの確認ダイアログ表示に使う。
+  const [pendingSwitch, setPendingSwitch] = useState<null | "link" | "signout">(
+    null,
+  );
 
   if (!isLoaded) {
     return (
@@ -51,29 +78,59 @@ export function AccountPage({
     );
   }
 
-  const onLink = async () => {
-    if (!linkGoogle) return;
-    setBusy(true);
-    setLinkError(null);
-    try {
-      await linkGoogle();
-    } catch (e) {
-      // 従来は catch 無しで失敗が無言だった（C20260614-002: reverification 403 で「押しても何も起きない」）。
-      setLinkError(linkErrorMessage(e));
-    } finally {
-      setBusy(false);
+  // 実際の切替アクション（確認後 or 進行中なしで直接実行）。
+  const runSwitch = async (kind: "link" | "signout") => {
+    if (kind === "link") {
+      if (!linkGoogle) return;
+      setBusy(true);
+      setLinkError(null);
+      try {
+        await linkGoogle();
+      } catch (e) {
+        // 従来は catch 無しで失敗が無言だった（C20260614-002: reverification 403 で「押しても何も起きない」）。
+        setLinkError(linkErrorMessage(e));
+      } finally {
+        setBusy(false);
+      }
+    } else {
+      if (!signOut) return;
+      setBusy(true);
+      try {
+        await signOut();
+      } finally {
+        setBusy(false);
+      }
     }
   };
 
-  const onSignOut = async () => {
-    if (!signOut) return;
+  // アカウント切替の要求口（R20260615-001）。進行中があれば確認、なければ即切替。
+  const requestSwitch = async (kind: "link" | "signout") => {
+    if (probeInProgress && (await probeInProgress())) {
+      setPendingSwitch(kind);
+      return;
+    }
+    await runSwitch(kind);
+  };
+
+  // 「停止して続行」: 進行中を保存して停止 → 切替を続行（保存してから切替ポリシーへ）。
+  const onConfirmStop = async () => {
+    const kind = pendingSwitch;
+    setPendingSwitch(null);
+    if (!kind) return;
     setBusy(true);
     try {
-      await signOut();
+      await onStopInProgress?.();
     } finally {
       setBusy(false);
     }
+    await runSwitch(kind);
   };
+
+  // 「キャンセル」: 切替を中止（計時は継続、ログイン/サインアウトしない）。
+  const onCancelStop = () => setPendingSwitch(null);
+
+  const onLink = () => requestSwitch("link");
+  const onSignOutClick = () => requestSwitch("signout");
 
   const onDelete = async () => {
     if (!onDeleteAllData) return;
@@ -90,6 +147,23 @@ export function AccountPage({
     <main>
       <h1>アカウント</h1>
 
+      {pendingSwitch ? (
+        <section role="alertdialog" aria-label="計時中の確認">
+          <p role="alert">計時中の活動があります。停止しますか？</p>
+          <button
+            type="button"
+            className="btn-primary"
+            onClick={onConfirmStop}
+            disabled={busy}
+          >
+            停止して続行
+          </button>
+          <button type="button" onClick={onCancelStop} disabled={busy}>
+            キャンセル
+          </button>
+        </section>
+      ) : null}
+
       {isLinked ? (
         <section aria-label="連携済みアカウント">
           <p>
@@ -97,7 +171,7 @@ export function AccountPage({
             アカウントで引き継ぎ済みです。別の端末でも続きを記録できます。
           </p>
           {email ? <p>{email}</p> : null}
-          <button type="button" onClick={onSignOut} disabled={busy}>
+          <button type="button" onClick={onSignOutClick} disabled={busy}>
             サインアウト
           </button>
         </section>

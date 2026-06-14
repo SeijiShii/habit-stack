@@ -169,4 +169,25 @@ export class LocalStore {
       await tx.done;
     }
   }
+
+  /**
+   * current owner 以外の全 owner のローカルデータを物理削除する
+   * （既存アカウントへのサインイン=上書き時の cleanup、R20260615-001 / spec-review R2）。
+   * OAuth リダイレクトで切替境界では同期 wipe できないため、サインイン復帰後にこれを呼んで
+   * デバイスを current owner のデータだけにする。サーバ API は呼ばない（ローカル限定）。
+   * 注意: 単なるゲスト churn では呼ばないこと（orphan は保持し復元余地を残す、spec-review R3）。
+   * 呼び出しは「明示的な既存アカウントサインイン」マーカーでガードする。
+   */
+  async wipeOtherOwners(currentOwnerId: string): Promise<void> {
+    const others = new Set<string>();
+    for (const entity of ENTITY_STORES) {
+      const all = (await this.db.getAll(entity)) as LocalRecord[];
+      for (const r of all) {
+        if (r.ownerId && r.ownerId !== currentOwnerId) others.add(r.ownerId);
+      }
+    }
+    for (const oid of others) {
+      await this.wipeOwner(oid);
+    }
+  }
 }

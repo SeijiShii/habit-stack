@@ -4,6 +4,7 @@ import { SetsRepo } from "../features/activity-sets/model/setsRepo.js";
 import { ExecutionRepo } from "../features/execution/model/executionRepo.js";
 import { SummaryRepo } from "../features/streak-summary/model/summaryRepo.js";
 import { rebuildAchievements } from "../services/sync/migrations/rebuildAchievements.js";
+import { consumeDeviceOverwrite } from "../services/auth/deviceOverwrite.js";
 import { useOwner } from "../hooks/useOwner.js";
 
 export interface Repos {
@@ -38,6 +39,18 @@ export function useRepos(): Repos | null {
     void rebuildAchievements(store, ownerId).catch(() => {
       // 失敗時はフラグ未設定のまま → 次回ロードで再実行（005_REVISE_MIGRATION §5）
     });
+  }, [store, ownerId]);
+
+  // 既存アカウントへのサインイン復帰時のみ、current owner 以外のローカルを wipe する
+  // （= デバイス上書き、R20260615-001 / spec-review R2）。marker は明示的な既存サインインでのみ立ち、
+  // 単なるゲスト churn では立たない（保持すべきデータを誤って消さない、spec-review R3）。
+  useEffect(() => {
+    if (!store || !ownerId) return;
+    if (consumeDeviceOverwrite()) {
+      void store.wipeOtherOwners(ownerId).catch(() => {
+        // 失敗しても owner 絞り（getAllByOwner）で混在表示は起きない。次回機会に委ねる。
+      });
+    }
   }, [store, ownerId]);
 
   return useMemo(() => {

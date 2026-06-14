@@ -1,4 +1,4 @@
-import { useEffect, type ReactElement } from "react";
+import { type ReactElement } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Routes,
@@ -10,8 +10,8 @@ import {
   Navigate,
 } from "react-router-dom";
 import { AuthenticateWithRedirectCallback } from "@clerk/clerk-react";
-import { isLoginPath } from "./features/execution/model/recovery.js";
 import type { SetRecord } from "./features/activity-sets/model/setsRepo.js";
+import { useOwner } from "./services/auth/ownerContext.js";
 import { AppLayout } from "./components/AppLayout.js";
 import { HomePage } from "./pages/HomePage.js";
 import {
@@ -217,18 +217,43 @@ function SummaryRoute({ repos }: { repos: Repos }) {
 }
 
 /**
- * 計時中にログイン/アカウント画面（/account）へ遷移したら進行中セッションを終了する
- * （UC-EX-LOGIN-END、R20260611-001 論点-001）。ふりかえり/サマリ等への遷移では終了しない。
- * owner 切替はこの画面で起きるため、ログイン前に done 化して owner を跨ぐ進行中セッションを無くす。
+ * アカウント画面のルート。アカウント切替（Google ログイン / サインアウト）を契機にした
+ * 計時停止の確認 + デバイス wipe を App 層で配線する（R20260615-001 / spec-review R1）。
+ * - 停止条件は「明示的なアカウント切替時」のみ。/account へ遷移しただけでは止めない（旧 LoginEndGuard 撤去）。
+ * - signOut は Clerk 破棄後にデバイスのローカルデータを wipe（ownerId は signOut 前に捕捉、サーバは無傷）。
+ *   AuthProvider は LocalStore に到達できないため、store を握る App 層で合成する。
  */
-function LoginEndGuard({ repos }: { repos: Repos }) {
-  const { pathname } = useLocation();
-  useEffect(() => {
-    if (isLoginPath(pathname)) {
-      void repos.execution.endInProgressNow(new Date().toISOString());
-    }
-  }, [pathname, repos]);
-  return null;
+function AccountRoute({ repos }: { repos: Repos | null }) {
+  const { signOut } = useOwner();
+  if (!repos) {
+    // keyless / ローカル準備中: 進行中検出・wipe は不可。素の AccountPage を出す。
+    return <AccountPage />;
+  }
+  const onSignOut = signOut
+    ? async () => {
+        const oid = repos.ownerId;
+        await signOut();
+        // デバイス（ローカル）のデータを削除。サーバ（アカウント）データは保持し再ログインで復元可。
+        await repos.store.wipeOwner(oid);
+      }
+    : undefined;
+  return (
+    <AccountPage
+      onSignOut={onSignOut}
+      probeInProgress={() => repos.execution.findInProgress().then((s) => !!s)}
+      onStopInProgress={() =>
+        repos.execution
+          .endInProgressNow(new Date().toISOString())
+          .then(() => undefined)
+      }
+      onDeleteAllData={() =>
+        purgeAllData({
+          store: repos.store,
+          ownerId: asOwnerId(repos.ownerId),
+        }).then(() => undefined)
+      }
+    />
+  );
 }
 
 /**
@@ -253,7 +278,6 @@ export function App() {
     repos ? el(repos) : <Loading />;
   return (
     <AppLayout>
-      {repos && <LoginEndGuard repos={repos} />}
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route
@@ -286,22 +310,7 @@ export function App() {
             <SummaryRoute repos={r} />
           ))}
         />
-        <Route
-          path="/account"
-          element={
-            <AccountPage
-              onDeleteAllData={
-                repos
-                  ? () =>
-                      purgeAllData({
-                        store: repos.store,
-                        ownerId: asOwnerId(repos.ownerId),
-                      }).then(() => undefined)
-                  : undefined
-              }
-            />
-          }
-        />
+        <Route path="/account" element={<AccountRoute repos={repos} />} />
         <Route path="/sso-callback" element={<SsoCallbackRoute />} />
         <Route path="/legal/privacy" element={<PrivacyPage />} />
         <Route path="/legal/terms" element={<TermsPage />} />

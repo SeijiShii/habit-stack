@@ -125,4 +125,124 @@ describe("AccountPage", () => {
     wrap(base, <AccountPage />);
     expect(screen.queryByRole("button", { name: "全データを削除" })).toBeNull();
   });
+
+  // --- R20260615-001: アカウント切替時の計時停止確認ゲート ---
+
+  it("U-01: 進行中なし → ログインは確認なしで即 linkGoogle", async () => {
+    const linkGoogle = vi.fn(async () => {});
+    const probeInProgress = vi.fn(async () => false);
+    const onStopInProgress = vi.fn(async () => {});
+    wrap(
+      { ...base, linkGoogle },
+      <AccountPage
+        probeInProgress={probeInProgress}
+        onStopInProgress={onStopInProgress}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Google でログイン" }));
+    await waitFor(() => expect(linkGoogle).toHaveBeenCalledTimes(1));
+    expect(onStopInProgress).not.toHaveBeenCalled();
+    expect(screen.queryByRole("button", { name: "停止して続行" })).toBeNull();
+  });
+
+  it("U-02: 進行中あり + ログイン → 確認 → 停止して続行で endInProgressNow→linkGoogle", async () => {
+    const linkGoogle = vi.fn(async () => {});
+    const probeInProgress = vi.fn(async () => true);
+    const onStopInProgress = vi.fn(async () => {});
+    wrap(
+      { ...base, linkGoogle },
+      <AccountPage
+        probeInProgress={probeInProgress}
+        onStopInProgress={onStopInProgress}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Google でログイン" }));
+    // 確認ダイアログが出て、まだ linkGoogle は呼ばれない
+    await waitFor(() =>
+      expect(screen.getByText(/計時中の活動があります/)).toBeTruthy(),
+    );
+    expect(linkGoogle).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "停止して続行" }));
+    await waitFor(() => expect(onStopInProgress).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(linkGoogle).toHaveBeenCalledTimes(1));
+  });
+
+  it("U-09: 進行中あり + ログイン → キャンセルで停止も linkGoogle もしない", async () => {
+    const linkGoogle = vi.fn(async () => {});
+    const probeInProgress = vi.fn(async () => true);
+    const onStopInProgress = vi.fn(async () => {});
+    wrap(
+      { ...base, linkGoogle },
+      <AccountPage
+        probeInProgress={probeInProgress}
+        onStopInProgress={onStopInProgress}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Google でログイン" }));
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "キャンセル" })).toBeTruthy(),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "キャンセル" }));
+    expect(onStopInProgress).not.toHaveBeenCalled();
+    expect(linkGoogle).not.toHaveBeenCalled();
+    // 確認が閉じてログインボタンに戻る
+    expect(
+      screen.getByRole("button", { name: "Google でログイン" }),
+    ).toBeTruthy();
+  });
+
+  it("U-03: 進行中あり + サインアウト → 停止して続行で onStopInProgress→onSignOut(合成)", async () => {
+    const onSignOut = vi.fn(async () => {});
+    const probeInProgress = vi.fn(async () => true);
+    const onStopInProgress = vi.fn(async () => {});
+    wrap(
+      { ...base, isLocalGuest: false, isLinked: true, email: "u@e.com" },
+      <AccountPage
+        onSignOut={onSignOut}
+        probeInProgress={probeInProgress}
+        onStopInProgress={onStopInProgress}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "サインアウト" }));
+    await waitFor(() =>
+      expect(screen.getByText(/計時中の活動があります/)).toBeTruthy(),
+    );
+    expect(onSignOut).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "停止して続行" }));
+    await waitFor(() => expect(onStopInProgress).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(onSignOut).toHaveBeenCalledTimes(1));
+  });
+
+  it("U-10: 進行中あり + サインアウト → キャンセルで onSignOut しない", async () => {
+    const onSignOut = vi.fn(async () => {});
+    const probeInProgress = vi.fn(async () => true);
+    wrap(
+      { ...base, isLocalGuest: false, isLinked: true, email: "u@e.com" },
+      <AccountPage onSignOut={onSignOut} probeInProgress={probeInProgress} />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "サインアウト" }));
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "キャンセル" })).toBeTruthy(),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "キャンセル" }));
+    expect(onSignOut).not.toHaveBeenCalled();
+  });
+
+  it("U-Sig: onSignOut 注入時は context.signOut でなく注入版を呼ぶ（App 合成 wipe 経路, spec-review R1）", async () => {
+    const ctxSignOut = vi.fn(async () => {});
+    const onSignOut = vi.fn(async () => {});
+    wrap(
+      {
+        ...base,
+        isLocalGuest: false,
+        isLinked: true,
+        email: "u@e.com",
+        signOut: ctxSignOut,
+      },
+      <AccountPage onSignOut={onSignOut} />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "サインアウト" }));
+    await waitFor(() => expect(onSignOut).toHaveBeenCalledTimes(1));
+    expect(ctxSignOut).not.toHaveBeenCalled();
+  });
 });

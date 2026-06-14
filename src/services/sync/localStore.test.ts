@@ -76,4 +76,42 @@ describe("LocalStore", () => {
     expect(await store.get("activity_set", "a")).toBeUndefined();
     expect(await store.get("activity_item", "i")).toBeUndefined();
   });
+
+  it("U-15: wipeOtherOwners は current 以外を消し current は残す（既存ログイン上書き, R20260615-001）", async () => {
+    const store = await LocalStore.open();
+    // current owner = oNew のデータ（account 側）
+    await store.put(
+      "activity_set",
+      rec({ id: "new", ownerId: "oNew", clientLocalId: "cn" }),
+    );
+    // 旧 guest owner = oGuest のデータ（上書きで消えるべき）
+    await store.put(
+      "activity_set",
+      rec({ id: "g1", ownerId: "oGuest", clientLocalId: "cg1" }),
+    );
+    await store.put(
+      "activity_item",
+      rec({ id: "g2", ownerId: "oGuest", clientLocalId: "cg2" }),
+    );
+    await store.wipeOtherOwners("oNew");
+    // current は残る
+    expect(await store.get("activity_set", "new")).toMatchObject({
+      ownerId: "oNew",
+    });
+    // 他 owner は消える
+    expect(await store.get("activity_set", "g1")).toBeUndefined();
+    expect(await store.get("activity_item", "g2")).toBeUndefined();
+  });
+
+  it("U-07b: wipeOtherOwners は他 owner が無ければ no-op（保持経路でデータを消さない）", async () => {
+    const store = await LocalStore.open();
+    await store.put(
+      "activity_set",
+      rec({ id: "a", ownerId: "oSame", clientLocalId: "c1" }),
+    );
+    await store.wipeOtherOwners("oSame");
+    expect(await store.get("activity_set", "a")).toMatchObject({
+      ownerId: "oSame",
+    });
+  });
 });

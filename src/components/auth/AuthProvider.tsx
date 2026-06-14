@@ -10,6 +10,7 @@ import { asOwnerId } from "../../types/domain.js";
 import { getOrCreateLocalGuestId } from "../../services/auth/localGuest.js";
 import { OwnerContext } from "../../services/auth/ownerContext.js";
 import { linkWithGoogle } from "../../services/auth/linkWithGoogle.js";
+import { markDeviceOverwrite } from "../../services/auth/deviceOverwrite.js";
 
 export type GuestTicketFetcher = () => Promise<string | null>;
 
@@ -105,6 +106,9 @@ function ClerkOwnerBridge({
     if (sessionStorage.getItem(KEY)) return; // 既に 1 回試行済み → ループ防止
     sessionStorage.setItem(KEY, "1");
     refreshingRef.current = true;
+    // 既存アカウントへ入り直す = デバイス上書き。復帰後の app init で旧 owner を wipe する印を残す
+    // （R20260615-001 / spec-review R2。churn ではなく明示サインインなのでマーク可）。
+    markDeviceOverwrite();
     void (async () => {
       await setActive({ session: null });
       await signIn.authenticateWithRedirect({
@@ -173,6 +177,8 @@ function ClerkOwnerBridge({
     signIn && setActive
       ? async () => {
           refreshingRef.current = true;
+          // 既存アカウントへサインイン = デバイス上書き。復帰後の app init で旧 owner を wipe する印。
+          markDeviceOverwrite();
           await setActive({ session: null });
           await signIn.authenticateWithRedirect({
             strategy: "oauth_google",
