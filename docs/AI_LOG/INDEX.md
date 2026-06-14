@@ -17,6 +17,9 @@
 
 | ファイル | 実行日 | コマンド | 対象 | decision 範囲 | 状態 |
 |---|---|---|---|---|---|
+| [D20260615_006_fix_execution_F20260615-001.md](./D20260615_006_fix_execution_F20260615-001.md) | 2026-06-15 | /flow:fix | execution F20260615-001 (stale-in-progress-badge) | D20260615-028〜031 | 完了（設計、medium、修正計画済） |
+| [D20260615_005_e2e__shared_auth_revise_R20260615-001.md](./D20260615_005_e2e__shared_auth_revise_R20260615-001.md) | 2026-06-15 | /flow:e2e | _shared/auth revise R20260615-001 | D20260615-023〜026 | 完了（E2E 24 green） |
+| [D20260615_004_resume_continuous.md](./D20260615_004_resume_continuous.md) | 2026-06-15 | /flow:auto | continuous（revise→e2e→fix dispatch） | D20260615-021〜027 | 進行中 |
 | [D20260615_003_tdd__shared_auth_revise_R20260615-001.md](./D20260615_003_tdd__shared_auth_revise_R20260615-001.md) | 2026-06-15 | /flow:tdd | _shared/auth revise R20260615-001 (account-switch-stop-sync) | D20260615-017〜020 | 完了（unit 245 green / tsc clean） |
 | [D20260615_002_spec-review__shared_auth_R20260615-001.md](./D20260615_002_spec-review__shared_auth_R20260615-001.md) | 2026-06-15 | /flow:spec-review | _shared/auth R20260615-001 (account-switch-stop-sync) | D20260615-009〜016 | 完了（High1/Med2/Low2、P91 追加） |
 | [D20260615_001_revise__shared_auth_R20260615-001.md](./D20260615_001_revise__shared_auth_R20260615-001.md) | 2026-06-15 | /flow:revise | _shared/auth R20260615-001 (account-switch-stop-sync) | D20260615-001〜008 | 設計完了（実装待ち） |

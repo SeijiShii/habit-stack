@@ -15,7 +15,7 @@
 | 優先度 | 基盤 | フォルダ | 状態 | 設計完了 | 改修件数 | バグ修正件数 | クレーム件数 | INDEX |
 |---|---|---|---|---|---|---|---|---|
 | 3 | ❌ | activity-sets | 実装完了 | 2026-06-08 | 0 | 0 | 0 | [INDEX](./activity-sets/INDEX.md) |
-| 4 | ✅ | execution | 実装完了 | 2026-06-08 | 3 | 1 | 1 | [INDEX](./execution/INDEX.md) |
+| 4 | ✅ | execution | 実装完了 | 2026-06-08 | 3 | 2 | 1 | [INDEX](./execution/INDEX.md) |
 | 4 | ❌ | feedback | 実装完了 | 2026-06-08 | 0 | 0 | 0 | [INDEX](./feedback/INDEX.md) |
 | 5 | ❌ | streak-summary | 実装完了 | 2026-06-08 | 3 | 0 | 0 | [INDEX](./streak-summary/INDEX.md) |
 | 5 | ❌ | tip-jar | 実装完了 | 2026-06-08 | 0 | 0 | 0 | [INDEX](./tip-jar/INDEX.md) |

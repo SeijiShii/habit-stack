@@ -21,6 +21,7 @@
 ## サブフォルダ（改修・バグ修正・クレーム判定履歴）
 | パス | 種別 | issue/slug | 状態 | 概要 | INDEX |
 |---|---|---|---|---|---|
+| `fix_F20260615-001_20260615_stale-in-progress-badge/` | fix | F20260615-001 / stale-in-progress-badge | 修正計画済（実装待ち） | 計時停止後も「進行中」バッジ／復帰導線が残る。根本原因=done 化時に `["in-progress-session"]` query を invalidate しない（R20260614-001 で読み取りクエリのみ導入）。修正=ExecutionPage done 検知 effect で invalidateQueries | `INDEX.md` |
 | `revise_R20260614-001_20260614_running-session-visible-nav/` | revise | R20260614-001 / running-session-visible-nav | テスト完了（unit+E2E green） | 計時中セッションの可視化と導線確立。セット一覧に「進行中」表示 + 進行中セット選択で活動画面へ復帰、セット詳細「開始」で中間ページを挟まず自動開始、別セット計時中の二重開始防止（幽霊セッション根絶） | `INDEX.md` |
 | `revise_R20260614-002_20260614_activity-periods/` | revise | R20260614-002 / activity-periods | テスト完了（unit+E2E green） | 活動を 1:N period 化し中断時間を経過から除外（pause で period を閉じ resume で開く）。表示開始時刻は最初の period。起点: claim C20260614-001 | `INDEX.md` |
 | `claim_C20260614-001_20260614_pause-time-counted/` | claim | C20260614-001 / pause-time-counted | 判定完了→revise | 中断時間が活動の経過に算入される→**仕様変更判定**（単一ペア→1:N period）。分岐先 revise R20260614-002 | `001_TRIAGE.md` |
