@@ -13,6 +13,20 @@ import { linkWithGoogle } from "../../services/auth/linkWithGoogle.js";
 
 export type GuestTicketFetcher = () => Promise<string | null>;
 
+/**
+ * 表示用の email を選ぶ（C20260614-002）。合成ゲスト email（`@guests.<domain>`）は内部用なので
+ * ユーザーに見せない。Google 連携済みなら外部アカウント（Google）の email を優先表示する。
+ * どちらも無い / 合成のみなら undefined（email 行を出さない）。
+ */
+export function displayEmail(
+  externalEmail: string | undefined,
+  primaryEmail: string | undefined,
+): string | undefined {
+  if (externalEmail) return externalEmail;
+  if (primaryEmail && !primaryEmail.includes("@guests.")) return primaryEmail;
+  return undefined;
+}
+
 const defaultFetchGuestTicket: GuestTicketFetcher = async () => {
   try {
     const res = await fetch("/api/auth/guest", { method: "POST" });
@@ -68,7 +82,11 @@ function ClerkOwnerBridge({
 
   // 外部アカウント（Google 等）連携済みか = データ引き継ぎ可能な authed owner
   const isLinked = (user?.externalAccounts?.length ?? 0) > 0;
-  const email = user?.primaryEmailAddress?.emailAddress ?? undefined;
+  // 表示 email: 合成ゲスト email（@guests.<domain>、内部用）は隠し、連携済みなら外部(Google)の email を出す。
+  const email = displayEmail(
+    user?.externalAccounts?.[0]?.emailAddress,
+    user?.primaryEmailAddress?.emailAddress,
+  );
 
   const linkGoogle = user
     ? async () => {
