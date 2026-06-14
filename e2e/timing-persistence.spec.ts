@@ -85,6 +85,24 @@ test("E-01b: 計時中に /account 閲覧後セット一覧に戻っても『進
   await expect(page.getByTestId("in-progress-badge")).toBeVisible();
 });
 
+test("RG-02: 計時を終了したらセット一覧の「進行中」バッジが消える（F20260615-001 stale 表示解消）", async ({
+  page,
+}) => {
+  await startTimingOnSecondItem(page);
+
+  // 正規にセット終了 → done 化で in-progress query が無効化される。
+  // 「セット終了」ボタンは毎秒の現在時刻 tick で再描画されるため、稀にクリックが detach する。
+  // クリック→done 確認をリトライして確実に終了させる（Playwright best practice: toPass）。
+  await expect(async () => {
+    await page.getByRole("button", { name: "セット終了" }).click();
+    await expect(page.getByRole("status")).toBeVisible({ timeout: 1500 });
+  }).toPass({ timeout: 15000 });
+
+  // セット一覧に戻ると「進行中」バッジは残らない
+  await page.goto("/sets");
+  await expect(page.getByTestId("in-progress-badge")).toHaveCount(0);
+});
+
 test("E-SUMMARY: ふりかえり(/summary)へ遷移しても計時は終了しない（継続）", async ({
   page,
 }) => {

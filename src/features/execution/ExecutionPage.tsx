@@ -36,6 +36,12 @@ export interface ExecutionPageProps {
    */
   autoStart?: boolean;
   now?: () => string;
+  /**
+   * セッションが done に遷移したときに 1 度だけ呼ばれる（F20260615-001）。
+   * App 側で `["in-progress-session"]` query を invalidate し、停止後に「進行中」バッジ／
+   * 復帰導線が stale 表示で残らないようにする。ExecutionPage は react-query に直接依存しない。
+   */
+  onSessionEnd?: () => void;
 }
 
 function mmss(sec: number): string {
@@ -61,6 +67,7 @@ export function ExecutionPage({
   ownerId,
   autoStart,
   now,
+  onSessionEnd,
 }: ExecutionPageProps) {
   const exec = useExecution(repo, sessionLocalId, { now });
   const s = exec.state;
@@ -102,9 +109,17 @@ export function ExecutionPage({
   }, [isTiming, ownerId, repo, exec.activeId, nowIso]);
 
   // セッション done でハートビートを消す（放置判定に古いセッションを残さない）。
+  // 併せて onSessionEnd を 1 度発火し、App 側で進行中 query を無効化（停止後の stale 表示を解消、F20260615-001）。
+  const endedNotifiedRef = useRef(false);
   useEffect(() => {
-    if (s?.status === "done" && ownerId) clearHeartbeat(ownerId);
-  }, [s?.status, ownerId]);
+    if (s?.status === "done") {
+      if (ownerId) clearHeartbeat(ownerId);
+      if (!endedNotifiedRef.current) {
+        endedNotifiedRef.current = true;
+        onSessionEnd?.();
+      }
+    }
+  }, [s?.status, ownerId, onSessionEnd]);
 
   // セット詳細「開始」からの遷移（autoStart）時、復元 settle 後に進行中が無ければ自動で計時開始する。
   // 進行中（同セット）があれば exec.state が復元されるため start は走らず、そのまま再開になる（R20260614-001）。

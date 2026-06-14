@@ -61,6 +61,31 @@ describe("ExecutionPage (UC4)", () => {
     expect(all[0]).toMatchObject({ achieved: true });
   });
 
+  it("RG-01: セッション done で onSessionEnd が 1 度発火する（停止後 stale 表示の解消、F20260615-001）", async () => {
+    const repo = new ExecutionRepo(
+      await LocalStore.open(),
+      asOwnerId("owner_1"),
+    );
+    const onSessionEnd = vi.fn();
+    render(
+      <ExecutionPage
+        repo={repo}
+        setId="set_1"
+        setName="平日の朝"
+        items={items}
+        sessionLocalId="sess_1"
+        onSessionEnd={onSessionEnd}
+      />,
+    );
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "開始" }));
+    // RG-05: 計時中（running）は発火しない
+    expect(onSessionEnd).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole("button", { name: "セット終了" }));
+    await waitFor(() => expect(onSessionEnd).toHaveBeenCalledTimes(1));
+  });
+
   it("U1: running に「終了」ボタンが無く、次の活動へ/一時停止/セット終了がある (R20260610-001)", async () => {
     await setup();
     const user = userEvent.setup();

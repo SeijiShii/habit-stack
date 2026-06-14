@@ -1,5 +1,5 @@
 import { type ReactElement } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Routes,
   Route,
@@ -68,7 +68,9 @@ function SetsRoute({ repos }: { repos: Repos }) {
   // 計時中（進行中）セッションの有無を取得（owner グローバル単一）。
   const inProgress = useQuery({
     queryKey: ["in-progress-session"],
-    queryFn: () => repos.execution.findInProgress(),
+    // null へ正規化（undefined は react-query が「pending」扱いし、invalidate 時に isLoading が
+    // true へ戻って消費側を Loading で再マウントさせる。null は確定データなので refetch が滑らか、F20260615-001）。
+    queryFn: () => repos.execution.findInProgress().then((r) => r ?? null),
   });
   const ipSetId = inProgress.data ? String(inProgress.data.setId) : null;
   return (
@@ -127,6 +129,7 @@ function RunInner({
   setName: string;
 }) {
   const { state } = useLocation();
+  const queryClient = useQueryClient();
   const autoStart =
     (state as { autoStart?: boolean } | null)?.autoStart === true;
   const items = useQuery({
@@ -134,9 +137,11 @@ function RunInner({
     queryFn: () => repos.sets.listItems(setId),
   });
   // 進行中（owner グローバル単一）セッションの有無 + セット名解決用。
+  // null へ正規化（undefined だと invalidate 時に isLoading が true へ戻り ExecutionPage が
+  // 再マウント → 復元レースで done 表示が running に巻き戻る、F20260615-001）。
   const inProgress = useQuery({
     queryKey: ["in-progress-session"],
-    queryFn: () => repos.execution.findInProgress(),
+    queryFn: () => repos.execution.findInProgress().then((r) => r ?? null),
   });
   const sets = useQuery({
     queryKey: ["activity-sets"],
@@ -180,6 +185,12 @@ function RunInner({
         sessionLocalId={sessionLocalId}
         ownerId={repos.ownerId}
         autoStart={autoStart}
+        // 計時終了で進行中 query を無効化 → 一覧の「進行中」バッジ／復帰導線が stale 表示で残らない（F20260615-001）。
+        onSessionEnd={() =>
+          void queryClient.invalidateQueries({
+            queryKey: ["in-progress-session"],
+          })
+        }
       />
       <nav aria-label="実行後">
         <Link to={`/summary/${setId}`}>継続を見る</Link>
