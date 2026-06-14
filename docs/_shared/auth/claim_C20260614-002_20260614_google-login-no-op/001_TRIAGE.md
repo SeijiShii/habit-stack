@@ -3,7 +3,9 @@
 **claim id**: C20260614-002
 **判定日**: 2026-06-14
 **判定者**: Claude (opus-4-8) + seiji
-**判定**: バグ (fix) — ただし**根本原因はコードではなく本番設定の欠落**（production Clerk instance に Google カスタム OAuth 認証情報が未登録）。remediation = 設定作業（`/flow:release` §3.1 social sign-in OAuth）。
+**判定**: バグ (fix)。**根本原因は §7 で更新**（初期仮説「本番 OAuth 設定欠落」は実機リモートデバッグで否定 → 確定原因 = **Clerk reverification による 403**）。remediation = コードで 403 ハンドル + ゲストセッション fresh 化（+ 必要なら Clerk Dashboard reverification 緩和）。→ `/flow:fix _shared/auth`。
+
+> ⚠️ 下記 §1–§3 は初期トリアージ（設定欠落仮説）。**確定した根本原因と修正方針は §7 を参照**（§1–§3 は調査経緯として保全）。
 
 ## 1. 三項照合
 
@@ -59,4 +61,33 @@
 ## 6. 関連
 - クレーム原文: `./000_CLAIM_REPORT.md`
 - 前回 fix（動線実装）: `../fix_C20260609-002_20260609_google-login-doukan/`
-- remediation SoT: `~/.claude/flow-data/env-acquisition-guide.md` + `/flow:release` §3.1 social OAuth / perspectives O22 / CF-20260531-002
+- remediation SoT: perspectives O22 / `/flow:release` §3.4 social smoke
+
+## 7. 追加調査・根本原因確定（2026-06-14、実機リモートデバッグ）
+
+初期仮説「本番 Clerk カスタム OAuth 未登録」は **否定**された:
+- **PC ブラウザ**では「Google で引き継ぐ」が機能し `accounts.google.com/signin/oauth/...`（有効な `client_id=578339694087-...`）へ遷移 = **カスタム OAuth は設定済み・有効**。
+- **スマホ（Android Chrome・通常ブラウザ）でのみ無反応**。`chrome://inspect` リモートデバッグで確定:
+  ```
+  POST https://clerk.habit-stack.givers.work/v1/me/external_accounts → 403 Forbidden
+  Uncaught (in promise): "You need to provide additional verification to perform this operation"
+    at u.createExternalAccount (clerk.browser.js) → linkWithGoogle → onLink
+  ```
+
+**確定した根本原因**: Clerk の **reverification（step-up / 再認証）**。`createExternalAccount`（外部アカウント追加）は機密操作で、セッションが reverification window 内に認証済みであることを要求する。満たさないと 403。
+- PC = fresh セッション（直近サインイン）で window 内 → 成功。スマホ = 古いセッションで window 切れ → 403。**mobile 固有ではなく session 鮮度の問題**（古い session を持つ端末で顕在化）。
+- **ゲスト特有の詰み**: ticket ベースの匿名ゲストは password/email 等の factor を持たず reverification を**完了できない**。さらにゲストにはサインアウト動線が無く（`AccountPage.tsx:74-84` は isLinked 時のみ）、ただのリロードでも更新されない（`AuthProvider` は isSignedIn なら ticket 再発行を skip）→ **ユーザー操作で回復不能**。
+- コードは catch が無く（`onLink` / `linkGoogle` / `linkWithGoogle`）403 を**無言で握り潰す**＝「何も起きない」。
+
+**修正方針（→ `/flow:fix _shared/auth`）**:
+1. **コード（本命）**: `createExternalAccount` の前に**ゲストセッションを fresh 化**（新 ticket → `signIn.create({strategy:'ticket'})` → `setActive`）して reverification window 内に入れる。userId が変わる場合は `dataOps.reassignOwner` でローカルデータ引継。
+2. **403 を catch**（無言失敗をやめ画面にメッセージ + 上記リフレッシュ＆リトライ）。
+3. **Clerk Dashboard**: reverification 設定の確認・緩和（ゲスト中心アプリでは初回連携に step-up 不要）。コード側 1+2 を入れれば設定に依存せず堅牢。
+
+**確定判定**: バグ (fix)。根本原因 = Clerk reverification 403（aged guest session）。コードは正しく見えて**aged session で破綻**する欠陥。
+
+## 8. 横展開（[flow] 学習、CF-20260614-001）
+この欠陥は **dev instance（共有 OAuth）/ fresh session / E2E（stub auth）では一切露見せず、production instance + aged guest session でのみ顕在化**する（O22 の broad-match mask と同型の「動線もコードも有るのに aged session で動かない」）。横展開先:
+- **perspectives O22**: 「guest/匿名 + 外部アカウント連携（`createExternalAccount`/`linkWith*`）があるなら reverification 403 ハンドル（catch + session refresh）が必須」を required_signals 化 → audit が未対応を検知。
+- **release §3.4 social smoke**: social 連携は **fresh だけでなく aged guest session でも**実機で 1 回踏む（reverification は aged でしか出ない）。
+- **audit #4 O22**: `createExternalAccount` あり × 403/reverification ハンドル無し → finding。
