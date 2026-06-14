@@ -61,6 +61,24 @@ describe("AccountPage", () => {
     );
   });
 
+  it("C20260614-002: 未連携ゲストに「Google でログイン」導線が出て signInWithGoogle を呼ぶ", async () => {
+    const linkGoogle = vi.fn(async () => {});
+    const signInWithGoogle = vi.fn(async () => {});
+    wrap({ ...base, linkGoogle, signInWithGoogle }, <AccountPage />);
+
+    const btn = screen.getByRole("button", { name: "Google でログイン" });
+    fireEvent.click(btn);
+    await waitFor(() => expect(signInWithGoogle).toHaveBeenCalledTimes(1));
+  });
+
+  it("C20260614-002: signInWithGoogle 未供給（keyless）では「Google でログイン」を出さない", () => {
+    const linkGoogle = vi.fn(async () => {});
+    wrap({ ...base, linkGoogle }, <AccountPage />);
+    expect(
+      screen.queryByRole("button", { name: "Google でログイン" }),
+    ).toBeNull();
+  });
+
   it("連携済み: メール表示 + サインアウト導線", async () => {
     const signOut = vi.fn(async () => {});
     wrap(

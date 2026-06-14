@@ -7,7 +7,9 @@ import {
   useParams,
   useLocation,
   Link,
+  Navigate,
 } from "react-router-dom";
+import { AuthenticateWithRedirectCallback } from "@clerk/clerk-react";
 import { isLoginPath } from "./features/execution/model/recovery.js";
 import type { SetRecord } from "./features/activity-sets/model/setsRepo.js";
 import { AppLayout } from "./components/AppLayout.js";
@@ -229,6 +231,22 @@ function LoginEndGuard({ repos }: { repos: Repos }) {
   return null;
 }
 
+/**
+ * Google OAuth サインインの戻り先（C20260614-002）。Clerk が OAuth コールバックを処理して
+ * セッションを確立し /account へ。Clerk キー未設定（keyless/オフライン）では OAuth 自体が
+ * 起きないため /account へリダイレクトするだけ（Clerk コンポーネントを描画しない）。
+ */
+function SsoCallbackRoute() {
+  const hasClerk = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+  if (!hasClerk) return <Navigate to="/account" replace />;
+  return (
+    <AuthenticateWithRedirectCallback
+      signInForceRedirectUrl="/account"
+      signUpForceRedirectUrl="/account"
+    />
+  );
+}
+
 export function App() {
   const repos = useRepos();
   const gate = (el: (r: Repos) => ReactElement) =>
@@ -284,6 +302,7 @@ export function App() {
             />
           }
         />
+        <Route path="/sso-callback" element={<SsoCallbackRoute />} />
         <Route path="/legal/privacy" element={<PrivacyPage />} />
         <Route path="/legal/terms" element={<TermsPage />} />
         <Route

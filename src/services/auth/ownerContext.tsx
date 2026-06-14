@@ -11,10 +11,15 @@ export interface OwnerState {
   /** 連携後の表示用メールアドレス（未連携なら undefined）。 */
   email?: string;
   /**
-   * Google アカウント連携を開始する（段階的認証、auth SPEC §3）。
+   * Google アカウント連携を開始する（この端末のゲストデータを引き継ぐ＝アップグレード、auth SPEC §3）。
    * Clerk モードでのみ供給。keyless（ローカルゲスト）では undefined。
    */
   linkGoogle?: () => Promise<void>;
+  /**
+   * 既存の Google アカウントへサインインし直す（別端末で作成済み／サインアウトから復帰、C20260614-002）。
+   * 成功すると既存ユーザーに入り直し、ローカルの匿名データは上書きされる。Clerk モードでのみ供給。
+   */
+  signInWithGoogle?: () => Promise<void>;
   /** サインアウト（Clerk モードでのみ供給）。 */
   signOut?: () => Promise<void>;
 }

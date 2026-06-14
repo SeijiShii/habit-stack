@@ -55,7 +55,16 @@ function ClerkOwnerBridge({
   const refreshingRef = useRef(false);
 
   useEffect(() => {
-    if (!isLoaded || isSignedIn || !signIn || refreshingRef.current) return;
+    // /sso-callback 処理中は自動ゲスト生成を抑止する（OAuth サインインの session 確立と競合させない）。
+    if (
+      !isLoaded ||
+      isSignedIn ||
+      !signIn ||
+      refreshingRef.current ||
+      (typeof window !== "undefined" &&
+        window.location.pathname === "/sso-callback")
+    )
+      return;
     let cancelled = false;
     void (async () => {
       const ticket = await fetchGuestTicket();
@@ -125,6 +134,23 @@ function ClerkOwnerBridge({
       }
     : undefined;
 
+  // 既存 Google アカウントへサインインし直す（別端末で作成済み／サインアウトから復帰、C20260614-002）。
+  // single-session のため現ゲストを外してから OAuth sign-in。成功すると既存ユーザーに入り直し、
+  // ローカルの匿名データは上書きされる（ユーザー方針: Google アカウントのデータを優先）。
+  const signInWithGoogle =
+    signIn && setActive
+      ? async () => {
+          refreshingRef.current = true;
+          await setActive({ session: null });
+          await signIn.authenticateWithRedirect({
+            strategy: "oauth_google",
+            redirectUrl: `${window.location.origin}/sso-callback`,
+            redirectUrlComplete: `${window.location.origin}/account`,
+          });
+          // ここで Google へ遷移するため以降は実行されない。
+        }
+      : undefined;
+
   const signOut = async () => {
     await clerk.signOut();
   };
@@ -138,6 +164,7 @@ function ClerkOwnerBridge({
         isLinked,
         email,
         linkGoogle,
+        signInWithGoogle,
         signOut,
       }}
     >
