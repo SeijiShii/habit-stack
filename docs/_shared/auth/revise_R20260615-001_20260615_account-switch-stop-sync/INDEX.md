@@ -2,7 +2,7 @@
 
 **issue / slug**: R20260615-001 / account-switch-stop-sync
 **実施日**: 2026-06-15
-**状態**: 実装完了（unit 245 green / tsc clean）
+**状態**: テスト完了（unit 245 green / tsc clean / E2E 24 green）
 
 <!-- auto-generated-start -->
 
@@ -17,6 +17,7 @@
 | 905 | 905_REVISE_SPEC_REVIEW.md | 設計レビュー（R1-R6、P91 追加） | 2026-06-15 |
 | 101 | 101_REVISE_IMPL_REPORT.md | 実装レポート | 2026-06-15 |
 | 102 | 102_REVISE_UNIT_TEST_REPORT.md | 単体テストレポート（245 green） | 2026-06-15 |
+| 103 | 103_REVISE_E2E_REPORT.md | E2E レポート（24 green、E-01/E-01b 追加） | 2026-06-15 |
 
 ## 関連
 - 親機能 INDEX: `../INDEX.md`
