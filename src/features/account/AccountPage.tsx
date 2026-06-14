@@ -38,8 +38,7 @@ export function AccountPage({
   onDeleteAllData,
   onDeleted,
 }: AccountPageProps = {}): ReactElement {
-  const { isLoaded, isLinked, email, linkGoogle, signInWithGoogle, signOut } =
-    useOwner();
+  const { isLoaded, isLinked, email, linkGoogle, signOut } = useOwner();
   const [busy, setBusy] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [linkError, setLinkError] = useState<string | null>(null);
@@ -62,19 +61,6 @@ export function AccountPage({
       // 従来は catch 無しで失敗が無言だった（C20260614-002: reverification 403 で「押しても何も起きない」）。
       setLinkError(linkErrorMessage(e));
     } finally {
-      setBusy(false);
-    }
-  };
-
-  const onSignIn = async () => {
-    if (!signInWithGoogle) return;
-    setBusy(true);
-    setLinkError(null);
-    try {
-      await signInWithGoogle();
-      // 成功時は Google へ遷移するためここには戻らない。
-    } catch (e) {
-      setLinkError(linkErrorMessage(e));
       setBusy(false);
     }
   };
@@ -119,7 +105,7 @@ export function AccountPage({
         <section aria-label="アカウント連携">
           <p>
             いまはこの端末だけにデータが保存されています。Google
-            でログインすると、 記録を引き継いで別の端末でも続けられます。
+            でログインすると、別の端末でも続けて記録できます。初めてのアカウントならこの端末の記録を引き継ぎ、すでに使っているアカウントならそのデータが反映されます。
           </p>
           <button
             type="button"
@@ -127,17 +113,8 @@ export function AccountPage({
             onClick={onLink}
             disabled={busy}
           >
-            Google で引き継ぐ
+            Google でログイン
           </button>
-          {signInWithGoogle ? (
-            <p>
-              別の端末で Google
-              アカウントを作成済みの場合は、こちらからログインできます（この端末のデータは上書きされます）。
-              <button type="button" onClick={onSignIn} disabled={busy}>
-                Google でログイン
-              </button>
-            </p>
-          ) : null}
           {linkError ? <p role="alert">{linkError}</p> : null}
         </section>
       ) : (

@@ -24,7 +24,7 @@ describe("AccountPage", () => {
     const linkGoogle = vi.fn(async () => {});
     wrap({ ...base, linkGoogle }, <AccountPage />);
 
-    const btn = screen.getByRole("button", { name: "Google で引き継ぐ" });
+    const btn = screen.getByRole("button", { name: "Google でログイン" });
     fireEvent.click(btn);
     await waitFor(() => expect(linkGoogle).toHaveBeenCalledTimes(1));
   });
@@ -41,7 +41,7 @@ describe("AccountPage", () => {
     });
     wrap({ ...base, linkGoogle }, <AccountPage />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Google で引き継ぐ" }));
+    fireEvent.click(screen.getByRole("button", { name: "Google でログイン" }));
     // 従来は catch 無しで無言失敗（「押しても何も起きない」）。今は alert を表示する。
     await waitFor(() =>
       expect(screen.getByRole("alert").textContent).toContain(
@@ -59,24 +59,6 @@ describe("AccountPage", () => {
     expect(linkErrorMessage(new Error("network down"))).toContain(
       "通信状況を確認",
     );
-  });
-
-  it("C20260614-002: 未連携ゲストに「Google でログイン」導線が出て signInWithGoogle を呼ぶ", async () => {
-    const linkGoogle = vi.fn(async () => {});
-    const signInWithGoogle = vi.fn(async () => {});
-    wrap({ ...base, linkGoogle, signInWithGoogle }, <AccountPage />);
-
-    const btn = screen.getByRole("button", { name: "Google でログイン" });
-    fireEvent.click(btn);
-    await waitFor(() => expect(signInWithGoogle).toHaveBeenCalledTimes(1));
-  });
-
-  it("C20260614-002: signInWithGoogle 未供給（keyless）では「Google でログイン」を出さない", () => {
-    const linkGoogle = vi.fn(async () => {});
-    wrap({ ...base, linkGoogle }, <AccountPage />);
-    expect(
-      screen.queryByRole("button", { name: "Google でログイン" }),
-    ).toBeNull();
   });
 
   it("連携済み: メール表示 + サインアウト導線", async () => {
@@ -100,7 +82,7 @@ describe("AccountPage", () => {
   it("keyless（linkGoogle 無し）: 連携ボタンを出さずローカル利用の旨を表示", () => {
     wrap(base, <AccountPage />);
     expect(
-      screen.queryByRole("button", { name: "Google で引き継ぐ" }),
+      screen.queryByRole("button", { name: "Google でログイン" }),
     ).toBeNull();
     expect(screen.getByText(/ゲストとして利用中/)).toBeTruthy();
   });

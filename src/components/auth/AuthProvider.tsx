@@ -83,6 +83,38 @@ function ClerkOwnerBridge({
     };
   }, [isLoaded, isSignedIn, signIn, setActive, fetchGuestTicket]);
 
+  // 「Google でログイン」自動分岐の後段（C20260614-002）。連携(createExternalAccount)が
+  // 「選んだ Google が既に別ユーザーに連携済み」で失敗していたら、**既存アカウントへサインインし直す**
+  // （= DB 連携済みなら DB データでデバイスを上書き）。連携が新規＝成功ならここは何もしない
+  // （= デバイスのデータをそのまま引き継ぐ）。二重リダイレクトは sessionStorage で 1 回に制限。
+  useEffect(() => {
+    if (!user || !signIn || !setActive) return;
+    const failed = user.externalAccounts?.find(
+      (a) => a.verification?.error != null,
+    );
+    const err = failed?.verification?.error as
+      | { code?: string; message?: string; longMessage?: string }
+      | undefined;
+    const text = `${err?.code ?? ""} ${err?.longMessage ?? err?.message ?? ""}`;
+    const alreadyLinked = /exists|claimed|already|identification/i.test(text);
+    const KEY = "sso_signin_fallback";
+    if (!alreadyLinked) {
+      sessionStorage.removeItem(KEY);
+      return;
+    }
+    if (sessionStorage.getItem(KEY)) return; // 既に 1 回試行済み → ループ防止
+    sessionStorage.setItem(KEY, "1");
+    refreshingRef.current = true;
+    void (async () => {
+      await setActive({ session: null });
+      await signIn.authenticateWithRedirect({
+        strategy: "oauth_google",
+        redirectUrl: `${window.location.origin}/sso-callback`,
+        redirectUrlComplete: `${window.location.origin}/account`,
+      });
+    })();
+  }, [user, signIn, setActive]);
+
   const ownerId = userId
     ? asOwnerId(userId)
     : isLoaded
