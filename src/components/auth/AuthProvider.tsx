@@ -82,7 +82,10 @@ function ClerkOwnerBridge({
           const ticket = await fetchGuestTicket();
           if (ticket && signIn && setActive) {
             refreshingRef.current = true;
-            await clerk.signOut();
+            // 現セッションを「非アクティブ化」する。clerk.signOut() は afterSignOutUrl('/') へ
+            // ページ遷移してしまい以降のコードが走らないため使わない（CF-20260614-002）。
+            // setActive({session:null}) は遷移せずアクティブ session を外すので signIn.create が通る。
+            await setActive({ session: null });
             const res = await signIn.create({ strategy: "ticket", ticket });
             if (res.status === "complete" && res.createdSessionId) {
               await setActive({ session: res.createdSessionId });
