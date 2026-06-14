@@ -2,7 +2,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
-import { AccountPage } from "./AccountPage.js";
+import { AccountPage, linkErrorMessage } from "./AccountPage.js";
 import {
   OwnerContext,
   type OwnerState,
@@ -27,6 +27,38 @@ describe("AccountPage", () => {
     const btn = screen.getByRole("button", { name: "Google で引き継ぐ" });
     fireEvent.click(btn);
     await waitFor(() => expect(linkGoogle).toHaveBeenCalledTimes(1));
+  });
+
+  it("C20260614-002: linkGoogle が reverification 403 で失敗したら無言でなくエラー表示する", async () => {
+    const linkGoogle = vi.fn(async () => {
+      const err = Object.assign(
+        new Error(
+          "You need to provide additional verification to perform this operation",
+        ),
+        { status: 403 },
+      );
+      throw err;
+    });
+    wrap({ ...base, linkGoogle }, <AccountPage />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Google で引き継ぐ" }));
+    // 従来は catch 無しで無言失敗（「押しても何も起きない」）。今は alert を表示する。
+    await waitFor(() =>
+      expect(screen.getByRole("alert").textContent).toContain(
+        "セッションの再確認",
+      ),
+    );
+  });
+
+  it("C20260614-002: linkErrorMessage — reverification(403) と汎用を区別", () => {
+    expect(
+      linkErrorMessage(
+        Object.assign(new Error("additional verification"), { status: 403 }),
+      ),
+    ).toContain("セッションの再確認");
+    expect(linkErrorMessage(new Error("network down"))).toContain(
+      "通信状況を確認",
+    );
   });
 
   it("連携済み: メール表示 + サインアウト導線", async () => {

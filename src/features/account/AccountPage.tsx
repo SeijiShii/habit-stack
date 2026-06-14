@@ -1,6 +1,20 @@
 import { useState, type ReactElement } from "react";
 import { useOwner } from "../../services/auth/ownerContext.js";
 
+/**
+ * Google 連携失敗時のユーザー向けメッセージ（C20260614-002）。
+ * Clerk reverification（aged session の step-up）は 403 "additional verification" で返るため専用文言にする。
+ * 従来は onLink が catch を持たず失敗が無言だった（「押しても何も起きない」）。
+ */
+export function linkErrorMessage(e: unknown): string {
+  const msg = e instanceof Error ? e.message : String(e ?? "");
+  const status = (e as { status?: number } | null)?.status;
+  if (status === 403 || /additional verification|reverif/i.test(msg)) {
+    return "セッションの再確認が必要なため連携を開始できませんでした。アプリを開き直してから、もう一度お試しください。";
+  }
+  return "Google 連携を開始できませんでした。通信状況を確認して、もう一度お試しください。";
+}
+
 export interface AccountPageProps {
   /**
    * 全データのセルフサービス削除を実行する（O54 消去権）。
@@ -27,6 +41,7 @@ export function AccountPage({
   const { isLoaded, isLinked, email, linkGoogle, signOut } = useOwner();
   const [busy, setBusy] = useState(false);
   const [confirming, setConfirming] = useState(false);
+  const [linkError, setLinkError] = useState<string | null>(null);
 
   if (!isLoaded) {
     return (
@@ -39,8 +54,12 @@ export function AccountPage({
   const onLink = async () => {
     if (!linkGoogle) return;
     setBusy(true);
+    setLinkError(null);
     try {
       await linkGoogle();
+    } catch (e) {
+      // 従来は catch 無しで失敗が無言だった（C20260614-002: reverification 403 で「押しても何も起きない」）。
+      setLinkError(linkErrorMessage(e));
     } finally {
       setBusy(false);
     }
@@ -96,6 +115,7 @@ export function AccountPage({
           >
             Google で引き継ぐ
           </button>
+          {linkError ? <p role="alert">{linkError}</p> : null}
         </section>
       ) : (
         <section aria-label="ローカル利用">

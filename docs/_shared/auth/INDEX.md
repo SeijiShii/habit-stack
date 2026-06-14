@@ -22,7 +22,8 @@
 ## サブフォルダ（改修・バグ修正・クレーム判定履歴）
 | パス | 種別 | issue/slug | 状態 | 概要 | INDEX |
 |---|---|---|---|---|---|
-| `claim_C20260614-002_20260614_google-login-no-op/` | claim | C20260614-002 / google-login-no-op | 判定完了→release設定 | Google ログインボタン無反応→**バグ判定だが根本原因は本番設定欠落**（production Clerk instance に Google カスタム OAuth 未登録、CF-20260531-002）。コードは正しい。remediation=`/flow:release` §3.1 social OAuth（human dashboard） | `001_TRIAGE.md` |
+| `claim_C20260614-002_20260614_google-login-no-op/` | claim | C20260614-002 / google-login-no-op | 判定完了→fix分岐 | Google ログインボタン無反応。当初の本番設定欠落仮説は実機リモートデバッグで否定 → 確定原因=**Clerk reverification 403（aged guest session）**。→ fix_C20260614-002 へ分岐 | `001_TRIAGE.md` §7 |
+| `fix_C20260614-002_20260614_google-link-reverification/` | fix | C20260614-002 / google-link-reverification | 実装完了(unit green) | aged guest session の `createExternalAccount` が Clerk reverification で 403。CODE=403 を catch+role="alert" で可視化（無言失敗撲滅、auth suite 32 tests green）。functional fix は Clerk Dashboard で reverification 緩和（Class C） | `001_ROOT_CAUSE.md` |
 | `revise_R20260611-002_20260611_self-service-delete/` | revise | R20260611-002 / self-service-delete | E2E green | O54 セルフ削除 UI 導線実装（AccountPage 削除導線 + DELETE /api/account + purgeAllData + wipeOwner outbox 拡張）。176 unit + 8 E2E green。AUDIT_20260611_2000 Critical 解消（「配線待ち」の完了） | `INDEX.md` |
 
 ## 関連
