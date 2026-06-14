@@ -21,8 +21,8 @@
 ## サブフォルダ（改修・バグ修正・クレーム判定履歴）
 | パス | 種別 | issue/slug | 状態 | 概要 | INDEX |
 |---|---|---|---|---|---|
-| `revise_R20260614-001_20260614_running-session-visible-nav/` | revise | R20260614-001 / running-session-visible-nav | 実装完了（unit green） | 計時中セッションの可視化と導線確立。セット一覧に「進行中」表示 + 進行中セット選択で活動画面へ復帰、セット詳細「開始」で中間ページを挟まず自動開始、別セット計時中の二重開始防止（幽霊セッション根絶） | `INDEX.md` |
-| `revise_R20260614-002_20260614_activity-periods/` | revise | R20260614-002 / activity-periods | 実装完了（unit green） | 活動を 1:N period 化し中断時間を経過から除外（pause で period を閉じ resume で開く）。表示開始時刻は最初の period。起点: claim C20260614-001 | `INDEX.md` |
+| `revise_R20260614-001_20260614_running-session-visible-nav/` | revise | R20260614-001 / running-session-visible-nav | テスト完了（unit+E2E green） | 計時中セッションの可視化と導線確立。セット一覧に「進行中」表示 + 進行中セット選択で活動画面へ復帰、セット詳細「開始」で中間ページを挟まず自動開始、別セット計時中の二重開始防止（幽霊セッション根絶） | `INDEX.md` |
+| `revise_R20260614-002_20260614_activity-periods/` | revise | R20260614-002 / activity-periods | テスト完了（unit+E2E green） | 活動を 1:N period 化し中断時間を経過から除外（pause で period を閉じ resume で開く）。表示開始時刻は最初の period。起点: claim C20260614-001 | `INDEX.md` |
 | `claim_C20260614-001_20260614_pause-time-counted/` | claim | C20260614-001 / pause-time-counted | 判定完了→revise | 中断時間が活動の経過に算入される→**仕様変更判定**（単一ペア→1:N period）。分岐先 revise R20260614-002 | `001_TRIAGE.md` |
 | `revise_R20260613-004_20260613_set-total-time/` | revise | R20260613-004 / set-total-time | テスト完了（unit+E2E green） | セット全体の経過時間を計時画面に表示（全 record 合計、sessionElapsedSec 純関数 + formatDuration で振り返りと統一） | `INDEX.md` |
 | `revise_R20260611-001_20260611_timing-persistence-resume/` | revise | R20260611-001 / timing-persistence-resume | E2E green | 計時状態の永続化・復帰（毎秒localStorage+15秒backend, account-scoped）+ 4H放置キャップ/自動終了 + ログイン遷移終了。unit 167 + E2E 6/6 green、StrictMode 復元バグ修正、last_saved_at migration 0001 | `INDEX.md` |

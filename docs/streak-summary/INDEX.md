@@ -21,7 +21,7 @@
 ## サブフォルダ（改修・バグ修正・クレーム判定履歴）
 | パス | 種別 | issue/slug | 状態 | 概要 | INDEX |
 |---|---|---|---|---|---|
-| revise_R20260614-003_20260614_furikaeri-pagination/ | revise | R20260614-003/furikaeri-pagination | 実装完了（unit green） | ふりかえりの活動記録一覧を 10 件/ページでページネーション（フロント側 slice + 前へ/次へ、setId 切替で先頭へ） | [INDEX](./revise_R20260614-003_20260614_furikaeri-pagination/INDEX.md) |
+| revise_R20260614-003_20260614_furikaeri-pagination/ | revise | R20260614-003/furikaeri-pagination | テスト完了（unit green、E2E は unit 網羅） | ふりかえりの活動記録一覧を 10 件/ページでページネーション（フロント側 slice + 前へ/次へ、setId 切替で先頭へ） | [INDEX](./revise_R20260614-003_20260614_furikaeri-pagination/INDEX.md) |
 | revise_O31_20260609_share-button/ | revise | O31/share-button | 実装完了 | シェアボタン追加 (O31 公開周知導線) | [INDEX](./revise_O31_20260609_share-button/INDEX.md) |
 | revise_R20260613-001_20260613_reflect-overview-streak-fix/ | revise | R20260613-001/reflect-overview-streak-fix | E2E green (2026-06-13) | 振り返り総覧(ドロップダウン+折りたたみ+合計時間) + streak ローカル日付是正 + 達成日再構築 migration | [INDEX](./revise_R20260613-001_20260613_reflect-overview-streak-fix/INDEX.md) |
 | revise_R20260613-003_20260613_remove-dots/ | revise | R20260613-003/remove-dots | テスト完了（unit+E2E green） | ふりかえり画面の達成日ドット（丸）表示を廃止（縦並び崩れ解消、率バー+連続日数で代替、dead code 整理） | [INDEX](./revise_R20260613-003_20260613_remove-dots/INDEX.md) |

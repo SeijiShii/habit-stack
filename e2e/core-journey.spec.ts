@@ -33,10 +33,9 @@ test("コアジャーニー: セット作成 → アイテム → 実行 → 達
   await page.getByLabel("アイテム名").fill("英単語");
   await page.getByRole("button", { name: "追加" }).click();
 
-  // 実行（UC4）
-  await page.getByRole("link", { name: "実行する" }).click();
-  await expect(page).toHaveURL(/\/run\//);
+  // 実行（UC4）— セット詳細「開始」で中間ページを挟まず計時開始（R20260614-001）
   await page.getByRole("button", { name: "開始" }).click();
+  await expect(page).toHaveURL(/\/run\//);
   await expect(page.getByTestId("current-item")).toHaveText("ストレッチ");
   await page.getByRole("button", { name: "次の活動へ" }).click();
   await expect(page.getByTestId("current-item")).toHaveText("英単語");
@@ -53,8 +52,8 @@ test("継続サマリに達成が反映（穴あき許容）", async ({ page }) 
   await page.getByRole("button", { name: "読書" }).click();
   await page.getByLabel("アイテム名").fill("小説");
   await page.getByRole("button", { name: "追加" }).click();
-  await page.getByRole("link", { name: "実行する" }).click();
   await page.getByRole("button", { name: "開始" }).click();
+  await expect(page.getByTestId("current-item")).toBeVisible();
   await page.getByRole("button", { name: "セット終了" }).click();
   await expect(page.getByRole("status")).toBeVisible();
 

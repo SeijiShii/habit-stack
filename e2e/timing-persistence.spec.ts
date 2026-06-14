@@ -30,9 +30,9 @@ async function startTimingOnSecondItem(page: Page): Promise<string> {
   await page.getByLabel("アイテム名").fill("英単語");
   await page.getByRole("button", { name: "追加" }).click();
 
-  await page.getByRole("link", { name: "実行する" }).click();
-  await expect(page).toHaveURL(/\/run\//);
+  // セット詳細「開始」で中間ページを挟まず計時開始（R20260614-001）
   await page.getByRole("button", { name: "開始" }).click();
+  await expect(page).toHaveURL(/\/run\//);
   await expect(page.getByTestId("current-item")).toHaveText("ストレッチ");
   await page.getByRole("button", { name: "次の活動へ" }).click();
   await expect(page.getByTestId("current-item")).toHaveText("英単語");
