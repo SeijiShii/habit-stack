@@ -22,6 +22,7 @@
 ## サブフォルダ（改修・バグ修正・クレーム判定履歴）
 | パス | 種別 | issue/slug | 状態 | 概要 | INDEX |
 |---|---|---|---|---|---|
+| `claim_C20260614-002_20260614_google-login-no-op/` | claim | C20260614-002 / google-login-no-op | 判定完了→release設定 | Google ログインボタン無反応→**バグ判定だが根本原因は本番設定欠落**（production Clerk instance に Google カスタム OAuth 未登録、CF-20260531-002）。コードは正しい。remediation=`/flow:release` §3.1 social OAuth（human dashboard） | `001_TRIAGE.md` |
 | `revise_R20260611-002_20260611_self-service-delete/` | revise | R20260611-002 / self-service-delete | E2E green | O54 セルフ削除 UI 導線実装（AccountPage 削除導線 + DELETE /api/account + purgeAllData + wipeOwner outbox 拡張）。176 unit + 8 E2E green。AUDIT_20260611_2000 Critical 解消（「配線待ち」の完了） | `INDEX.md` |
 
 ## 関連
