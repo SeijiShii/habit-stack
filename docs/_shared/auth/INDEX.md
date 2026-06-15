@@ -1,6 +1,6 @@
 # auth ドキュメントインデックス
 
-**最終更新**: 2026-06-15（revise_R20260615-001 追加）
+**最終更新**: 2026-06-16（claim_C20260616-001 + fix_C20260616-001 追加）
 **生成元**: /flow:concept (初期化)
 
 <!-- auto-generated-start -->
@@ -26,6 +26,8 @@
 | `fix_C20260614-002_20260614_google-link-reverification/` | fix | C20260614-002 / google-link-reverification | 実装完了(unit green) | aged guest session の `createExternalAccount` が Clerk reverification で 403。**機能修正=連携直前に同一 userId でセッション fresh 化**（refreshGuestTicket + signIn.create ticket、reverification window 回避、churn なし）+ CODE=403 catch+可視化。全 230 tests green | `001_ROOT_CAUSE.md` |
 | `revise_R20260611-002_20260611_self-service-delete/` | revise | R20260611-002 / self-service-delete | E2E green | O54 セルフ削除 UI 導線実装（AccountPage 削除導線 + DELETE /api/account + purgeAllData + wipeOwner outbox 拡張）。176 unit + 8 E2E green。AUDIT_20260611_2000 Critical 解消（「配線待ち」の完了） | `INDEX.md` |
 | `revise_R20260615-001_20260615_account-switch-stop-sync/` | revise | R20260615-001 / account-switch-stop-sync | 実装完了（unit 245 green） | アカウント切替（Google ログイン/サインアウト）を契機に計時停止条件を緩和（`/account` 閲覧では止めない）＋確認ダイアログ＋強制停止時データ消失是正。同期ポリシー: 未連携ログイン=保持アップロード / 既存データ持ち=デバイス上書き / サインアウト=デバイス wipe（サーバ保持）。LoginEndGuard 撤去・wipeOwner 再利用・migration 不要 | `INDEX.md` |
+| `claim_C20260616-001_20260616_set-data-loss-after-login/` | claim | C20260616-001 / set-data-loss-after-login | 判定完了→fix分岐 | ログイン状態で活動セットがパーシャル消失（「夕方の勉強」+実績のみ喪失、「朝の勉強」残存）。**バグ(fix)**: 期待(ログイン状態でデータ保持・パーシャル消失禁止)=SPEC ≠ 現実。昨日デプロイ R20260615-001 の `wipeOtherOwners`(owner 不一致ローカル物理削除)/deviceOverwrite marker/強制停止是正/getAllByOwner の deletedAt フィルタと発生タイミング整合＝回帰最有力。根本原因は単一未確定→fix 調査へ | `001_TRIAGE.md` |
+| `fix_C20260616-001_20260616_set-data-loss-after-login/` | fix | C20260616-001 / set-data-loss-after-login | 調査中 | claim C20260616-001 のデータ消失バグ修正。owner_id 不整合×wipeOtherOwners / deviceOverwrite marker 過剰発火 / wipe 不可逆×サーバ未保持 / soft-delete・sync 経路 の 4 仮説を調査。Postmortem 推奨 | `INDEX.md` |
 
 ## 関連
 - 親 concept: `../../concept.md` §1.3.2 auth 行
