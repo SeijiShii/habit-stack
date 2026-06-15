@@ -3,7 +3,7 @@
 **issue / slug**: C20260616-001 / set-data-loss-after-login
 **重大度**: high
 **実施日**: 2026-06-16
-**状態**: 修正計画済（実装は /flow:tdd 待ち）
+**状態**: 実装完了（unit 248 green / typecheck clean）
 
 <!-- auto-generated-start -->
 
@@ -15,6 +15,8 @@
 | 002 | `002_FIX_PLAN.md` | 修正計画 | 2026-06-16 |
 | 003 | `003_REGRESSION_TEST.md` | リグレッションテスト | 2026-06-16 |
 | 004 | `004_POSTMORTEM.md` | Postmortem | 2026-06-16 |
+| 101 | `101_FIX_IMPL_REPORT.md` | 実装レポート | 2026-06-16 |
+| 102 | `102_FIX_UNIT_TEST_REPORT.md` | 単体テストレポート | 2026-06-16 |
 | — | `README.md` | 概要 | 2026-06-16 |
 
 ## 関連
