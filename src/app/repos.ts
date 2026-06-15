@@ -41,14 +41,16 @@ export function useRepos(): Repos | null {
     });
   }, [store, ownerId]);
 
-  // 既存アカウントへのサインイン復帰時のみ、current owner 以外のローカルを wipe する
-  // （= デバイス上書き、R20260615-001 / spec-review R2）。marker は明示的な既存サインインでのみ立ち、
-  // 単なるゲスト churn では立たない（保持すべきデータを誤って消さない、spec-review R3）。
+  // 既存アカウントへのサインイン復帰時のみ、current owner 以外のローカルデータを current owner へ
+  // 付け替えて保全する（= デバイスのゲストデータをアカウントへ引き継ぐ、concept §1.1 UC8）。
+  // marker は明示的な既存サインインでのみ立ち、単なるゲスト churn では立たない（spec-review R3）。
+  // 旧実装は wipeOtherOwners で物理削除しており、owner churn で取り残されたゲストデータを outbox ごと
+  // 恒久喪失させていた（C20260616-001 データ消失バグ）。破棄せず付け替えに変更。
   useEffect(() => {
     if (!store || !ownerId) return;
     if (consumeDeviceOverwrite()) {
-      void store.wipeOtherOwners(ownerId).catch(() => {
-        // 失敗しても owner 絞り（getAllByOwner）で混在表示は起きない。次回機会に委ねる。
+      void store.reassignOtherOwnersTo(ownerId).catch(() => {
+        // 失敗しても owner 絞り（getAllByOwner）で混在表示は起きない。データは保持され次回機会に付け替え。
       });
     }
   }, [store, ownerId]);

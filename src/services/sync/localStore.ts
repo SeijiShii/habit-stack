@@ -171,14 +171,62 @@ export class LocalStore {
   }
 
   /**
-   * current owner 以外の全 owner のローカルデータを物理削除する
-   * （既存アカウントへのサインイン=上書き時の cleanup、R20260615-001 / spec-review R2）。
-   * OAuth リダイレクトで切替境界では同期 wipe できないため、サインイン復帰後にこれを呼んで
-   * デバイスを current owner のデータだけにする。サーバ API は呼ばない（ローカル限定）。
-   * 注意: 単なるゲスト churn では呼ばないこと（orphan は保持し復元余地を残す、spec-review R3）。
-   * 呼び出しは「明示的な既存アカウントサインイン」マーカーでガードする。
+   * ローカルの owner を付け替える（破棄せず保全）。fromOwner の全エンティティを toOwner へ移し、
+   * 付け替え後の状態を outbox に upsert として積んでサーバへ反映する。旧 owner 宛の未送信 outbox は
+   * 付け替え後の upsert が代替するため除去する（旧 owner で push されないように）。サーバ API は呼ばない。
+   * [論点-009] reassignOwner（サーバ側）のローカル対応（C20260616-001）。
    */
-  async wipeOtherOwners(currentOwnerId: string): Promise<void> {
+  async reassignOwnerLocal(
+    fromOwnerId: string,
+    toOwnerId: string,
+  ): Promise<void> {
+    if (fromOwnerId === toOwnerId) return;
+    for (const entity of ENTITY_STORES) {
+      const recs = (await this.db.getAllFromIndex(
+        entity,
+        "ownerId",
+        fromOwnerId,
+      )) as LocalRecord[];
+      for (const r of recs) {
+        const moved = { ...r, ownerId: toOwnerId };
+        await this.db.put(entity, moved);
+        await this.db.add(OUTBOX, {
+          entity,
+          op: "upsert",
+          payload: moved,
+          clientLocalId: r.clientLocalId,
+          updatedAt: r.updatedAt,
+        } satisfies Omit<OutboxItem, "seq">);
+      }
+    }
+    // 旧 owner 宛の未送信 outbox を除去（上の upsert が新 owner で代替するため）。
+    const items = (await this.db.getAll(OUTBOX)) as (OutboxItem & {
+      seq: number;
+    })[];
+    const staleSeqs = items
+      .filter(
+        (it) =>
+          (it.payload as LocalRecord | undefined)?.ownerId === fromOwnerId,
+      )
+      .map((it) => it.seq);
+    if (staleSeqs.length > 0) {
+      const tx = this.db.transaction(OUTBOX, "readwrite");
+      await Promise.all(staleSeqs.map((s) => tx.store.delete(s)));
+      await tx.done;
+    }
+  }
+
+  /**
+   * current owner 以外の全 owner のローカルデータを current owner へ付け替えて保全する
+   * （既存アカウントへのサインイン時、デバイスのゲストデータを失わずアカウントへ引き継ぐ。
+   * concept §1.1 UC8「データを引き継ぎたいときにログイン」）。
+   * 旧実装 `wipeOtherOwners` は entity + 未送信 outbox を物理削除してデータを恒久喪失させていた
+   * （C20260616-001 のデータ消失バグ）。本実装は破棄せず付け替える（last-write-wins で競合解決）。
+   * OAuth リダイレクトで切替境界では同期処理できないため、サインイン復帰後にこれを呼ぶ。
+   * 注意: 単なるゲスト churn では呼ばないこと。呼び出しは「明示的な既存アカウントサインイン」
+   * マーカー（deviceOverwrite）でガードする。
+   */
+  async reassignOtherOwnersTo(currentOwnerId: string): Promise<void> {
     const others = new Set<string>();
     for (const entity of ENTITY_STORES) {
       const all = (await this.db.getAll(entity)) as LocalRecord[];
@@ -187,7 +235,7 @@ export class LocalStore {
       }
     }
     for (const oid of others) {
-      await this.wipeOwner(oid);
+      await this.reassignOwnerLocal(oid, currentOwnerId);
     }
   }
 }

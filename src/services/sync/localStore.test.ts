@@ -77,14 +77,14 @@ describe("LocalStore", () => {
     expect(await store.get("activity_item", "i")).toBeUndefined();
   });
 
-  it("U-15: wipeOtherOwners は current 以外を消し current は残す（既存ログイン上書き, R20260615-001）", async () => {
+  it("RT-3: reassignOtherOwnersTo は他 owner を消さず current へ付け替えて保全（既存ログイン, C20260616-001）", async () => {
     const store = await LocalStore.open();
     // current owner = oNew のデータ（account 側）
     await store.put(
       "activity_set",
       rec({ id: "new", ownerId: "oNew", clientLocalId: "cn" }),
     );
-    // 旧 guest owner = oGuest のデータ（上書きで消えるべき）
+    // 旧 guest owner = oGuest のデータ（旧実装では消えていた = データ消失バグ）
     await store.put(
       "activity_set",
       rec({ id: "g1", ownerId: "oGuest", clientLocalId: "cg1" }),
@@ -93,23 +93,64 @@ describe("LocalStore", () => {
       "activity_item",
       rec({ id: "g2", ownerId: "oGuest", clientLocalId: "cg2" }),
     );
-    await store.wipeOtherOwners("oNew");
+    await store.reassignOtherOwnersTo("oNew");
     // current は残る
     expect(await store.get("activity_set", "new")).toMatchObject({
       ownerId: "oNew",
     });
-    // 他 owner は消える
-    expect(await store.get("activity_set", "g1")).toBeUndefined();
-    expect(await store.get("activity_item", "g2")).toBeUndefined();
+    // 旧 guest データは「消えず」current owner へ付け替えられて残る（恒久喪失しない）
+    expect(await store.get("activity_set", "g1")).toMatchObject({
+      ownerId: "oNew",
+    });
+    expect(await store.get("activity_item", "g2")).toMatchObject({
+      ownerId: "oNew",
+    });
+    // 付け替え後は current owner の read で全て見える（パーシャル消失しない）
+    expect(
+      (await store.getAllByOwner("activity_set", "oNew"))
+        .map((r) => r.id)
+        .sort(),
+    ).toEqual(["g1", "new"]);
   });
 
-  it("U-07b: wipeOtherOwners は他 owner が無ければ no-op（保持経路でデータを消さない）", async () => {
+  it("RT-5: reassignOwnerLocal は entity を付け替え + 新 owner の upsert を積む（削除しない）", async () => {
+    const store = await LocalStore.open();
+    await store.put(
+      "activity_set",
+      rec({ id: "a", ownerId: "from", clientLocalId: "c1" }),
+    );
+    await store.reassignOwnerLocal("from", "to");
+    // entity は削除されず owner だけ付け替わる
+    expect(await store.get("activity_set", "a")).toMatchObject({
+      ownerId: "to",
+    });
+    // outbox には新 owner の upsert が積まれる（サーバへ反映）。旧 owner 宛は残さない。
+    const outbox = await store.drainOutbox();
+    const owners = outbox.map((o) => (o.payload as LocalRecord).ownerId);
+    expect(owners).toContain("to");
+    expect(owners).not.toContain("from");
+  });
+
+  it("RT: reassignOwnerLocal は from===to なら no-op", async () => {
+    const store = await LocalStore.open();
+    await store.put(
+      "activity_set",
+      rec({ id: "a", ownerId: "o", clientLocalId: "c1" }),
+    );
+    await store.drainOutbox(); // clear initial upsert via re-open? (drain は消さないので件数で確認)
+    await store.reassignOwnerLocal("o", "o");
+    expect(await store.get("activity_set", "a")).toMatchObject({
+      ownerId: "o",
+    });
+  });
+
+  it("RT-2: reassignOtherOwnersTo は他 owner が無ければ no-op（current を消さない）", async () => {
     const store = await LocalStore.open();
     await store.put(
       "activity_set",
       rec({ id: "a", ownerId: "oSame", clientLocalId: "c1" }),
     );
-    await store.wipeOtherOwners("oSame");
+    await store.reassignOtherOwnersTo("oSame");
     expect(await store.get("activity_set", "a")).toMatchObject({
       ownerId: "oSame",
     });
