@@ -17,6 +17,8 @@
 
 | ファイル | 実行日 | コマンド | 対象 | decision 範囲 | 状態 |
 |---|---|---|---|---|---|
+| [D20260615_009_resume_continuous.md](./D20260615_009_resume_continuous.md) | 2026-06-15 | /flow:auto | continuous（wording 後 → 鮮度監査 dispatch） | D20260615-038〜 | 進行中 |
+| [D20260615_008_wording_ui.md](./D20260615_008_wording_ui.md) | 2026-06-15 | /flow:wording | R20260615-001 確認ダイアログ文言 | D20260615-037 | 完了（現状維持） |
 | [D20260615_007_tdd_execution_fix_F20260615-001.md](./D20260615_007_tdd_execution_fix_F20260615-001.md) | 2026-06-15 | /flow:tdd | execution fix F20260615-001 (stale-in-progress-badge) | D20260615-033〜036 | 完了（unit 246 + E2E 25 green、undefined→null 回帰修正） |
 | [D20260615_006_fix_execution_F20260615-001.md](./D20260615_006_fix_execution_F20260615-001.md) | 2026-06-15 | /flow:fix | execution F20260615-001 (stale-in-progress-badge) | D20260615-028〜031 | 完了（設計、medium、修正計画済） |
 | [D20260615_005_e2e__shared_auth_revise_R20260615-001.md](./D20260615_005_e2e__shared_auth_revise_R20260615-001.md) | 2026-06-15 | /flow:e2e | _shared/auth revise R20260615-001 | D20260615-023〜026 | 完了（E2E 24 green） |
