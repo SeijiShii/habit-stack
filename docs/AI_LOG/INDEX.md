@@ -1,8 +1,8 @@
 # AI_LOG インデックス — habit-stack
 
-**最終更新**: 2026-06-16 (/flow:claim → fix → auto → tdd → audit — _shared/auth C20260616-001 set-data-loss-after-login: 既存アカウントサインイン時のデータ消失バグ。**根本原因=owner churn × wipeOtherOwners が outbox ごと物理削除**。破壊的 wipe を非破壊的 owner 付け替え（reassign）に置換。**unit 248 green / tsc clean**。release-pre full 監査 C0/H0)
-**総セッション数**: 92（表記載は直近のみ。D20260614_006〜011 等は未掲載、`ls docs/AI_LOG/D*.md` 参照）
-**総 decision 数**: 174（D20260616-001〜017 を加算。中間セッション分は別 bookkeeping）
+**最終更新**: 2026-06-17 (/flow:claim — _shared/auth C20260617-001 token-stale-owner-churn-data-loss: 認証トークン陳腐化後の再読込でデータ消失・再ログインでも復旧せず。**バグ判定**。**C20260616-001 とは別機序**＝session 失効→新ゲスト userId 発行で owner churn→getAllByOwner で orphan 化。根本=サーバ発行ゲスト userId のクライアント未永続。→ /flow:fix へ auto-route)
+**総セッション数**: 96（D20260616_005/006/007 audit/secure/release + D20260617_001 claim を加算。表記載は直近のみ、`ls docs/AI_LOG/D*.md` 参照）
+**総 decision 数**: 184（D20260616-018〜023 + D20260617-001〜004 を加算。中間セッション分は別 bookkeeping）
 
 > 注: 下の「セッション一覧」表は直近セッションのみ列挙（全 60 件は `ls docs/AI_LOG/D*.md` 参照）。
 > AUDIT_20260611_2000 で表の網羅性を Low 指摘済み、再生成は別 bookkeeping。
@@ -17,6 +17,7 @@
 
 | ファイル | 実行日 | コマンド | 対象 | decision 範囲 | 状態 |
 |---|---|---|---|---|---|
+| [D20260617_001_claim__shared_auth_C20260617-001.md](./D20260617_001_claim__shared_auth_C20260617-001.md) | 2026-06-17 | /flow:claim | _shared/auth C20260617-001 (token-stale-owner-churn-data-loss) | D20260617-001〜004 | 完了（バグ判定→fix 分岐。session 失効の silent owner churn＝C20260616-001 と別機序） |
 | [D20260616_004_tdd__shared_auth_fix_C20260616-001.md](./D20260616_004_tdd__shared_auth_fix_C20260616-001.md) | 2026-06-16 | /flow:tdd | _shared/auth fix C20260616-001 (set-data-loss-after-login) | D20260616-012〜016 | 完了（unit 248 green / tsc clean、破壊的 wipe→非破壊 reassign） |
 | [D20260616_003_resume_continuous.md](./D20260616_003_resume_continuous.md) | 2026-06-16 | /flow:auto | continuous（claim→fix→tdd チェーン） | D20260616-011, 017 | 完了（tdd 実装後 Release gate で pause） |
 | [D20260616_002_fix__shared_auth_C20260616-001.md](./D20260616_002_fix__shared_auth_C20260616-001.md) | 2026-06-16 | /flow:fix | _shared/auth C20260616-001 (set-data-loss-after-login) | D20260616-005〜010 | 完了（設計、high、修正計画 + Postmortem） |

@@ -1,6 +1,6 @@
 # auth ドキュメントインデックス
 
-**最終更新**: 2026-06-16（claim_C20260616-001 + fix_C20260616-001 追加）
+**最終更新**: 2026-06-17（claim_C20260617-001 追加）
 **生成元**: /flow:concept (初期化)
 
 <!-- auto-generated-start -->
@@ -28,6 +28,7 @@
 | `revise_R20260615-001_20260615_account-switch-stop-sync/` | revise | R20260615-001 / account-switch-stop-sync | 実装完了（unit 245 green） | アカウント切替（Google ログイン/サインアウト）を契機に計時停止条件を緩和（`/account` 閲覧では止めない）＋確認ダイアログ＋強制停止時データ消失是正。同期ポリシー: 未連携ログイン=保持アップロード / 既存データ持ち=デバイス上書き / サインアウト=デバイス wipe（サーバ保持）。LoginEndGuard 撤去・wipeOwner 再利用・migration 不要 | `INDEX.md` |
 | `claim_C20260616-001_20260616_set-data-loss-after-login/` | claim | C20260616-001 / set-data-loss-after-login | 判定完了→fix分岐 | ログイン状態で活動セットがパーシャル消失（「夕方の勉強」+実績のみ喪失、「朝の勉強」残存）。**バグ(fix)**: 期待(ログイン状態でデータ保持・パーシャル消失禁止)=SPEC ≠ 現実。昨日デプロイ R20260615-001 の `wipeOtherOwners`(owner 不一致ローカル物理削除)/deviceOverwrite marker/強制停止是正/getAllByOwner の deletedAt フィルタと発生タイミング整合＝回帰最有力。根本原因は単一未確定→fix 調査へ | `001_TRIAGE.md` |
 | `fix_C20260616-001_20260616_set-data-loss-after-login/` | fix | C20260616-001 / set-data-loss-after-login | 実装完了（unit 248 green） | **根本原因確定**: 既存アカウントサインインで userId churn → 旧 owner に取り残されたローカル未同期データを `wipeOtherOwners`→`wipeOwner` が **outbox ごと物理削除**（同期前消滅＝不可逆）。`reassignOwner` は dead code でローカル owner 移行皆無。物理 wipe は read 隔離で正当性に不要（R20260615-001 spec-review R2 自認）。**即時 mitigation=wipe 撤去（機能リグレッションゼロ）** + 恒久=owner 保全/移行+確認。Postmortem 生成済 | `INDEX.md` |
+| `claim_C20260617-001_20260617_token-stale-owner-churn-data-loss/` | claim | C20260617-001 / token-stale-owner-churn-data-loss | 判定完了→fix分岐 | ログイン後作成データが、認証トークン(Clerk セッション)陳腐化後の再読込で消失・再ログインでも復旧せず。**バグ(fix)**: 期待(認証遷移でデータ欠損させず引き継ぐ=concept §1.1 UC8/§3 NFR) ≠ 現実。**C20260616-001 とは別機序**: あちら=明示サインインの wipe(fix 済)、本件=**session 失効→新ゲスト userId 発行で owner churn→getAllByOwner で orphan 化**。根本=サーバ発行ゲスト userId のクライアント未永続(`issueGuestTicket` が毎回 createUser)。→ fix_C20260617-001 へ分岐 | `001_TRIAGE.md` |
 
 ## 関連
 - 親 concept: `../../concept.md` §1.3.2 auth 行
