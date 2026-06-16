@@ -1,48 +1,43 @@
-import { createClerkClient } from "@clerk/backend";
-import {
-  issueGuestTicket,
-  refreshGuestTicket,
-} from "../../src/services/auth/guestSession.js";
+import { provisionGuest } from "../../src/services/auth/guestProvision.js";
+import { signGuestToken } from "../../src/services/auth/guestToken.js";
 
 /**
- * ゲストサインインチケット発行エンドポイント（Vercel Function）。
- * フロントは初回起動時にこれを呼び、返ったチケットでセッションを確立する（0 タップ実行、O22）。
- * 公開エンドポイントのためレート制限対象（SEC-005、app-shell で配線）。
+ * ゲスト発行エンドポイント（Vercel Function、C20260617-001 で guest 自前署名 JWT 化）。
+ * フロントは初回起動時にこれを呼び、返った guest JWT を localStorage に永続して再利用する
+ * （Clerk セッションに紐づけない = トークン失効/リロードで owner churn しない）。
  *
- * 既存セッション（確立済みゲスト）から呼ばれた場合は **同一 userId に対して** 新チケットを発行する
- * （CF-20260614-002）。フロントが redeem すると first-factor を再検証し、Clerk reverification
- * （aged session の step-up 403）を回避できる。これを Google 連携直前に使い「aged guest session で
- * createExternalAccount が 403 無反応」を解消する。createUser しないので userId は変わらない。
+ * 旧実装は Clerk 匿名 user を作成し sign-in ticket を返していた（= セッション失効で新 userId churn →
+ * owner-scoped ローカルデータ orphan 化、C20260617-001 データ消失バグ）。createUser を撤去し、
+ * `guest_<uuid>` を sub とする自前署名 guest JWT（HS256, GUEST_TOKEN_SECRET）を返す。
+ * client は不透明 token を保持するだけ = `sub` 偽造不可で SEC-001 と矛盾しない。
  */
-export async function handleGuestTicket(req: Request): Promise<Response> {
-  const secretKey = process.env.CLERK_SECRET_KEY ?? "";
-  const publishableKey = process.env.CLERK_PUBLISHABLE_KEY ?? "";
-  try {
-    const clerk = createClerkClient({ secretKey, publishableKey });
-    // 既存セッションがあれば同一 userId を refresh、無ければ新規ゲスト作成。
-    // クライアント送信値は見ず Clerk セッションから userId を解決（SEC-001）。
-    let userId: string | null = null;
-    try {
-      const auth = (await clerk.authenticateRequest(req)).toAuth();
-      userId = auth?.userId ?? null;
-    } catch {
-      userId = null;
-    }
-    const opts = { secretKey, publishableKey, client: clerk };
-    const { ticket } = userId
-      ? await refreshGuestTicket(opts, userId)
-      : await issueGuestTicket(opts);
-    return new Response(JSON.stringify({ ticket }), {
-      status: 200,
-      headers: { "content-type": "application/json" },
+export async function handleGuestProvision(req: Request): Promise<Response> {
+  const headers = { "content-type": "application/json" };
+  if (req.method !== "POST") {
+    return new Response(JSON.stringify({ error: "method_not_allowed" }), {
+      status: 405,
+      headers,
     });
-  } catch {
-    // ゲスト発行失敗時はフロントがローカル（IndexedDB）で degrade（offline-critical）。
+  }
+  const secret = process.env.GUEST_TOKEN_SECRET ?? "";
+  if (!secret) {
+    // secret 未設定はフロントが localStorage ローカルゲストで degrade（offline-critical）。
     return new Response(JSON.stringify({ error: "guest_unavailable" }), {
       status: 503,
-      headers: { "content-type": "application/json" },
+      headers,
+    });
+  }
+  try {
+    const { guestToken } = provisionGuest({
+      signToken: (sub) => signGuestToken(secret, sub),
+    });
+    return new Response(JSON.stringify({ guestToken }), { status: 200, headers });
+  } catch {
+    return new Response(JSON.stringify({ error: "guest_unavailable" }), {
+      status: 503,
+      headers,
     });
   }
 }
 
-export default handleGuestTicket;
+export default handleGuestProvision;

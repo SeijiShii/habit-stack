@@ -4,7 +4,6 @@ import { SetsRepo } from "../features/activity-sets/model/setsRepo.js";
 import { ExecutionRepo } from "../features/execution/model/executionRepo.js";
 import { SummaryRepo } from "../features/streak-summary/model/summaryRepo.js";
 import { rebuildAchievements } from "../services/sync/migrations/rebuildAchievements.js";
-import { consumeDeviceOverwrite } from "../services/auth/deviceOverwrite.js";
 import { useOwner } from "../hooks/useOwner.js";
 
 export interface Repos {
@@ -41,18 +40,19 @@ export function useRepos(): Repos | null {
     });
   }, [store, ownerId]);
 
-  // 既存アカウントへのサインイン復帰時のみ、current owner 以外のローカルデータを current owner へ
-  // 付け替えて保全する（= デバイスのゲストデータをアカウントへ引き継ぐ、concept §1.1 UC8）。
-  // marker は明示的な既存サインインでのみ立ち、単なるゲスト churn では立たない（spec-review R3）。
-  // 旧実装は wipeOtherOwners で物理削除しており、owner churn で取り残されたゲストデータを outbox ごと
-  // 恒久喪失させていた（C20260616-001 データ消失バグ）。破棄せず付け替えに変更。
+  // current owner 以外のローカルデータを current owner へ付け替えて保全する（C20260617-001）。
+  // 目的は 2 つ:
+  //  ① owner churn 復旧: 旧実装（ゲスト=Clerk セッション）でトークン失効ごとに churn した旧 Clerk
+  //     guest userId のデータ、および旧ローカルゲスト id のデータを、現 owner（安定した guest JWT sub）
+  //     へ回収する（= 既に消えて見えていた orphan データの復活）。
+  //  ② ゲスト→アカウント引き継ぎ: Google ログインで owner が guest sub → Clerk userId に昇格したとき、
+  //     ゲストのローカルデータをアカウントへ付け替える（concept §1.1 UC8）。
+  // 破棄せず付け替え = データ消失しない。owner 一致なら no-op（marker 不要・churn でも安全）。
   useEffect(() => {
     if (!store || !ownerId) return;
-    if (consumeDeviceOverwrite()) {
-      void store.reassignOtherOwnersTo(ownerId).catch(() => {
-        // 失敗しても owner 絞り（getAllByOwner）で混在表示は起きない。データは保持され次回機会に付け替え。
-      });
-    }
+    void store.reassignOtherOwnersTo(ownerId).catch(() => {
+      // 失敗しても owner 絞り（getAllByOwner）で混在表示は起きない。データは保持され次回機会に付け替え。
+    });
   }, [store, ownerId]);
 
   return useMemo(() => {

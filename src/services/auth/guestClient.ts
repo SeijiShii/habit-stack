@@ -105,6 +105,27 @@ export async function fetchGuestToken(
   return data.guestToken;
 }
 
+/**
+ * guest JWT の payload を**検証せず** decode して sub を読む（owner キー用）。
+ * ローカル IndexedDB の owner キーに使うだけ = 署名検証は不要（サーバはリクエスト時に検証する）。
+ * 不正/欠落時は null。
+ */
+export function decodeGuestSub(token: string | null): string | null {
+  if (!token) return null;
+  const parts = token.split(".");
+  if (parts.length !== 3) return null;
+  try {
+    const json =
+      typeof atob === "function"
+        ? atob(parts[1].replace(/-/g, "+").replace(/_/g, "/"))
+        : Buffer.from(parts[1], "base64url").toString("utf8");
+    const payload = JSON.parse(json) as { sub?: unknown };
+    return typeof payload.sub === "string" && payload.sub ? payload.sub : null;
+  } catch {
+    return null;
+  }
+}
+
 /** 「未保持なら 1 度取得して保持」を ensureGuestSession に注入する形に組み立てる。 */
 export function buildEnsureGuestToken(p: {
   fetchToken: () => Promise<string>;

@@ -6,9 +6,11 @@ import {
   clearGuestToken,
   fetchGuestToken,
   buildEnsureGuestToken,
+  decodeGuestSub,
   GuestTokenRateLimitedError,
   GuestTokenFetchError,
 } from "./guestClient.js";
+import { signGuestToken } from "./guestToken.js";
 
 function memStorage(initial: Record<string, string> = {}) {
   const m = new Map(Object.entries(initial));
@@ -102,6 +104,13 @@ describe("guestClient localStorage 永続 (C20260617-001)", () => {
     await ensure();
     expect(fetchToken).not.toHaveBeenCalled();
     expect(getStoredGuestToken(s)).toBe("gjwt_existing");
+  });
+
+  it("decodeGuestSub は検証せず sub を読む（owner キー用）", () => {
+    const token = signGuestToken("any-secret-cccccccccccc", "guest_owner_1");
+    expect(decodeGuestSub(token)).toBe("guest_owner_1");
+    expect(decodeGuestSub(null)).toBeNull();
+    expect(decodeGuestSub("garbage")).toBeNull();
   });
 
   it("localStorage 不可環境（null storage）でも例外で停止しない", () => {

@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   ClerkProvider,
   useAuth,
@@ -9,15 +9,40 @@ import {
 import { asOwnerId } from "../../types/domain.js";
 import { getOrCreateLocalGuestId } from "../../services/auth/localGuest.js";
 import { OwnerContext } from "../../services/auth/ownerContext.js";
-import { linkWithGoogle } from "../../services/auth/linkWithGoogle.js";
-import { markDeviceOverwrite } from "../../services/auth/deviceOverwrite.js";
+import {
+  fetchGuestToken as defaultFetchGuestToken,
+  getStoredGuestToken,
+  storeGuestToken,
+  clearGuestToken,
+  decodeGuestSub,
+} from "../../services/auth/guestClient.js";
 
-export type GuestTicketFetcher = () => Promise<string | null>;
+/** guest JWT を取得して返す（失敗時 null）。注入で差し替え可能。 */
+export type GuestTokenFetcher = () => Promise<string | null>;
+
+/**
+ * owner（データ所有キー）を決める純ロジック（C20260617-001、churn 根治の核）。
+ * - サインイン済（Google 連携アカウント）= Clerk userId（実アカウント、安定）。
+ * - 未サインイン（ゲスト）= **永続 guest JWT の sub**。Clerk セッションの userId を一切見ないため、
+ *   トークン失効・リロードで Clerk guest userId が churn しても owner は不変 = データが orphan 化しない。
+ * - guest sub も無い（取得前/失敗）= ローカルゲスト id（offline degrade、localStorage 永続で安定）。
+ * - 未ロード = null。
+ */
+export function pickOwnerId(p: {
+  isSignedIn: boolean;
+  userId: string | null | undefined;
+  isLoaded: boolean;
+  guestSub: string | null;
+  getLocalGuestId: () => string;
+}): string | null {
+  if (p.isSignedIn && p.userId) return p.userId;
+  if (!p.isLoaded) return null;
+  return p.guestSub ?? p.getLocalGuestId();
+}
 
 /**
  * 表示用の email を選ぶ（C20260614-002）。合成ゲスト email（`@guests.<domain>`）は内部用なので
  * ユーザーに見せない。Google 連携済みなら外部アカウント（Google）の email を優先表示する。
- * どちらも無い / 合成のみなら undefined（email 行を出さない）。
  */
 export function displayEmail(
   externalEmail: string | undefined,
@@ -28,166 +53,103 @@ export function displayEmail(
   return undefined;
 }
 
-const defaultFetchGuestTicket: GuestTicketFetcher = async () => {
+const defaultFetcher: GuestTokenFetcher = async () => {
   try {
-    const res = await fetch("/api/auth/guest", { method: "POST" });
-    if (!res.ok) return null;
-    const data = (await res.json()) as { ticket?: string };
-    return data.ticket ?? null;
+    return await defaultFetchGuestToken();
   } catch {
     return null;
   }
 };
 
-/** Clerk セッションを owner に橋渡し（未確立はローカルゲスト fallback）。 */
+/**
+ * Clerk セッションを owner に橋渡しする（C20260617-001 で guest 自前署名 JWT 化）。
+ *
+ * **ゲストは Clerk セッションではない**: 未サインイン時はサーバ発行の guest JWT を localStorage に
+ * 永続し、owner はその `sub` に由来する。これにより Clerk セッションの TTL 失効・リロードをまたいでも
+ * owner が不変 = owner churn が起きず owner-scoped ローカルデータが orphan 化しない（データ消失バグの根治）。
+ * Clerk サインイン（Google 連携）時のみ owner = Clerk userId へ昇格し、repos が旧 owner（guest sub /
+ * 旧 Clerk guest userId / ローカルゲスト id）のデータを現 owner へ reassign で引き継ぐ。
+ * 範型: bousai-bag-checker `src/shared/auth/*`（revise_003）。
+ */
 function ClerkOwnerBridge({
-  fetchGuestTicket,
+  fetchGuestToken,
   children,
 }: {
-  fetchGuestTicket: GuestTicketFetcher;
+  fetchGuestToken: GuestTokenFetcher;
   children: ReactNode;
 }) {
   const { isLoaded, isSignedIn, userId } = useAuth();
-  const { signIn, setActive } = useSignIn();
+  const { signIn } = useSignIn();
   const { user } = useUser();
   const clerk = useClerk();
-  // 連携前の意図的な session fresh 化中（signOut→re-sign-in）は、下の自動ゲスト生成 effect の
-  // 割り込みを抑止する（割り込むと別 userId のゲストが作られ所有データが churn する、CF-20260614-002）。
-  const refreshingRef = useRef(false);
+  const [guestSub, setGuestSub] = useState<string | null>(() =>
+    decodeGuestSub(getStoredGuestToken()),
+  );
+  const ensuring = useRef(false);
 
+  // 未サインイン時: guest JWT を ensure（保持済なら再利用 = 同一 sub 維持、無ければ取得して永続）。
+  // /sso-callback 処理中は OAuth セッション確立と競合させないため抑止する。
   useEffect(() => {
-    // /sso-callback 処理中は自動ゲスト生成を抑止する（OAuth サインインの session 確立と競合させない）。
+    if (!isLoaded || isSignedIn || ensuring.current) return;
     if (
-      !isLoaded ||
-      isSignedIn ||
-      !signIn ||
-      refreshingRef.current ||
-      (typeof window !== "undefined" &&
-        window.location.pathname === "/sso-callback")
+      typeof window !== "undefined" &&
+      window.location.pathname === "/sso-callback"
     )
       return;
+    const stored = getStoredGuestToken();
+    if (stored) {
+      setGuestSub(decodeGuestSub(stored));
+      return;
+    }
+    ensuring.current = true;
     let cancelled = false;
     void (async () => {
-      const ticket = await fetchGuestTicket();
-      if (cancelled || !ticket) return;
-      try {
-        const res = await signIn.create({ strategy: "ticket", ticket });
-        if (res.status === "complete" && setActive) {
-          await setActive({ session: res.createdSessionId });
-        }
-      } catch {
-        // degrade: ローカルゲストで継続
-      }
+      const token = await fetchGuestToken();
+      ensuring.current = false;
+      if (cancelled || !token) return; // 取得失敗は localGuest で degrade
+      storeGuestToken(token);
+      setGuestSub(decodeGuestSub(token));
     })();
     return () => {
       cancelled = true;
     };
-  }, [isLoaded, isSignedIn, signIn, setActive, fetchGuestTicket]);
+  }, [isLoaded, isSignedIn, fetchGuestToken]);
 
-  // 「Google でログイン」自動分岐の後段（C20260614-002）。連携(createExternalAccount)が
-  // 「選んだ Google が既に別ユーザーに連携済み」で失敗していたら、**既存アカウントへサインインし直す**
-  // （= DB 連携済みなら DB データでデバイスを上書き）。連携が新規＝成功ならここは何もしない
-  // （= デバイスのデータをそのまま引き継ぐ）。二重リダイレクトは sessionStorage で 1 回に制限。
+  // Clerk サインイン確立時（Google 連携成功）: guest token を破棄（identity がアカウントへ昇格）。
   useEffect(() => {
-    if (!user || !signIn || !setActive) return;
-    const failed = user.externalAccounts?.find(
-      (a) => a.verification?.error != null,
-    );
-    const err = failed?.verification?.error as
-      | { code?: string; message?: string; longMessage?: string }
-      | undefined;
-    const text = `${err?.code ?? ""} ${err?.longMessage ?? err?.message ?? ""}`;
-    const alreadyLinked = /exists|claimed|already|identification/i.test(text);
-    const KEY = "sso_signin_fallback";
-    if (!alreadyLinked) {
-      sessionStorage.removeItem(KEY);
-      return;
-    }
-    if (sessionStorage.getItem(KEY)) return; // 既に 1 回試行済み → ループ防止
-    sessionStorage.setItem(KEY, "1");
-    refreshingRef.current = true;
-    // 既存アカウントへ入り直す = デバイス上書き。復帰後の app init で旧 owner を wipe する印を残す
-    // （R20260615-001 / spec-review R2。churn ではなく明示サインインなのでマーク可）。
-    markDeviceOverwrite();
-    void (async () => {
-      await setActive({ session: null });
-      await signIn.authenticateWithRedirect({
-        strategy: "oauth_google",
-        redirectUrl: `${window.location.origin}/sso-callback`,
-        redirectUrlComplete: `${window.location.origin}/account`,
-      });
-    })();
-  }, [user, signIn, setActive]);
+    if (isSignedIn) clearGuestToken();
+  }, [isSignedIn]);
 
-  const ownerId = userId
-    ? asOwnerId(userId)
-    : isLoaded
-      ? asOwnerId(getOrCreateLocalGuestId())
-      : null;
+  // owner 決定（純ロジックは pickOwnerId で単体テスト）。
+  const owner = pickOwnerId({
+    isSignedIn: !!isSignedIn,
+    userId,
+    isLoaded,
+    guestSub,
+    getLocalGuestId: getOrCreateLocalGuestId,
+  });
+  const ownerId = owner ? asOwnerId(owner) : null;
 
-  // 外部アカウント（Google 等）連携済みか = データ引き継ぎ可能な authed owner
+  // 外部アカウント（Google 等）連携済みか
   const isLinked = (user?.externalAccounts?.length ?? 0) > 0;
-  // 表示 email: 合成ゲスト email（@guests.<domain>、内部用）は隠し、連携済みなら外部(Google)の email を出す。
   const email = displayEmail(
     user?.externalAccounts?.[0]?.emailAddress,
     user?.primaryEmailAddress?.emailAddress,
   );
 
-  const linkGoogle = user
+  // 「Google でログイン」= OAuth サインイン（ゲストは Clerk セッションでないので link でなく sign-in）。
+  // 新規 Google なら Clerk が user 作成、既存なら入り直し。どちらも復帰後 isSignedIn=true で
+  // owner=Clerk userId になり、repos が guest sub のローカルデータを現 owner へ reassign で引き継ぐ。
+  // ゲストが Clerk セッションでないため reverification / already-signed-in の壁を踏まない（O58）。
+  const signInWithGoogle = signIn
     ? async () => {
-        // 連携直前にゲストセッションを張り直して reverification window 内に戻す（同一 userId、CF-20260614-002）。
-        // Clerk は single-session 中 signIn.create が 400 になるため、
-        //   ① 現セッションで fresh ticket を取得（server が同一 userId に発行）
-        //   ② refreshingRef を立てて自動ゲスト生成を抑止
-        //   ③ signOut → signIn.create({ticket}) → setActive で first-factor を再検証（fva リセット）
-        // ticket は同一 userId なので所有データは保たれる（reassignOwner 不要）。
-        try {
-          const ticket = await fetchGuestTicket();
-          if (ticket && signIn && setActive) {
-            refreshingRef.current = true;
-            // 現セッションを「非アクティブ化」する。clerk.signOut() は afterSignOutUrl('/') へ
-            // ページ遷移してしまい以降のコードが走らないため使わない（CF-20260614-002）。
-            // setActive({session:null}) は遷移せずアクティブ session を外すので signIn.create が通る。
-            await setActive({ session: null });
-            const res = await signIn.create({ strategy: "ticket", ticket });
-            if (res.status === "complete" && res.createdSessionId) {
-              await setActive({ session: res.createdSessionId });
-            }
-          }
-        } catch {
-          // refresh 失敗は致命でない。続行し、なお 403 なら AccountPage が可視化する。
-        } finally {
-          refreshingRef.current = false;
-        }
-        const freshUser = clerk.user ?? user;
-        await linkWithGoogle(
-          freshUser,
-          `${window.location.origin}/account`,
-          (url) => {
-            window.location.href = url;
-          },
-        );
+        await signIn.authenticateWithRedirect({
+          strategy: "oauth_google",
+          redirectUrl: `${window.location.origin}/sso-callback`,
+          redirectUrlComplete: `${window.location.origin}/account`,
+        });
       }
     : undefined;
-
-  // 既存 Google アカウントへサインインし直す（別端末で作成済み／サインアウトから復帰、C20260614-002）。
-  // single-session のため現ゲストを外してから OAuth sign-in。成功すると既存ユーザーに入り直し、
-  // ローカルの匿名データは上書きされる（ユーザー方針: Google アカウントのデータを優先）。
-  const signInWithGoogle =
-    signIn && setActive
-      ? async () => {
-          refreshingRef.current = true;
-          // 既存アカウントへサインイン = デバイス上書き。復帰後の app init で旧 owner を wipe する印。
-          markDeviceOverwrite();
-          await setActive({ session: null });
-          await signIn.authenticateWithRedirect({
-            strategy: "oauth_google",
-            redirectUrl: `${window.location.origin}/sso-callback`,
-            redirectUrlComplete: `${window.location.origin}/account`,
-          });
-          // ここで Google へ遷移するため以降は実行されない。
-        }
-      : undefined;
 
   const signOut = async () => {
     await clerk.signOut();
@@ -198,10 +160,11 @@ function ClerkOwnerBridge({
       value={{
         ownerId,
         isLoaded,
-        isLocalGuest: !userId && isLoaded,
+        isLocalGuest: !isSignedIn && isLoaded,
         isLinked,
         email,
-        linkGoogle,
+        // 1 ボタン統合（C20260614-002）: link も sign-in も同一の OAuth サインイン経路。
+        linkGoogle: signInWithGoogle,
         signInWithGoogle,
         signOut,
       }}
@@ -230,23 +193,24 @@ function LocalOwnerProvider({ children }: { children: ReactNode }) {
 export interface AuthProviderProps {
   publishableKey: string;
   children: ReactNode;
-  fetchGuestTicket?: GuestTicketFetcher;
+  fetchGuestToken?: GuestTokenFetcher;
 }
 
 /**
- * publishableKey があれば Clerk 認証（匿名→段階認証）、無ければローカルゲストのみで動作（offline-first）。
+ * publishableKey があれば Clerk 認証（匿名ゲスト = 自前 guest JWT → Google 連携で昇格）、
+ * 無ければローカルゲストのみで動作（offline-first）。
  */
 export function AuthProvider({
   publishableKey,
   children,
-  fetchGuestTicket = defaultFetchGuestTicket,
+  fetchGuestToken = defaultFetcher,
 }: AuthProviderProps) {
   if (!publishableKey) {
     return <LocalOwnerProvider>{children}</LocalOwnerProvider>;
   }
   return (
     <ClerkProvider publishableKey={publishableKey}>
-      <ClerkOwnerBridge fetchGuestTicket={fetchGuestTicket}>
+      <ClerkOwnerBridge fetchGuestToken={fetchGuestToken}>
         {children}
       </ClerkOwnerBridge>
     </ClerkProvider>
