@@ -4,7 +4,8 @@
 - **起点クレーム**: `../claim_C20260617-001_20260617_token-stale-owner-churn-data-loss/001_TRIAGE.md`（decision: D20260617-003）
 - **severity**: high（不可逆データ消失クラス／受動・不可避トリガー）
 - **対象**: _shared/auth（ゲスト owner 継続性、_shared/local-sync 協働）
-- **状態**: 調査待ち（/flow:fix 起動）
+- **状態**: 修正計画済（案A=bousai guest-JWT 永続の移植 + one-time orphan migration）→ /flow:tdd 実装へ
+- **flow tooling 是正**: 本バグ class を audit が検知できなかった穴を CF-20260617-001 で是正済（perspectives O22 (D) + audit #4 step 3.9 + scaffold §1.7、flow-suite commits d01215a/829a1f1/38fd50e/cc095eb/9e451f8）。検証: bousai PASS / habit-stack・prayer-list HIGH fire
 
 ## 根本原因（claim triage からの引き継ぎ）
 サーバ発行ゲスト userId のクライアント未永続。`issueGuestTicket`（`src/services/auth/guestSession.ts:33`）が
