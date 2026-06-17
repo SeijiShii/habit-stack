@@ -3,8 +3,22 @@
 - **実行日時**: 2026-06-17（JST）
 - **コマンド**: /flow:auto（continuous）
 - **実行者**: seiji + Claude
-- **状態**: 進行中
+- **状態**: 完了（5 反復で C20260617-001 を検証→本番反映、Class C 実機確認待ちで停止）
 - **含まれる decision 範囲**: 前回停止ふりかえり / P1 SEC チェック / §3.0c 鮮度ゲート / 優先度判定 + auto-pick / 各反復 / 停止判断
+
+## 反復ログ
+
+| 反復 | 優先度 | action | 結果 |
+|---|---|---|---|
+| 1 | §3.0c 鮮度ゲート | /flow:audit --scope=standard | C0/H0/M1（O22(D) owner churn PASS、SCENARIO §5 drift 検出） |
+| 2 | §3.0c drift シューティング | /flow:scenario --update | §5 HEAD 同期（drift reconcile） |
+| 3 | §3.0c secure 鮮度（auth 機構刷新） | /flow:secure | L1 C0/H0（guest-JWT design-clean、SEC-001〜005 維持） |
+| 4 | §3.0c release-pre 必須監査 | /flow:audit --scope=full | C0/H0/M0（参照 commit=HEAD、release-pre クリア） |
+| 5 | P4.7 Release gate | /flow:release | 本番デプロイ + smoke green（guest EP 503→200）、Class C 実機確認待ちで停止 |
+
+## 停止判断
+
+§4.5.1 条件1（P5 essentially complete）+ §4.5.1#0 no-key/Class-A 枯渇証明済。全 Class A（実装/audit/secure/scenario）完遂 + Class B デプロイ実行・API スモーク green。残るは Class C 人間確認のみ（実機 reload-persistence 目視 + 既存残 100円 live tip B-4）= loop が自走できる作業なし → marker 削除して停止。歪曲停止でない（実キー/外部/Class B/C を出し尽くした境界、§4.5.1#0 step 4 で release dispatch 済）。
 
 ## 主要決定サマリ
 
