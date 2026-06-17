@@ -17,6 +17,8 @@
 
 | ファイル | 実行日 | コマンド | 対象 | decision 範囲 | 状態 |
 |---|---|---|---|---|---|
+| [D20260617_005_audit_standard.md](./D20260617_005_audit_standard.md) | 2026-06-17 | /flow:audit | standard（guest-auth 書換後の鮮度監査） | D20260617-015〜017 | 完了（C0/H0/M1。O22(D) owner churn step 3.9 = FAIL→PASS 確認、Medium=SCENARIO §5 drift） |
+| [D20260617_004_resume_continuous.md](./D20260617_004_resume_continuous.md) | 2026-06-17 | /flow:auto | continuous（C20260617-001 後の検証→リリース駆動） | D20260617-R01〜R02 | 進行中（反復1 = §3.0c 鮮度ゲート → /flow:audit standard） |
 | [D20260617_003_tdd__shared_auth_fix_C20260617-001.md](./D20260617_003_tdd__shared_auth_fix_C20260617-001.md) | 2026-06-17 | /flow:tdd | _shared/auth fix C20260617-001 (token-stale-owner-churn-data-loss) | D20260617-011〜014 | 完了（unit 272 green / tsc clean。bousai guest-JWT 移植 + 旧 churn コード削除、audit step 3.9 PASS） |
 | [D20260617_002_fix__shared_auth_C20260617-001.md](./D20260617_002_fix__shared_auth_C20260617-001.md) | 2026-06-17 | /flow:fix | _shared/auth C20260617-001 (token-stale-owner-churn-data-loss) | D20260617-005〜010 | 修正計画済→tdd（案A=bousai guest-JWT 永続の移植 + migration。[flow] CF-20260617-001 で audit 検知穴も是正） |
 | [D20260617_001_claim__shared_auth_C20260617-001.md](./D20260617_001_claim__shared_auth_C20260617-001.md) | 2026-06-17 | /flow:claim | _shared/auth C20260617-001 (token-stale-owner-churn-data-loss) | D20260617-001〜004 | 完了（バグ判定→fix 分岐。session 失効の silent owner churn＝C20260616-001 と別機序） |
