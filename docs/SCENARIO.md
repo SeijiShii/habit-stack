@@ -67,25 +67,26 @@
 ## 5. 現在地カーソル
 
 <!-- AUTO-GENERATED:BEGIN scenario-cursor -->
-- 現在フェーズ: Phase 5 (公開後運用) — **未デプロイ改修 1 件**: revise R20260613-001 (振り返り総覧+streak ローカル日付是正+達成日 migration、unit 197 + E2E 12/12 green) → 次 = /flow:release で本番反映。残: 実機 B-4 (100円 live tip) 確認
-- 進行中ターゲット: streak-summary revise R20260613-001（実装+E2E 完了、デプロイ待ち）
+- 現在フェーズ: Phase 5 (公開後運用) — **未デプロイ改修 1 件**: fix C20260617-001 (token-stale-owner-churn = 認証トークン失効→リロードで新ゲスト userId 発行→getAllByOwner orphan でデータ消失。bousai guest 自前署名 JWT 機構を移植し Clerk 非セッション化で根治、unit 272 green) → 次 = release-pre full audit+secure → /flow:release で本番反映。残: 実機 B-4 (100円 live tip) 確認
+- 進行中ターゲット: _shared/auth fix C20260617-001（guest-JWT 永続化で owner churn 根治、実装+unit 完了、デプロイ待ち）
 - 公開 URL: **https://habit-stack.givers.work**（live、Clerk prod verified / Neon prod / Stripe live）
-- 直近デプロイ (2026-06-12): R20260611-001 計時永続化 + R20260611-002 セルフ削除を本番反映。prod-direct、Build Output API、**8関数**、smoke 5/5 green
-- ⚠️ release 中に本番バグ検出・修正 (C20260612): DELETE /api/account が 405 (ルート不整合 api/account/delete.ts→実ルート/api/account/delete、クライアントは/api/account を呼ぶ) = サーバ自己削除が本番未実行だった → api/account.ts 移設 + メソッドガード + 回帰 U-DEL-10 + smoke 恒久追加で修正 (e33434f)、再デプロイ後 401 で解消
-- スモーク (2026-06-12): / 200 / health 200 / guest 200 (Clerk prod) / sync 401 / **DELETE /api/account 401** (O54 消去権が本番で履行可能に回復)
-- デザイン: design-system 適用済 (00dddf5)・視覚レビュー green（2026-06-13 総覧画面含む再レビュー、details カード化）
-- audit/secure: AUDIT_20260611_2025 (full, C0/H0/L2) + SECURITY_REVIEW _shared/auth (D20260612_002, C0/H0, O54 充足) = release-pre クリア
-- promote: 告知文ドラフト生成済 (docs/marketing/、投稿は手動) / wording: 校正済 (24527d5) / 残: 実機 B-4 (100円 live tip) 確認のみ
-- 最終更新セッション: D20260613_002_resume_continuous → D20260613_004_e2e
-- 最終更新時刻: 2026-06-13 11:20
-- 完了フェーズ: [Phase 1 概念設計, Phase 1.5 デザイン, Phase 2 機能設計(全11), Phase 2.5 spec-review(全11), Phase 3 実装(全11), Phase 3.5 E2E, release-pre audit/secure, **Phase 4 本番デプロイ(計時永続化+セルフ削除 含む)**]
-- Phase 3 実装: **全11 target + revise R20260610/0611-001/002 実装完了**
-  - 累計 177 unit + 8 E2E green、typecheck green、vite build 成功、release-pre audit/secure pass
+- 直近デプロイ (2026-06-16): **C20260616-001 set-data-loss-after-login fix** を本番反映（破壊的 wipe→非破壊 reassignOwnerLocal、smoke green、commit 124adc2）。それ以前: R20260611-001 計時永続化 + R20260611-002 セルフ削除 (2026-06-12, prod-direct, Build Output API, smoke green)
+- ⚠️ データ消失 2 段ロケット: ① C20260616-001 = ログイン直後の set 消失（破壊的 wipe）を非破壊 reassign で修正・**デプロイ済** ② C20260617-001 = トークン失効後リロードでの silent owner churn（別機序）を guest 自前署名 JWT 永続化で根治・**未デプロイ**
+- guest-auth 機構刷新 (C20260617-001 Phase1-6): Clerk ticket ゲスト → **自前署名 guest JWT (signGuestToken/verifyGuestToken) + localStorage 永続 (GUEST_TOKEN_KEY) + 複合 owner resolver**。`GUEST_TOKEN_SECRET` env 追加（.env.example 記載済、本番 env 設定が release 残作業）
+- デザイン: design-system 適用済 (00dddf5)・視覚レビュー green（2026-06-13 総覧画面含む再レビュー）
+- audit/secure: **AUDIT_20260617_1417 (standard, C0/H0/M1) — O22(D) owner churn step 3.9 = PASS 確認**。release 前に full audit+secure 再実行が必要（HEAD ≠ 最新 full AUDIT）
+- promote: 告知文ドラフト生成済 (docs/marketing/、投稿は手動) / wording: 校正済 (24527d5)
+- 最終更新セッション: D20260617_004_resume_continuous → D20260617_005_audit_standard
+- 最終更新時刻: 2026-06-17 14:20
+- 完了フェーズ: [Phase 1 概念設計, Phase 1.5 デザイン, Phase 2 機能設計(全11), Phase 2.5 spec-review(全11), Phase 3 実装(全11), Phase 3.5 E2E, release-pre audit/secure, **Phase 4 本番デプロイ(計時永続化+セルフ削除+C20260616-001 データ消失 fix 含む)**]
+- Phase 3 実装: **全11 target + revise R20260610/0611-001/002 + R20260613-001 + fix C20260616-001 + fix C20260617-001 実装完了**
+  - 累計 272 unit green、typecheck green、vite build 成功
   - SEC-001〜005 実装で充足、SEC-DEP High closed/Critical accepted-risk(dev-only)
-- 次の推奨: **P5 完了評価** — 残作業は実機 B-4 (100円 live tip、Class C 本人実課金確認) のみ。それ以外 (デプロイ/サブドメ/wording/promote 生成/audit/secure) は完了
+- 次の推奨: **release-pre full audit+secure → /flow:release** で C20260617-001 guest-auth fix を本番反映（GUEST_TOKEN_SECRET 本番 env 設定 + デプロイ = Class B/C）。並行残: 実機 B-4 (100円 live tip、Class C)
 - Open 論点: 論点-002(ドメイン=サブドメ確定済 givers.work)、論点-003/010(feedback-hub)、論点-009(Clerk確認時)、論点-011(vitest accepted-risk)
 <!-- AUTO-GENERATED:END scenario-cursor -->
 
 ## 6. 変更履歴
 
+- 2026-06-17: /flow:scenario --update で §5 を HEAD 同期 — C20260616-001 データ消失 fix デプロイ済 + C20260617-001 guest-auth 書換 (owner churn 根治) 実装済・未デプロイ を反映 (decision_id=D20260617-018、/flow:auto §3.0c drift シューティング由来)
 - 2026-06-08: /flow:concept で初回生成

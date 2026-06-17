@@ -17,6 +17,7 @@
 
 | ファイル | 実行日 | コマンド | 対象 | decision 範囲 | 状態 |
 |---|---|---|---|---|---|
+| [D20260617_006_scenario_update.md](./D20260617_006_scenario_update.md) | 2026-06-17 | /flow:scenario | --update（§5 カーソル HEAD 同期） | D20260617-018 | 完了（C20260616-001 デプロイ済 + C20260617-001 実装済・未デプロイ を §5 反映） |
 | [D20260617_005_audit_standard.md](./D20260617_005_audit_standard.md) | 2026-06-17 | /flow:audit | standard（guest-auth 書換後の鮮度監査） | D20260617-015〜017 | 完了（C0/H0/M1。O22(D) owner churn step 3.9 = FAIL→PASS 確認、Medium=SCENARIO §5 drift） |
 | [D20260617_004_resume_continuous.md](./D20260617_004_resume_continuous.md) | 2026-06-17 | /flow:auto | continuous（C20260617-001 後の検証→リリース駆動） | D20260617-R01〜R02 | 進行中（反復1 = §3.0c 鮮度ゲート → /flow:audit standard） |
 | [D20260617_003_tdd__shared_auth_fix_C20260617-001.md](./D20260617_003_tdd__shared_auth_fix_C20260617-001.md) | 2026-06-17 | /flow:tdd | _shared/auth fix C20260617-001 (token-stale-owner-churn-data-loss) | D20260617-011〜014 | 完了（unit 272 green / tsc clean。bousai guest-JWT 移植 + 旧 churn コード削除、audit step 3.9 PASS） |
