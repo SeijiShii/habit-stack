@@ -17,6 +17,7 @@
 
 | ファイル | 実行日 | コマンド | 対象 | decision 範囲 | 状態 |
 |---|---|---|---|---|---|
+| [D20260617_009_release_habit-stack.md](./D20260617_009_release_habit-stack.md) | 2026-06-17 | /flow:release | habit-stack（C20260617-001 guest-auth fix 本番反映） | D20260617-021〜025 | 完了（GUEST_TOKEN_SECRET prod 設定 + deploy + smoke green。guest EP 503→200、owner churn 根治が本番稼働） |
 | [D20260617_008_audit_full.md](./D20260617_008_audit_full.md) | 2026-06-17 | /flow:audit | full（release-pre 必須監査、C20260617-001 デプロイ直前） | D20260617-020 | 完了（C0/H0/M0、参照 commit=HEAD。release-pre クリア） |
 | [D20260617_007_secure__shared_auth.md](./D20260617_007_secure__shared_auth.md) | 2026-06-17 | /flow:secure | _shared/auth（guest-JWT 機構 L1 再レビュー） | D20260617-019 | 完了（新規 C0/H0/M0。HS256+timingSafeEqual+iss+server署名+404秘匿 を確認、SEC-001〜005 維持） |
 | [D20260617_006_scenario_update.md](./D20260617_006_scenario_update.md) | 2026-06-17 | /flow:scenario | --update（§5 カーソル HEAD 同期） | D20260617-018 | 完了（C20260616-001 デプロイ済 + C20260617-001 実装済・未デプロイ を §5 反映） |
