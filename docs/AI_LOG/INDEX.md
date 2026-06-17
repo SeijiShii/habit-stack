@@ -17,6 +17,7 @@
 
 | ファイル | 実行日 | コマンド | 対象 | decision 範囲 | 状態 |
 |---|---|---|---|---|---|
+| [D20260617_007_secure__shared_auth.md](./D20260617_007_secure__shared_auth.md) | 2026-06-17 | /flow:secure | _shared/auth（guest-JWT 機構 L1 再レビュー） | D20260617-019 | 完了（新規 C0/H0/M0。HS256+timingSafeEqual+iss+server署名+404秘匿 を確認、SEC-001〜005 維持） |
 | [D20260617_006_scenario_update.md](./D20260617_006_scenario_update.md) | 2026-06-17 | /flow:scenario | --update（§5 カーソル HEAD 同期） | D20260617-018 | 完了（C20260616-001 デプロイ済 + C20260617-001 実装済・未デプロイ を §5 反映） |
 | [D20260617_005_audit_standard.md](./D20260617_005_audit_standard.md) | 2026-06-17 | /flow:audit | standard（guest-auth 書換後の鮮度監査） | D20260617-015〜017 | 完了（C0/H0/M1。O22(D) owner churn step 3.9 = FAIL→PASS 確認、Medium=SCENARIO §5 drift） |
 | [D20260617_004_resume_continuous.md](./D20260617_004_resume_continuous.md) | 2026-06-17 | /flow:auto | continuous（C20260617-001 後の検証→リリース駆動） | D20260617-R01〜R02 | 進行中（反復1 = §3.0c 鮮度ゲート → /flow:audit standard） |
